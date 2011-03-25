@@ -1,0 +1,8 @@
+*~
+*.user
+meego-app-music
+meego-app-music-*.tar.bz2
+Makefile
+.moc
+.obj
+libMusicPlugin.so
