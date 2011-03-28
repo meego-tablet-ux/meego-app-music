@@ -2105,7 +2105,8 @@ Window {
     MediaMultiBar {
         id: multibar
         parent:  content
-        height: (multiSelectMode)?55:0
+        height: 55
+        opacity: 0
         width: parent.width
         anchors.bottom: parent.bottom
         anchors.left: parent.left
@@ -2127,6 +2128,35 @@ Window {
                 playlistPicker.show();
             }
         }
+        states: [
+            State {
+                name: "showActionBar"
+                when: multiSelectMode
+                PropertyChanges {
+                    target: multibar
+                    opacity:1
+                }
+            },
+            State {
+                name: "hideActionBar"
+                when: !multiSelectMode
+                PropertyChanges {
+                    target: multibar
+                    opacity: 0
+                }
+            }
+        ]
+
+        transitions: [
+            Transition {
+                reversible: true
+                PropertyAnimation {
+                    target: multibar
+                    property: "opacity"
+                    duration: 250
+                }
+            }
+        ]
     }
 
     Component.onDestruction: {

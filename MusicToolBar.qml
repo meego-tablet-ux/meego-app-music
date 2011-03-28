@@ -22,6 +22,7 @@ Item {
     property bool loop: false
     property bool shuffle: false
     property bool landscape: false
+    property real nowPlayingHeight: 36
 
     signal playNeedsSongs()
 
@@ -43,26 +44,36 @@ Item {
         source: "image://theme/media/media_playbar_nowplaying_bg"
         height: 0
 
-        border.left: 10; border.top: 10
-        border.right: 10; border.bottom: 10
         anchors.bottom: audioToolbar.top
         anchors.left: parent.left
 
-        Text {
-            id: title
-            text: qsTr("Now playing: ")
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.left: parent.left
-            anchors.leftMargin: 10
-            color: theme_fontColorMediaHighlight
-        }
-        Text {
-            id: playinfo
-            text:qsTr("%1, %2").arg(trackName).arg(artistName)
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.left: title.right
-            anchors.leftMargin: 10
-            color: theme_fontColorMediaHighlight
+        Item {
+            id: nowPlayingText
+            anchors.fill: parent
+            Text {
+                id: title
+                text: qsTr("Now playing: ")
+                smooth: true
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.left: parent.left
+                anchors.leftMargin: 10
+                color: theme_fontColorMediaHighlight
+            }
+            Text {
+                id: playinfo
+                text:qsTr("%1, %2").arg(trackName).arg(artistName)
+                smooth: true
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.left: title.right
+                anchors.leftMargin: 10
+                color: theme_fontColorMediaHighlight
+            }
+            transform: Scale {
+                origin.x: (title.width + playinfo.width + 10)/2
+                origin.y: nowPlayingInfo.height/2
+                yScale: nowPlayingInfo.height/nowPlayingHeight
+            }
+            smooth: true
         }
     }
 
@@ -72,7 +83,7 @@ Item {
             when: playing
             PropertyChanges {
                 target: nowPlayingInfo
-                height: 36
+                height: nowPlayingHeight
                 opacity:1
             }
         },
@@ -97,7 +108,6 @@ Item {
                     duration: 250
 
                 }
-
                 PropertyAnimation {
                     target: nowPlayingInfo
                     property: "opacity"
