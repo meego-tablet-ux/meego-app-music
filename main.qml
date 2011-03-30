@@ -46,7 +46,7 @@ Window {
 
     property string labelRename:qsTr("Rename")
 
-    property string labelNewList: qsTr("New")
+    property string labelNewList: qsTr("Create New Playlist")
     property string labelEdit: qsTr("Edit")
     property string labelcShare: qsTr("Share")
     property string labelDelete: qsTr("Delete")
@@ -62,8 +62,8 @@ Window {
     property string labelGrid: qsTr("Grid")
     property string labelList: qsTr("List")
 
-    property string labelAlphabetical: qsTr("Sort Alphabetically")
-    property string labelDateOrder: qsTr("Sort by Date")
+    property string labelAlphabetical: qsTr("Alphabetically")
+    property string labelDateOrder: qsTr("By Date")
 
     property string labelCreateNewPlaylist: qsTr("Create new playlist")
     property string labelRenamePlaylist: qsTr("Rename playlist")
@@ -334,7 +334,7 @@ Window {
         property variant openpage
         property variant playlistmodel
         property variant sharemodel
-        onTriggered: {
+        onTriggered: {            
             if (model[index] == labelPlay)
             {
                 // Play
@@ -702,43 +702,22 @@ Window {
                 if(applicationData != undefined)
                     scene.applicationData = undefined;
             }
-            menuContent: Rectangle{
-                visible: !multiSelectMode
-                width: parent.width
-                height: childrenRect.height + 20
-                color:theme_appMenuBackgroundColor
-                radius: 10
-                Button {
-                    id: saveBt
-                    title: labelSavePlaylist
-                    color: theme_buttonFontColor
-                    width: parent.width -20
-                    height: 50
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.top: parent.top
-                    anchors.topMargin: 10
-                    onClicked: {
+            menuContent: ActionMenu {
+                model: [labelSavePlaylist, labelClearPlaylist]
+                onTriggered: {
+                    if(model[index] == labelSavePlaylist)
+                    {
                         scene.showModalDialog(playqueuePlaylistComponent)
                         playQueuePage.closeMenu();
                     }
-                }
-                Button {
-                    id: clearBt
-                    title: labelClearPlaylist
-                    color: theme_buttonFontColor
-                    width: parent.width -20
-                    height: 50
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.top: saveBt.bottom
-                    anchors.topMargin: 10
-                    onClicked: {
+                    else if(model[index] == labelClearPlaylist)
+                    {
                         Code.stop();
                         playqueueModel.clear();
                         playQueuePage.closeMenu();
                     }
                 }
             }
-
 
             onSearch: {
                 playqueueView.model.search = needle;
@@ -771,58 +750,33 @@ Window {
                 if(applicationData != undefined)
                     scene.applicationData = undefined;
             }
-            menuContent: Rectangle{
-                visible: !multiSelectMode
-                width: parent.width
-                height: childrenRect.height + 20
-                color:theme_appMenuBackgroundColor
-                radius: 10
-                Button {
-                    id: createNewListBt
-                    title: labelNewList
-                    color: theme_buttonFontColor
-                    width: parent.width -20
-                    height: 50
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.top: parent.top
-                    anchors.topMargin: 10
-                    onClicked: {
+            property int highlightindex: settings.get("PlaylistsView")
+            menuContent: ActionMenu {
+                title: qsTr("View By")
+                highlightIndex: highlightindex
+                model: [labelGrid, labelList, labelNewList]
+                onTriggered: {
+                    if(index < 2)
+                        highlightindex = index;
+                    if(model[index] == labelNewList)
+                    {
                         scene.showModalDialog(createPlaylistComponent)
                         playlistsPage.closeMenu();
                     }
-                }
-                Button {
-                    id: gridBt
-                    title: labelGrid
-                    color: theme_buttonFontColor
-                    width: parent.width -20
-                    height: 50
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.top: createNewListBt.bottom
-                    anchors.topMargin: 10
-                    onClicked: {
+                    else if(model[index] == labelGrid)
+                    {
                         showGridView = true;
                         settings.set("PlaylistsView",0);
                         playlistsPage.closeMenu();
                     }
-                }
-                Button {
-                    id: listBt
-                    title: labelList
-                    color: theme_buttonFontColor
-                    width: parent.width -20
-                    height: 50
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.top: gridBt.bottom
-                    anchors.topMargin: 10
-                    onClicked: {
+                    else if(model[index] == labelList)
+                    {
                         showGridView = false;
                         settings.set("PlaylistsView",1);
                         playlistsPage.closeMenu();
                     }
                 }
             }
-
             MusicListView {
                 parent: playlistsPage.content
                 anchors.fill: parent
@@ -896,37 +850,21 @@ Window {
                 if(applicationData != undefined)
                     scene.applicationData = undefined;
             }
-            menuContent: Rectangle{
-                width: parent.width
-                height: childrenRect.height + 20
-                color:theme_appMenuBackgroundColor
-                radius: 10
-
-                Button {
-                    id: gridBt
-                    title: labelGrid
-                    color: theme_buttonFontColor
-                    width: parent.width -20
-                    height: 50
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.top: parent.top
-                    anchors.topMargin: 10
-                    onClicked: {
+            property int highlightindex: settings.get("AllArtistsView")
+            menuContent: ActionMenu {
+                title: qsTr("View By")
+                highlightIndex: highlightindex
+                model: [labelGrid, labelList]
+                onTriggered: {
+                    highlightindex = index;
+                    if(model[index] == labelGrid)
+                    {
                         showGridView = true;
                         settings.set("AllArtistsView",0);
                         artistsPage.closeMenu();
                     }
-                }
-                Button {
-                    id: listBt
-                    title: labelList
-                    color: theme_buttonFontColor
-                    width: parent.width -20
-                    height: 50
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.top: gridBt.bottom
-                    anchors.topMargin: 10
-                    onClicked: {
+                    else if(model[index] == labelList)
+                    {
                         showGridView= false;
                         settings.set("AllArtistsView",1);
                         artistsPage.closeMenu();
@@ -1003,37 +941,21 @@ Window {
                 if(applicationData != undefined)
                     scene.applicationData = undefined;
             }
-            menuContent: Rectangle{
-                width: parent.width
-                height: childrenRect.height + 20
-                color:theme_appMenuBackgroundColor
-                radius: 10
-
-                Button {
-                    id: gridBt
-                    title: labelGrid
-                    color: theme_buttonFontColor
-                    width: parent.width -20
-                    height: 50
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.top: parent.top
-                    anchors.topMargin: 10
-                    onClicked: {
+            property int highlightindex: settings.get("AllAlbumsView")
+            menuContent: ActionMenu {
+                title: qsTr("View By")
+                highlightIndex: highlightindex
+                model: [labelGrid, labelList]
+                onTriggered: {
+                    highlightindex = index;
+                    if(model[index] == labelGrid)
+                    {
                         showGridView = true;
                         settings.set("AllAlbumsView",0);
                         albumsPage.closeMenu();
                     }
-                }
-                Button {
-                    id: listBt
-                    title: labelList
-                    color: theme_buttonFontColor
-                    width: parent.width -20
-                    height: 50
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.top: gridBt.bottom
-                    anchors.topMargin: 10
-                    onClicked: {
+                    else if(model[index] == labelList)
+                    {
                         showGridView= false;
                         settings.set("AllAlbumsView",1);
                         albumsPage.closeMenu();
@@ -1120,37 +1042,21 @@ Window {
                     scene.applicationData = undefined;
                 }
             }
-            menuContent: Rectangle{
-                width: parent.width
-                height: childrenRect.height + 20
-                color:theme_appMenuBackgroundColor
-                radius: 10
-
-                Button {
-                    id: gridBt
-                    title: labelGrid
-                    color: theme_buttonFontColor
-                    width: parent.width -20
-                    height: 50
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.top: parent.top
-                    anchors.topMargin: 10
-                    onClicked: {
+            property int highlightindex: settings.get("AllTracksView")
+            menuContent: ActionMenu {
+                title: qsTr("View By")
+                highlightIndex: highlightindex
+                model: [labelGrid, labelList]
+                onTriggered: {
+                    highlightindex = index;
+                    if(model[index] == labelGrid)
+                    {
                         showGridView = true;
                         settings.set("AllTracksView",0);
                         allTracksPage.closeMenu();
                     }
-                }
-                Button {
-                    id: listBt
-                    title: labelList
-                    color: theme_buttonFontColor
-                    width: parent.width -20
-                    height: 50
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.top: gridBt.bottom
-                    anchors.topMargin: 10
-                    onClicked: {
+                    else if(model[index] == labelList)
+                    {
                         showGridView= false;
                         settings.set("AllTracksView",1);
                         allTracksPage.closeMenu();
@@ -1263,36 +1169,22 @@ Window {
                     scene.applicationData = undefined;
                 }
             }
-            menuContent:Rectangle{
-                width: parent.width
-                height: childrenRect.height + 20
-                color:theme_appMenuBackgroundColor
-                radius: 10
-                Button {
-                    id: azBt
-                    title: labelAlphabetical
-                    color: theme_buttonFontColor
-                    width: parent.width -20
-                    height: 50
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.top: parent.top
-                    anchors.topMargin: 10
-                    onClicked: {
+            property int highlightindex: settings.get("FavoriteView")
+            menuContent: ActionMenu {
+                title: qsTr("Sort")
+                highlightIndex: highlightindex
+                model: [labelAlphabetical, labelDateOrder]
+                minWidth: parent.width
+                onTriggered: {
+                    highlightindex = index;
+                    if(model[index] == labelAlphabetical)
+                    {
                         listView.model.sort = MusicListModel.SortByTitle;
                         settings.set("FavoriteView",0);
                         favoritesPage.closeMenu();
                     }
-                }
-                Button {
-                    id: dateBt
-                    title: labelDateOrder
-                    color: theme_buttonFontColor
-                    width: parent.width -20
-                    height: 50
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.top: azBt.bottom
-                    anchors.topMargin: 10
-                    onClicked: {
+                    else if(model[index] == labelDateOrder)
+                    {
                         listView.model.sort = MusicListModel.SortByAddedTime;
                         settings.set("FavoriteView",1);
                         favoritesPage.closeMenu();
@@ -1368,36 +1260,21 @@ Window {
                 }
             }
 
-            menuContent: Rectangle{
-                width: parent.width
-                height: childrenRect.height + 20
-                color:theme_appMenuBackgroundColor
-                radius: 10
-                Button {
-                    id: gridBt
-                    title: labelGrid
-                    color: theme_buttonFontColor
-                    width: parent.width -20
-                    height: 50
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.top: parent.top
-                    anchors.topMargin: 10
-                    onClicked: {
+            property int highlightindex: settings.get("ArtistDetailView")
+            menuContent: ActionMenu {
+                title: qsTr("View By")
+                highlightIndex: highlightindex
+                model: [labelGrid, labelList]
+                onTriggered: {
+                    highlightindex = index;
+                    if(model[index] == labelGrid)
+                    {
                         artistDetailViewPage.showList = false;
                         settings.set("ArtistDetailView",1);
                         artistDetailViewPage.closeMenu();
                     }
-                }
-                Button {
-                    id: listBt
-                    title: labelList
-                    color: theme_buttonFontColor
-                    width: parent.width -20
-                    height: 50
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.top: gridBt.bottom
-                    anchors.topMargin: 10
-                    onClicked: {
+                    else if(model[index] == labelList)
+                    {
                         artistDetailViewPage.showList = true;
                         settings.set("ArtistDetailView",0);
                         artistDetailViewPage.closeMenu();
@@ -1853,29 +1730,15 @@ Window {
                     scene.applicationData = undefined;
                 }
             }
-            menuContent: Rectangle{
-                visible: !multiSelectMode
-                width: parent.width
-                height: childrenRect.height + 20
-                color:theme_appMenuBackgroundColor
-                radius: 10
-                Button {
-                    id: renameListBt
-                    title: labelRenamePlaylist
-                    color: theme_buttonFontColor
-                    width: parent.width -20
-                    height: 50
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.top: parent.top
-                    anchors.topMargin: 10
-                    onClicked: {
-                        // Rename playlist
-                        scene.showModalDialog(renamePlaylistComponent);
-                        dialogLoader.item.currTitle = labelPlaylist;
-                        dialogLoader.item.urn = labelPlaylistURN;
-                        dialogLoader.item.playListModel = playlistList.model;
-                        playlistDetailViewPage.closeMenu();
-                    }
+            menuContent: ActionMenu {
+                model: [labelRenamePlaylist]
+                onTriggered: {
+                    // Rename playlist
+                    scene.showModalDialog(renamePlaylistComponent);
+                    dialogLoader.item.currTitle = labelPlaylist;
+                    dialogLoader.item.urn = labelPlaylistURN;
+                    dialogLoader.item.playListModel = playlistList.model;
+                    playlistDetailViewPage.closeMenu();
                 }
             }
             Item {
