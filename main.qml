@@ -46,7 +46,7 @@ Window {
 
     property string labelRename:qsTr("Rename")
 
-    property string labelNewList: qsTr("Create New Playlist")
+    property string labelNewList: qsTr("New")
     property string labelEdit: qsTr("Edit")
     property string labelcShare: qsTr("Share")
     property string labelDelete: qsTr("Delete")
@@ -334,7 +334,7 @@ Window {
         property variant openpage
         property variant playlistmodel
         property variant sharemodel
-        onTriggered: {            
+        onTriggered: {
             if (model[index] == labelPlay)
             {
                 // Play
@@ -702,6 +702,7 @@ Window {
                 if(applicationData != undefined)
                     scene.applicationData = undefined;
             }
+            property int highlightindex: settings.get("PlaylistsView")
             menuContent: ActionMenu {
                 model: [labelSavePlaylist, labelClearPlaylist]
                 onTriggered: {
@@ -751,29 +752,47 @@ Window {
                     scene.applicationData = undefined;
             }
             property int highlightindex: settings.get("PlaylistsView")
-            menuContent: ActionMenu {
-                title: qsTr("View By")
-                highlightIndex: highlightindex
-                model: [labelGrid, labelList, labelNewList]
-                onTriggered: {
-                    if(index < 2)
+            menuContent: Item {
+                width: sortMenu.width
+                height: sortMenu.height + actionMenu.height
+                ActionMenu {
+                    id: sortMenu
+                    title: qsTr("View By")
+                    highlightIndex: highlightindex
+                    model: [labelGrid, labelList]
+                    onTriggered: {
                         highlightindex = index;
-                    if(model[index] == labelNewList)
-                    {
-                        scene.showModalDialog(createPlaylistComponent)
-                        playlistsPage.closeMenu();
+                        if(model[index] == labelGrid)
+                        {
+                            showGridView = true;
+                            settings.set("PlaylistsView",0);
+                            playlistsPage.closeMenu();
+                        }
+                        else if(model[index] == labelList)
+                        {
+                            showGridView = false;
+                            settings.set("PlaylistsView",1);
+                            playlistsPage.closeMenu();
+                        }
                     }
-                    else if(model[index] == labelGrid)
-                    {
-                        showGridView = true;
-                        settings.set("PlaylistsView",0);
-                        playlistsPage.closeMenu();
-                    }
-                    else if(model[index] == labelList)
-                    {
-                        showGridView = false;
-                        settings.set("PlaylistsView",1);
-                        playlistsPage.closeMenu();
+                }
+                Image {
+                    id: titleSeperatorImage
+                    anchors.top: sortMenu.bottom
+                    width: sortMenu.width
+                    source: "image://theme/menu_item_separator"
+                }
+                ActionMenu {
+                    id: actionMenu
+                    anchors.top: titleSeperatorImage.bottom
+                    title: qsTr("Actions")
+                    model: [labelNewList]
+                    onTriggered: {
+                        if(model[index] == labelNewList)
+                        {
+                            scene.showModalDialog(createPlaylistComponent)
+                            playlistsPage.closeMenu();
+                        }
                     }
                 }
             }
