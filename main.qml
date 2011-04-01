@@ -702,7 +702,6 @@ Window {
                 if(applicationData != undefined)
                     scene.applicationData = undefined;
             }
-            property int highlightindex: settings.get("PlaylistsView")
             menuContent: ActionMenu {
                 model: [labelSavePlaylist, labelClearPlaylist]
                 onTriggered: {
@@ -751,7 +750,7 @@ Window {
                 if(applicationData != undefined)
                     scene.applicationData = undefined;
             }
-            property int highlightindex: settings.get("PlaylistsView")
+            property int highlightindex: (showGridView)?0:1
             menuContent: Item {
                 width: sortMenu.width
                 height: sortMenu.height + actionMenu.height
@@ -869,7 +868,7 @@ Window {
                 if(applicationData != undefined)
                     scene.applicationData = undefined;
             }
-            property int highlightindex: settings.get("AllArtistsView")
+            property int highlightindex: (showGridView)?0:1
             menuContent: ActionMenu {
                 title: qsTr("View By")
                 highlightIndex: highlightindex
@@ -960,7 +959,7 @@ Window {
                 if(applicationData != undefined)
                     scene.applicationData = undefined;
             }
-            property int highlightindex: settings.get("AllAlbumsView")
+            property int highlightindex: (showGridView)?0:1
             menuContent: ActionMenu {
                 title: qsTr("View By")
                 highlightIndex: highlightindex
@@ -989,6 +988,7 @@ Window {
                 model:albumsGridView.model
                 mode: 3
                 onClicked: {
+                    labelArtist = payload.martist;
                     Code.openItemInDetailView(albumsPage,payload)
                 }
                 onDoubleClicked: {
@@ -1019,6 +1019,7 @@ Window {
                     sort:MusicListModel.SortByTitle
                 }
                 onClicked: {
+                    labelArtist = payload.martist;
                     Code.openItemInDetailView(albumsPage,payload)
                 }
                 onDoubleClicked: {
@@ -1061,7 +1062,7 @@ Window {
                     scene.applicationData = undefined;
                 }
             }
-            property int highlightindex: settings.get("AllTracksView")
+            property int highlightindex: (showGridView)?0:1
             menuContent: ActionMenu {
                 title: qsTr("View By")
                 highlightIndex: highlightindex
@@ -1188,7 +1189,7 @@ Window {
                     scene.applicationData = undefined;
                 }
             }
-            property int highlightindex: settings.get("FavoriteView")
+            property int highlightindex: (settings.get("FavoriteView") == 1)?1:0
             menuContent: ActionMenu {
                 title: qsTr("Sort")
                 highlightIndex: highlightindex
@@ -1279,7 +1280,7 @@ Window {
                 }
             }
 
-            property int highlightindex: settings.get("ArtistDetailView")
+            property int highlightindex: (showList)?1:0
             menuContent: ActionMenu {
                 title: qsTr("View By")
                 highlightIndex: highlightindex

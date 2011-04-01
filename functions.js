@@ -424,7 +424,6 @@ function openItemInDetailView(fromPage, item)
         thumbnailUri = item.mthumburi;
         fromPage.addApplicationPage(albumDetailViewContent);
         labelAlbum = item.mtitle;
-        labelArtist = item.martist;
         albumLength = item.mlength;
         break;
     case 5:
