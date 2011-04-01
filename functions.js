@@ -12,7 +12,6 @@ var currentView = null;
 var currentItem = null
 var startPos = null;
 
-
 function startDrag(mouse,view,item) {
     if (view == null || item == null)
         return;
@@ -394,6 +393,13 @@ function stop()
     audio.stop();
 }
 
+function formatLength(time)
+{
+    var val = parseInt(time);
+    var dec = parseInt((time-val)*10);
+    return (dec == 0)?val:(val + "." + dec)
+}
+
 function formatTime(time)
 {
     var min = parseInt(time/60);
@@ -418,6 +424,8 @@ function openItemInDetailView(fromPage, item)
         thumbnailUri = item.mthumburi;
         fromPage.addApplicationPage(albumDetailViewContent);
         labelAlbum = item.mtitle;
+        labelArtist = item.martist;
+        albumLength = item.mlength;
         break;
     case 5:
         // type is playlist

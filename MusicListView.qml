@@ -41,6 +41,7 @@ Item {
     Image {
         id: titleBar
         source: "image://theme/media/subtitle_landscape_bar"
+        anchors.top:parent.top
         anchors.left:parent.left
         width: parent.width
         Text {
@@ -233,6 +234,7 @@ Item {
             property string malbum:album
             property string muri: uri
             property string murn: urn
+            property int mlength: length
             Image {
                 id: rect
                 width: height

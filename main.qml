@@ -78,7 +78,7 @@ Window {
     property int numberOfAlbum: 0
     property string artistName: ""
     property int tabContentWidth: 300
-
+    property int albumLength: 0
     property alias shuffle: toolbar.shuffle
     property alias loop: toolbar.loop
 
@@ -1300,244 +1300,330 @@ Window {
                     }
                 }
             }
-            MediaGridView {
-                id: artistAlbumsGridView
-                type: musictype // music app = 0
+
+            Item {
+                id: artistDetailViewMain
                 parent:artistDetailViewPage.content
-                clip: true
-                model: artistDetailViewPage.model
                 anchors.fill: parent
-                cellWidth:(width- 15) / (scene.isLandscapeView() ? 7: 4)
-                cellHeight: cellWidth
-                anchors.leftMargin: 15
-                anchors.topMargin:3
-                visible: false
-                defaultThumbnail: "image://theme/media/music_thumb_med"
-                onClicked: {
-                    if(payload.misvirtual) {
-                        return;
-                    }
-                    Code.openItemInDetailView(artistDetailViewPage,payload)
-                }
 
-                onLongPressAndHold: {
-                    musicContextMenu(mouseX, mouseY, payload,
-                        [labelOpen, labelPlay, labelAddToPlayQueue, labelAddToPlaylist, labelDelete]);
-                    contextMenu.openpage = artistDetailViewPage;
-                    contextMenu.visible = true;
-                }
-            }
-
-
-            ListView {
-                id: artistAlbumsListView
-                parent: artistDetailViewPage.content
-                anchors.fill: parent
-                clip: true
-                model: artistDetailViewPage.model
-                delegate: Item {
-                    id: dinstance
-                    width: artistAlbumsListView.width
-                    height: Math.max(albumThumbnail.height, songsInAlbumList.height) + albumTitleText.height + 10
-
-                    property string mthumburi: thumburi
-                    property string mtitle: title
-                    property string mitemid: itemid
-                    property bool mfavorite: favorite
-                    property string martist
-                    property int mitemtype: itemtype
-                    property bool misvirtual: isvirtual
-
-                    martist: {
-                        artist[0] == undefined? labelUnknownArtist:artist[0];
-                    }
-
+                BorderImage {
+                    id: artistTitleText
+                    width: parent.width
+                    source: (scene.isLandscapeView())?"image://theme/media/subtitle_landscape_bar":"image://theme/media/subtitle_portrait_bar"
                     Text {
-                        id: albumTitleText
-                        height: 50
-                        text: mtitle
-                        font.bold:true
+                        text: labelArtist
                         font.pixelSize: theme_fontPixelSizeLarge
-                        color:theme_fontColorHighlight
+                        anchors.fill: parent
+                        color:theme_fontColorNormal
                         verticalAlignment:Text.AlignVCenter
                         horizontalAlignment:Text.AlignLeft
                         elide: Text.ElideRight
-                        MouseArea {
-                            anchors.fill:parent
-                            onClicked:{
-                                if(misvirtual) {
-                                    return;
-                                }
-                                Code.openItemInDetailView(artistDetailViewPage,dinstance)
-                            }
+                        anchors.leftMargin: 50
+                    }
+                }
+
+                MediaGridView {
+                    id: artistAlbumsGridView
+                    type: musictype // music app = 0
+                    clip: true
+                    model: artistDetailViewPage.model
+                    width: parent.width
+                    height: parent.height - artistTitleText.height
+                    anchors.top: artistTitleText.bottom
+                    cellWidth:(width- 15) / (scene.isLandscapeView() ? 7: 4)
+                    cellHeight: cellWidth
+                    anchors.leftMargin: 15
+                    anchors.topMargin:3
+                    visible: false
+                    defaultThumbnail: "image://theme/media/music_thumb_med"
+                    onClicked: {
+                        if(payload.misvirtual) {
+                            return;
                         }
+                        Code.openItemInDetailView(artistDetailViewPage,payload)
                     }
 
-                    BorderImage {
-                        id: albumThumbnail
-                        border.left: 10; border.top: 10
-                        border.right: 10; border.bottom: 10
-                        width:400
-                        height:width
-                        source: "image://theme/media/music_border_lrg"
-                        smooth:misvirtual? true: false
-                        anchors.leftMargin: 15
-                        RoundedItem {
-                            anchors.fill: parent
-                            radius: 8
-                            clip: true
-                            z: -10
-                            Image {
-                                anchors.fill: parent
-                                fillMode:Image.PreserveAspectFit
-                                source:misvirtual? "image://theme/media/music_default_album":thumburi
+                    onLongPressAndHold: {
+                        musicContextMenu(mouseX, mouseY, payload,
+                            [labelOpen, labelPlay, labelAddToPlayQueue, labelAddToPlaylist, labelDelete]);
+                        contextMenu.openpage = artistDetailViewPage;
+                        contextMenu.visible = true;
+                    }
+                }
+
+
+                ListView {
+                    id: artistAlbumsListView
+                    width: parent.width
+                    height: parent.height - artistTitleText.height
+                    anchors.top: artistTitleText.bottom
+                    clip: true
+                    model: artistDetailViewPage.model
+                    delegate: Item {
+                        id: dinstance
+                        width: artistAlbumsListView.width
+                        height: Math.max(albumDetailBackground.height, songsInAlbumList.height)
+
+                        property string mthumburi: thumburi
+                        property string mtitle: title
+                        property string mitemid: itemid
+                        property bool mfavorite: favorite
+                        property string martist
+                        property int mitemtype: itemtype
+                        property bool misvirtual: isvirtual
+                        property int mlength: length
+
+                        martist: {
+                            artist[0] == undefined? labelUnknownArtist:artist[0];
+                        }
+
+                        BorderImage {
+                            id: albumDetailBackground
+                            source: "image://meegotheme/widgets/apps/media/gradient-albumview"
+                            Item {
+                                id: albumDetailText
+                                height: albumThumbnail.height/3
+                                width: albumThumbnail.width
+                                Item {
+                                    id: albumDetailTextContainer
+                                    anchors.centerIn: parent
+                                    height: albumThumbnail.height/3
+                                    width: (parent.width*3)/4
+                                    Text {
+                                        id: albumTitleText
+                                        anchors.top: parent.top
+                                        height: albumThumbnail.height/9
+                                        width: parent.width
+                                        text: mtitle
+                                        color: theme_fontColorMediaHighlight
+                                        font.pixelSize: theme_fontPixelSizeLarge
+                                        verticalAlignment:Text.AlignVCenter
+                                        horizontalAlignment:Text.AlignLeft
+                                        elide: Text.ElideRight
+                                    }
+                                    Text {
+                                        id: albumTrackcountText
+                                        anchors.top: albumTitleText.bottom
+                                        height: albumThumbnail.height/10
+                                        width: parent.width
+                                        text: qsTr("%1 songs").arg(tracknum)
+                                        color: theme_fontColorMediaHighlight
+                                        font.pixelSize: theme_fontPixelSizeLarge-3
+                                        verticalAlignment:Text.AlignVCenter
+                                        horizontalAlignment:Text.AlignLeft
+                                        elide: Text.ElideRight
+                                    }
+                                    Text {
+                                        id: albumLengthText
+                                        anchors.top: albumTrackcountText.bottom
+                                        height: albumThumbnail.height/10
+                                        width: parent.width
+                                        text: (length < 60)?(qsTr("%1 Seconds").arg(Code.formatLength(length))):
+                                                ((length < 3600)?(qsTr("%1 Minutes").arg(Code.formatLength(length/60))):
+                                                 (qsTr("%1 Hours").arg(Code.formatLength(length/3600))))
+                                        color: theme_fontColorMediaHighlight
+                                        font.pixelSize: theme_fontPixelSizeLarge-3
+                                        verticalAlignment:Text.AlignVCenter
+                                        horizontalAlignment:Text.AlignLeft
+                                        elide: Text.ElideRight
+                                    }
+                                }
+                            }
+
+                            BorderImage {
+                                id: albumThumbnail
+                                border.left: 10; border.top: 10
+                                border.right: 10; border.bottom: 10
+                                width:400
+                                height:width
+                                source: "image://theme/media/music_border_lrg"
+                                smooth:misvirtual? true: false
+                                anchors.leftMargin: 15
+                                RoundedItem {
+                                    anchors.fill: parent
+                                    radius: 8
+                                    clip: true
+                                    z: -10
+                                    Image {
+                                        anchors.fill: parent
+                                        fillMode:Image.PreserveAspectFit
+                                        source:misvirtual? "image://theme/media/music_default_album":thumburi
+                                    }
+                                }
+
+                                MouseArea {
+                                    anchors.fill:parent
+                                    onClicked:{
+                                        if(misvirtual) {
+                                            return;
+                                        }
+                                        Code.openItemInDetailView(artistDetailViewPage,dinstance)
+                                    }
+                                    onPressAndHold: {
+                                        musicContextMenu(mouseX, mouseY, dinstance,
+                                            [labelOpen, labelPlay, labelAddToPlayQueue, labelAddToPlaylist, labelDelete]);
+                                        contextMenu.openpage = artistDetailViewPage;
+                                        contextMenu.visible = true;
+                                    }
+                                }
                             }
                         }
 
-                        MouseArea {
-                            anchors.fill:parent
-                            onPressAndHold: {
-                                musicContextMenu(mouseX, mouseY, dinstance,
-                                    [labelOpen, labelPlay, labelAddToPlayQueue, labelAddToPlaylist, labelDelete]);
-                                contextMenu.openpage = artistDetailViewPage;
+                        MusicListView{
+                            id: songsInAlbumList
+                            selectionMode: multiSelectMode
+                            height: 500
+                            interactive: false
+                            Component.onCompleted: {
+                                height = model.count * 50 + titleBarHeight;
+                            }
+                            model: MusicListModel {
+                                type: misvirtual? MusicListModel.ListofOrphanSongsForArtist: MusicListModel.ListofSongsForAlbum
+                                artist: misvirtual? martist:""
+                                album:misvirtual? "":mtitle
+                                limit:0
+                                sort:MusicListModel.SortByDefault
+                            }
+                            onClicked: {
+                                if(multiSelectMode)
+                                {
+                                    model.setSelected(payload.mitemid, !model.isSelected(payload.mitemid));
+                                    if (model.isSelected(payload.mitemid))
+                                        multibar.sharing.addItem(payload.muri);
+                                    else
+                                        multibar.sharing.delItem(payload.muri);
+                                }
+                                else
+                                {
+                                    songsInAlbumList.currentIndex = model.itemIndex(payload.mitemid);
+                                    Code.addToPlayqueueAndPlay(payload);
+                                }
+                            }
+                            onLongPressAndHold: {
+                                musicContextMenu(mouseX, mouseY, payload,
+                                    [labelPlay, "favorite", labelcShare, labelMultiSelect, labelAddToPlayQueue, labelAddToPlaylist, labelDelete]);
+                                multiSelectModel = model;
                                 contextMenu.visible = true;
                             }
                         }
+
+                        states: [
+                            State {
+                                name: "landscapeArtistDetailView"
+                                when: scene.isLandscapeView()
+                                PropertyChanges {
+                                    target: dinstance
+                                    height: Math.max(albumDetailBackground.height, songsInAlbumList.height)
+                                }
+                                PropertyChanges {
+                                    target: albumDetailBackground
+                                    width: albumThumbnail.width + 30
+                                    height: Math.max(songsInAlbumList.height, albumThumbnail.height + albumThumbnail.height/3)
+                                }
+                                PropertyChanges {
+                                    target: albumDetailText
+                                    height: albumThumbnail.height/3
+                                    width: albumThumbnail.width
+                                }
+                                PropertyChanges {
+                                    target: songsInAlbumList
+                                    width: parent.width - albumThumbnail.width - 30
+                                }
+                                AnchorChanges {
+                                    target: albumDetailBackground
+                                    anchors.left:parent.left
+                                    anchors.top:parent.top
+                                }
+                                AnchorChanges {
+                                    target:songsInAlbumList
+                                    anchors.left:albumDetailBackground.right
+                                    anchors.top:albumDetailBackground.top
+                                }
+                                AnchorChanges {
+                                    target: albumThumbnail
+                                    anchors.left:albumDetailBackground.left
+                                    anchors.top:albumDetailBackground.top
+                                }
+                                AnchorChanges {
+                                    target: albumDetailText
+                                    anchors.left:albumDetailBackground.left
+                                    anchors.top: albumThumbnail.bottom
+                                }
+                            },
+                            State {
+                                name: "portraitArtistDetailView"
+                                when: !scene.isLandscapeView()
+                                PropertyChanges {
+                                    target: dinstance
+                                    height: albumDetailBackground.height + songsInAlbumList.height
+                                }
+                                PropertyChanges {
+                                    target: albumDetailBackground
+                                    width: parent.width
+                                    height: albumThumbnail.height
+                                }
+                                PropertyChanges {
+                                    target: albumDetailText
+                                    height: albumThumbnail.height
+                                    width: parent.width - albumThumbnail.width
+                                }
+                                PropertyChanges {
+                                    target: songsInAlbumList
+                                    width: parent.width - 5
+                                }
+
+                                AnchorChanges {
+                                    target: albumDetailBackground
+                                    anchors.left:parent.left
+                                    anchors.top:parent.top
+                                }
+                                AnchorChanges {
+                                    target: albumDetailText
+                                    anchors.top:albumDetailBackground.top
+                                    anchors.left:albumThumbnail.right
+                                }
+                                AnchorChanges {
+                                    target: albumThumbnail
+                                    anchors.left:albumDetailBackground.left
+                                    anchors.top: albumDetailBackground.top
+                                }
+                                AnchorChanges {
+                                    target:songsInAlbumList
+                                    anchors.left:parent.left
+                                    anchors.top:albumDetailBackground.bottom
+                                }
+                            }
+                        ]
                     }
-                    MusicListView{
-                        id: songsInAlbumList
-                        selectionMode: multiSelectMode
-                        height: 500
-                        interactive: false
-                        Component.onCompleted: {
-                            height = model.count * 50 + titleBarHeight;
-                        }
-                        model: MusicListModel {
-                            type: misvirtual? MusicListModel.ListofOrphanSongsForArtist: MusicListModel.ListofSongsForAlbum
-                            artist: misvirtual? martist:""
-                            album:misvirtual? "":mtitle
-                            limit:0
-                            sort:MusicListModel.SortByDefault
-                        }
-                        onClicked: {
-                            if(multiSelectMode)
-                            {
-                                model.setSelected(payload.mitemid, !model.isSelected(payload.mitemid));
-                                if (model.isSelected(payload.mitemid))
-                                    multibar.sharing.addItem(payload.muri);
-                                else
-                                    multibar.sharing.delItem(payload.muri);
-                            }
-                            else
-                            {
-                                songsInAlbumList.currentIndex = model.itemIndex(payload.mitemid);
-                                Code.addToPlayqueueAndPlay(payload);
-                            }
-                        }
-                        onLongPressAndHold: {
-                            musicContextMenu(mouseX, mouseY, payload,
-                                [labelPlay, "favorite", labelcShare, labelMultiSelect, labelAddToPlayQueue, labelAddToPlaylist, labelDelete]);
-                            multiSelectModel = model;
-                            contextMenu.visible = true;
-                        }
-                    }
-
-                    states: [
-                        State {
-                            name: "landscapeArtistDetailView"
-                            when: scene.isLandscapeView()
-                            PropertyChanges {
-                                target: albumTitleText
-                                anchors.leftMargin: 15
-                                width: parent.width -15
-                            }
-                            PropertyChanges {
-                                target: songsInAlbumList
-                                anchors.margins: 3
-                                width: parent.width - albumThumbnail.width - 21
-                            }
-                            AnchorChanges {
-                                target: albumTitleText
-                                anchors.top:parent.top
-                                anchors.left:parent.left
-                            }
-                            AnchorChanges {
-                                target: albumThumbnail
-                                anchors.left:parent.left
-                                anchors.top: albumTitleText.bottom
-                            }
-                            AnchorChanges {
-                                target:songsInAlbumList
-                                anchors.left:albumThumbnail.right
-                                anchors.top:albumTitleText.bottom
-                            }
-
-                        },
-                        State {
-                            name: "portraitArtistDetailView"
-                            when: !scene.isLandscapeView()
-                            PropertyChanges {
-                                target: albumTitleText
-                                anchors.leftMargin: 15
-                                width: parent.width - albumThumbnail.width - 5
-                            }
-                            PropertyChanges {
-                                target: songsInAlbumList
-                                width: parent.width - 5
-                                anchors.margins: 3
-                            }
-                            PropertyChanges {
-                                target: dinstance
-                                height: albumThumbnail.height + songsInAlbumList.height + 30
-                            }
-
-                            AnchorChanges {
-                                target: albumTitleText
-                                anchors.top:parent.top
-                                anchors.left:albumThumbnail.right
-                            }
-                            AnchorChanges {
-                                target: albumThumbnail
-                                anchors.left:parent.left
-                                anchors.top: parent.top
-                            }
-                            AnchorChanges {
-                                target:songsInAlbumList
-                                anchors.left:parent.left
-                                anchors.top:albumThumbnail.bottom
-                            }
-                        }
-                    ]
                 }
+
+                states: [
+                    State {
+                        name: "listview"
+                        when: artistDetailViewPage.showList
+                        PropertyChanges {
+                            target: artistAlbumsListView
+                            visible: true
+                        }
+                        PropertyChanges {
+                            target: artistAlbumsGridView
+                            visible: false
+                        }
+                    },
+                    State {
+                        name: "gridview"
+                        when: !artistDetailViewPage.showList
+                        PropertyChanges {
+                            target: artistAlbumsListView
+                            visible: false
+                        }
+                        PropertyChanges {
+                            target: artistAlbumsGridView
+                            visible: true
+                        }
+                    }
+                ]
             }
-
-            states: [
-                State {
-                    name: "listview"
-                    when: artistDetailViewPage.showList
-                    PropertyChanges {
-                        target: artistAlbumsListView
-                        visible: true
-                    }
-                    PropertyChanges {
-                        target: artistAlbumsGridView
-                        visible: false
-                    }
-                },
-                State {
-                    name: "gridview"
-                    when: !artistDetailViewPage.showList
-                    PropertyChanges {
-                        target: artistAlbumsListView
-                        visible: false
-                    }
-                    PropertyChanges {
-                        target: artistAlbumsGridView
-                        visible: true
-                    }
-                }
-            ]
-
         }
     }
 
@@ -1578,49 +1664,99 @@ Window {
                 parent: albumDetailViewPage.content
                 anchors.fill: parent
 
-                Text {
-                    id: tAlbum
-                    text: labelAlbum
-                    height:50
-                    verticalAlignment:Text.AlignVCenter
-                    horizontalAlignment:Text.AlignLeft
-                    elide:Text.ElideRight
-                    font.bold:true
-                    font.pixelSize: theme_fontPixelSizeLarge
-                    color:theme_fontColorHighlight
-                }
                 BorderImage {
-                    id: albumThumbnail
-                    border.left: 10; border.top: 10
-                    border.right: 10; border.bottom: 10
-                    width: 400
-                    height: width
-                    anchors.leftMargin: 15
-                    source: "image://theme/media/music_border_lrg"
-                    RoundedItem {
+                    id: artistTitleText
+                    width: parent.width
+                    anchors.top: parent.top
+                    source: (scene.isLandscapeView())?"image://theme/media/subtitle_landscape_bar":"image://theme/media/subtitle_portrait_bar"
+                    Text {
+                        text: labelArtist
+                        font.pixelSize: theme_fontPixelSizeLarge
                         anchors.fill: parent
-                        radius: 8
-                        clip: true
-                        z: -10
-                        Image {
-                            anchors.fill: parent
-                            fillMode:Image.PreserveAspectFit
-                            source:thumbnailUri
+                        color:theme_fontColorNormal
+                        verticalAlignment:Text.AlignVCenter
+                        horizontalAlignment:Text.AlignLeft
+                        elide: Text.ElideRight
+                        anchors.leftMargin: 50
+                    }
+                }
+
+                BorderImage {
+                    id: albumDetailBackground
+                    anchors.top: artistTitleText.bottom
+                    source: "image://meegotheme/widgets/apps/media/gradient-albumview"
+                    Item {
+                        id: albumDetailText
+                        height: albumThumbnail.height/3
+                        width: albumThumbnail.width
+                        Item {
+                            id: albumDetailTextContainer
+                            anchors.centerIn: parent
+                            height: albumThumbnail.height/3
+                            width: (parent.width*3)/4
+                            Text {
+                                id: albumTitleText
+                                anchors.top: parent.top
+                                height: albumThumbnail.height/9
+                                width: parent.width
+                                text: labelAlbum
+                                color: theme_fontColorMediaHighlight
+                                font.pixelSize: theme_fontPixelSizeLarge
+                                verticalAlignment:Text.AlignVCenter
+                                horizontalAlignment:Text.AlignLeft
+                                elide: Text.ElideRight
+                            }
+                            Text {
+                                id: albumTrackcountText
+                                anchors.top: albumTitleText.bottom
+                                height: albumThumbnail.height/10
+                                width: parent.width
+                                text: qsTr("%1 songs").arg(model.count)
+                                color: theme_fontColorMediaHighlight
+                                font.pixelSize: theme_fontPixelSizeLarge-3
+                                verticalAlignment:Text.AlignVCenter
+                                horizontalAlignment:Text.AlignLeft
+                                elide: Text.ElideRight
+                            }
+                            Text {
+                                id: albumLengthText
+                                anchors.top: albumTrackcountText.bottom
+                                height: albumThumbnail.height/10
+                                width: parent.width
+                                text: (albumLength < 60)?(qsTr("%1 Seconds").arg(Code.formatLength(albumLength))):
+                                        ((albumLength < 3600)?(qsTr("%1 Minutes").arg(Code.formatLength(albumLength/60))):
+                                         (qsTr("%1 Hours").arg(Code.formatLength(albumLength/3600))))
+                                color: theme_fontColorMediaHighlight
+                                font.pixelSize: theme_fontPixelSizeLarge-3
+                                verticalAlignment:Text.AlignVCenter
+                                horizontalAlignment:Text.AlignLeft
+                                elide: Text.ElideRight
+                            }
                         }
                     }
 
-//                    MouseArea {
-//                        anchors.fill:parent
-//                        onPressAndHold: {
-//                            var map = mapToItem(scene, mouseX, mouseY);
-//                            // we don't have the instance to the current album item
-//                            // so we take it from the side content, which has a ListOfAlbums,
-//                            // and its current item is what we need.
-//                            scene.openContextMenu(albumContextComponent, contextLoader, map.x, map.y, payloadItem,
-//                                                  [labelPlay,labelAddToPlayQueue,labelAddToPlaylist,  payloadItem.mfavorite ? labelUnFavorite : labelFavorite,labelDelete]);
-//                         }
-//                    }
+                    BorderImage {
+                        id: albumThumbnail
+                        border.left: 10; border.top: 10
+                        border.right: 10; border.bottom: 10
+                        width:400
+                        height:width
+                        source: "image://theme/media/music_border_lrg"
+                        anchors.leftMargin: 15
+                        RoundedItem {
+                            anchors.fill: parent
+                            radius: 8
+                            clip: true
+                            z: -10
+                            Image {
+                                anchors.fill: parent
+                                fillMode:Image.PreserveAspectFit
+                                source:thumbnailUri
+                            }
+                        }
+                    }
                 }
+
                 MusicListView{
                     id: albumSongList
                     selectionMode: multiSelectMode
@@ -1654,73 +1790,82 @@ Window {
                     name: "landscapeAlbumDetailsView"
                     when: scene.isLandscapeView()
                     PropertyChanges {
-                        target: tAlbum
-                        width: parent.width - 15
-                        anchors.leftMargin: 15
+                        target: albumDetailBackground
+                        width: albumThumbnail.width + 30
+                        height: parent.height - artistTitleText.height
                     }
                     PropertyChanges {
-                        target: albumThumbnail
-                        anchors.leftMargin:15
+                        target: albumDetailText
+                        height: albumThumbnail.height/3
+                        width: albumThumbnail.width
                     }
                     PropertyChanges {
                         target: albumSongList
-                        anchors.margins:3
-                        width: parent.width - albumThumbnail.width - 21
-                        height: parent.height - tAlbum.height
+                        width: parent.width - albumDetailBackground.width
+                        height: parent.height - artistTitleText.height
                     }
                     AnchorChanges {
-                        target: albumSongList
-                        anchors.top: tAlbum.bottom
-                        anchors.left:albumThumbnail.right
+                        target: albumDetailBackground
+                        anchors.left:parent.left
+                        anchors.top:artistTitleText.bottom
+                    }
+                    AnchorChanges {
+                        target:albumSongList
+                        anchors.left:albumDetailBackground.right
+                        anchors.top:albumDetailBackground.top
                     }
                     AnchorChanges {
                         target: albumThumbnail
-                        anchors.left:parent.left
-                        anchors.top:tAlbum.bottom
+                        anchors.left:albumDetailBackground.left
+                        anchors.top:albumDetailBackground.top
                     }
                     AnchorChanges {
-                        target: tAlbum
-                        anchors.left:parent.left
-                        anchors.top:parent.top
+                        target: albumDetailText
+                        anchors.left:albumDetailBackground.left
+                        anchors.top: albumThumbnail.bottom
                     }
                 },
                 State {
                     name: "portraitAlbumDetailView"
                     when: !scene.isLandscapeView()
                     PropertyChanges {
-                        target: tAlbum
-                        width: parent.width - albumThumbnail.width - 5
-                        anchors.leftMargin: 5
+                        target: albumDetailBackground
+                        width: parent.width
+                        height: albumThumbnail.height
                     }
                     PropertyChanges {
-                        target: albumThumbnail
-                        anchors.leftMargin:5
+                        target: albumDetailText
+                        height: albumThumbnail.height
+                        width: parent.width - albumThumbnail.width
                     }
                     PropertyChanges {
                         target: albumSongList
-                        anchors.margins:3
-                        width: parent.width -5
-                        height: parent.height - albumThumbnail.height
+                        width: parent.width - 5
+                        height: parent.height - albumDetailBackground.height - artistTitleText.height
                     }
+
                     AnchorChanges {
-                        target: albumSongList
-                        anchors.top: albumThumbnail.bottom
+                        target: albumDetailBackground
                         anchors.left:parent.left
+                        anchors.top:artistTitleText.bottom
                     }
                     AnchorChanges {
-                        target: albumThumbnail
-                        anchors.left:parent.left
-                        anchors.top:parent.top
-                    }
-                    AnchorChanges {
-                        target: tAlbum
+                        target: albumDetailText
+                        anchors.top:albumDetailBackground.top
                         anchors.left:albumThumbnail.right
-                        anchors.top:parent.top
+                    }
+                    AnchorChanges {
+                        target: albumThumbnail
+                        anchors.left:albumDetailBackground.left
+                        anchors.top: albumDetailBackground.top
+                    }
+                    AnchorChanges {
+                        target:albumSongList
+                        anchors.left:parent.left
+                        anchors.top:albumDetailBackground.bottom
                     }
                 }
-
             ]
-
         }
     }
 
