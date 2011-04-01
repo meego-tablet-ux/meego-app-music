@@ -1448,7 +1448,7 @@ Window {
                                     Image {
                                         anchors.fill: parent
                                         fillMode:Image.PreserveAspectFit
-                                        source:misvirtual? "image://theme/media/music_default_album":thumburi
+                                        source:(thumburi == ""|thumburi == undefined)?"image://theme/media/music_thumb_med":thumburi
                                     }
                                 }
 
