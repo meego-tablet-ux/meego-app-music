@@ -72,6 +72,10 @@ Window {
     property string labelCancel: qsTr("Cancel")
     property string labelDefaultText:qsTr("Type playlist name here.")
     property string labelMultiSelect:qsTr("Select Multiple Songs")
+
+    property string labelNoMusicText1:qsTr("Where is all the music?")
+    property string labelNoMusicText2:qsTr("Buy, download or copy your music onto your table, then you can enjoy listening to it from here.")
+
     property int animationDuration: 500
 
     property int numberOfTrack: 0
@@ -120,6 +124,12 @@ Window {
     ShareObj {
         id: shareObj
         shareType: MeeGoUXSharingClientQmlObj.ShareTypeAudio
+    }
+
+    property variant allTracksModel: MusicListModel {
+        type: MusicListModel.ListofSongs
+        sort:MusicListModel.SortByDefault
+        limit: 0
     }
 
     // global now playing queue
@@ -311,10 +321,16 @@ Window {
         }
     }
 
-    Component.onCompleted: {
-        applicationPage = allTracksContent
+    Timer {
+        id: startupTimer
+        interval: 1000
+        repeat: false
     }
 
+    Component.onCompleted: {
+        startupTimer.start();
+        applicationPage = allTracksContent
+    }
 
     Loader {
         id: contextLoader
@@ -718,6 +734,30 @@ Window {
                     }
                 }
             }
+            Item {
+                id: noMusicScreen
+                anchors.centerIn: parent
+                height: parent.height/2
+                width: (scene.isLandscapeView())?(parent.width/2):(parent.width/1.2)
+                visible: ((allTracksModel.total == 0)&&(!startupTimer.running))
+                Text {
+                    id: noMusicScreenText1
+                    width: parent.width
+                    text: labelNoMusicText1
+                    font.pixelSize: scene.height/17
+                    anchors.top: parent.top
+                    wrapMode: Text.WordWrap
+                }
+                Text {
+                    id: noMusicScreenText2
+                    width: parent.width
+                    text: labelNoMusicText2
+                    font.pixelSize: scene.height/21
+                    anchors.top: noMusicScreenText1.bottom
+                    anchors.topMargin: scene.height/24
+                    wrapMode: Text.WordWrap
+                }
+            }
 
             onSearch: {
                 playqueueView.model.search = needle;
@@ -793,6 +833,30 @@ Window {
                             playlistsPage.closeMenu();
                         }
                     }
+                }
+            }
+            Item {
+                id: noMusicScreen
+                anchors.centerIn: parent
+                height: parent.height/2
+                width: (scene.isLandscapeView())?(parent.width/2):(parent.width/1.2)
+                visible: ((gridView.model.total == 0)&&(allTracksModel.total == 0)&&(!startupTimer.running))
+                Text {
+                    id: noMusicScreenText1
+                    width: parent.width
+                    text: labelNoMusicText1
+                    font.pixelSize: scene.height/17
+                    anchors.top: parent.top
+                    wrapMode: Text.WordWrap
+                }
+                Text {
+                    id: noMusicScreenText2
+                    width: parent.width
+                    text: labelNoMusicText2
+                    font.pixelSize: scene.height/21
+                    anchors.top: noMusicScreenText1.bottom
+                    anchors.topMargin: scene.height/24
+                    wrapMode: Text.WordWrap
                 }
             }
             MusicListView {
@@ -889,6 +953,30 @@ Window {
                     }
                 }
             }
+            Item {
+                id: noMusicScreen
+                anchors.centerIn: parent
+                height: parent.height/2
+                width: (scene.isLandscapeView())?(parent.width/2):(parent.width/1.2)
+                visible: ((allTracksModel.total == 0)&&(!startupTimer.running))
+                Text {
+                    id: noMusicScreenText1
+                    width: parent.width
+                    text: labelNoMusicText1
+                    font.pixelSize: scene.height/17
+                    anchors.top: parent.top
+                    wrapMode: Text.WordWrap
+                }
+                Text {
+                    id: noMusicScreenText2
+                    width: parent.width
+                    text: labelNoMusicText2
+                    font.pixelSize: scene.height/21
+                    anchors.top: noMusicScreenText1.bottom
+                    anchors.topMargin: scene.height/24
+                    wrapMode: Text.WordWrap
+                }
+            }
             MusicListView {
                 id: artistsListView
                 parent: artistsPage.content
@@ -978,6 +1066,30 @@ Window {
                         settings.set("AllAlbumsView",1);
                         albumsPage.closeMenu();
                     }
+                }
+            }
+            Item {
+                id: noMusicScreen
+                anchors.centerIn: parent
+                height: parent.height/2
+                width: (scene.isLandscapeView())?(parent.width/2):(parent.width/1.2)
+                visible: ((allTracksModel.total == 0)&&(!startupTimer.running))
+                Text {
+                    id: noMusicScreenText1
+                    width: parent.width
+                    text: labelNoMusicText1
+                    font.pixelSize: scene.height/17
+                    anchors.top: parent.top
+                    wrapMode: Text.WordWrap
+                }
+                Text {
+                    id: noMusicScreenText2
+                    width: parent.width
+                    text: labelNoMusicText2
+                    font.pixelSize: scene.height/21
+                    anchors.top: noMusicScreenText1.bottom
+                    anchors.topMargin: scene.height/24
+                    wrapMode: Text.WordWrap
                 }
             }
             MusicListView {
@@ -1083,17 +1195,37 @@ Window {
                     }
                 }
             }
+            Item {
+                id: noMusicScreen
+                anchors.centerIn: parent
+                height: parent.height/2
+                width: (scene.isLandscapeView())?(parent.width/2):(parent.width/1.2)
+                visible: ((allTracksModel.total == 0)&&(!startupTimer.running))
+                Text {
+                    id: noMusicScreenText1
+                    width: parent.width
+                    text: labelNoMusicText1
+                    font.pixelSize: scene.height/17
+                    anchors.top: parent.top
+                    wrapMode: Text.WordWrap
+                }
+                Text {
+                    id: noMusicScreenText2
+                    width: parent.width
+                    text: labelNoMusicText2
+                    font.pixelSize: scene.height/21
+                    anchors.top: noMusicScreenText1.bottom
+                    anchors.topMargin: scene.height/24
+                    wrapMode: Text.WordWrap
+                }
+            }
             MusicListView {
                 id: listview
                 selectionMode: multiSelectMode
                 parent: allTracksPage.content
                 anchors.fill:parent
                 visible: !showGridView
-                model:MusicListModel {
-                    type: MusicListModel.ListofSongs
-                    sort:MusicListModel.SortByDefault
-                    limit: 0
-                }
+                model: allTracksModel
                 onClicked: {
                     if(multiSelectMode)
                     {
@@ -1209,6 +1341,30 @@ Window {
                         settings.set("FavoriteView",1);
                         favoritesPage.closeMenu();
                     }
+                }
+            }
+            Item {
+                id: noMusicScreen
+                anchors.centerIn: parent
+                height: parent.height/2
+                width: (scene.isLandscapeView())?(parent.width/2):(parent.width/1.2)
+                visible: ((allTracksModel.total == 0)&&(!startupTimer.running))
+                Text {
+                    id: noMusicScreenText1
+                    width: parent.width
+                    text: labelNoMusicText1
+                    font.pixelSize: scene.height/17
+                    anchors.top: parent.top
+                    wrapMode: Text.WordWrap
+                }
+                Text {
+                    id: noMusicScreenText2
+                    width: parent.width
+                    text: labelNoMusicText2
+                    font.pixelSize: scene.height/21
+                    anchors.top: noMusicScreenText1.bottom
+                    anchors.topMargin: scene.height/24
+                    wrapMode: Text.WordWrap
                 }
             }
             MusicListView {
