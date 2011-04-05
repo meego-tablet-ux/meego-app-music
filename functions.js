@@ -12,6 +12,14 @@ var currentView = null;
 var currentItem = null
 var startPos = null;
 
+function playlistNameValidate(parm,val) {
+    if (parm == "") return true;
+    for (var i=0; i<parm.length; i++) {
+        if (val.indexOf(parm.charAt(i),0) != -1) return false;
+    }
+    return true;
+}
+
 function startDrag(mouse,view,item) {
     if (view == null || item == null)
         return;

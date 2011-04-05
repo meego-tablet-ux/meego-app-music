@@ -75,6 +75,8 @@ Window {
 
     property string labelNoMusicText1:qsTr("Where is all the music?")
     property string labelNoMusicText2:qsTr("Buy, download or copy your music onto your table, then you can enjoy listening to it from here.")
+    property string forbiddenchars: qsTr("\n\'\t\"\\");
+    property string forbiddencharsDisplay: qsTr("<return>, <tab>, \', \", \\");
 
     property int animationDuration: 500
 
@@ -595,13 +597,18 @@ Window {
             rightButtonText:labelCancel
             leftButtonText:labelCreate
             property string playlistTitle: ""
+            property bool isvalid: true
             onDialogClicked: {
-                if(button == 1) {
+                if((button == 1)&&isvalid) {
                     miscModel.type = MusicListModel.MusicPlaylist;
                     miscModel.clear();
                     miscModel.savePlaylist(playlistTitle);
+                    dialogLoader.sourceComponent = undefined;
                 }
-                dialogLoader.sourceComponent = undefined;
+                else if(button == 2)
+                {
+                    dialogLoader.sourceComponent = undefined;
+                }
             }
 
             Component.onCompleted: {
@@ -614,12 +621,25 @@ Window {
                     TextEntry{
                         id: editor
                         width: parent.width
+                        anchors.top: parent.top
                         height: 50
                         focus: true
                         defaultText: labelDefaultText
                         onTextChanged: {
                             playlistTitle = text
+                            isvalid = Code.playlistNameValidate(text, forbiddenchars);
                         }
+                    }
+                    Text{
+                        id: warningText
+                        visible: !isvalid
+                        width: parent.width
+                        height: 50
+                        font.pixelSize: theme_fontPixelSizeLarge
+                        color: "red"
+                        anchors.top: editor.bottom
+                        text: qsTr("Invalid Characters: %1").arg(forbiddencharsDisplay);
+                        wrapMode: Text.WordWrap
                     }
                 }
             }
@@ -636,12 +656,17 @@ Window {
             property string urn: ""
             property string newTitle: ""
             property variant playListModel
+            property bool isvalid: true
             onDialogClicked: {
-                if(button == 1) {
+                if((button == 1)&&isvalid) {
                     playListModel.changeTitleByURN(urn, newTitle);
                     labelPlaylist = newTitle;
+                    dialogLoader.sourceComponent = undefined;
                 }
-                dialogLoader.sourceComponent = undefined;
+                else if(button == 2)
+                {
+                    dialogLoader.sourceComponent = undefined;
+                }
             }
 
             Component.onCompleted: {
@@ -654,12 +679,25 @@ Window {
                     TextEntry{
                         id: editor
                         width: parent.width
+                        anchors.top: parent.top
                         height: 50
                         focus: true
                         text: currTitle
                         onTextChanged: {
                             newTitle = text
+                            isvalid = Code.playlistNameValidate(text, forbiddenchars);
                         }
+                    }
+                    Text{
+                        id: warningText
+                        visible: !isvalid
+                        width: parent.width
+                        height: 50
+                        font.pixelSize: theme_fontPixelSizeLarge
+                        color: "red"
+                        anchors.top: editor.bottom
+                        text: qsTr("Invalid Characters: %1").arg(forbiddencharsDisplay);
+                        wrapMode: Text.WordWrap
                     }
                 }
             }
