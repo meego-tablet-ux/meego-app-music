@@ -335,9 +335,6 @@ Window {
     }
 
     Loader {
-        id: contextLoader
-    }
-    Loader {
         id: dialogLoader
         onStatusChanged :{
             if (status == Loader.Ready){
@@ -2299,6 +2296,9 @@ Window {
                 multibar.sharing.clearItems();
                 multiSelectMode = false;
             }
+        }
+        onNewPlaylist: {
+            scene.showModalDialog(createPlaylistComponent);
         }
     }
 
