@@ -8,6 +8,7 @@
 
 import Qt 4.7
 import MeeGo.Labs.Components 0.1
+import MeeGo.Components 0.1 as Ux
 import MeeGo.Media 0.1
 import QtMultimediaKit 1.1
 import MeeGo.App.Music.MusicPlugin 1.0
@@ -349,6 +350,7 @@ Window {
         property variant openpage
         property variant playlistmodel
         property variant sharemodel
+        property variant playlistPicker
         onTriggered: {
             if (model[index] == labelPlay)
             {
@@ -392,7 +394,7 @@ Window {
                 // Add to a play list
                 if(!multiSelectMode)
                 {
-                    playlistPicker.payload = payload.mitemid;
+                    playlistPicker.payload = [payload.mitemid];
                     playlistPicker.show();
                 }
                 else if(multiSelectModel.selectionCount() > 0)
@@ -490,6 +492,21 @@ Window {
         contextMenu.payload = payload;
         contextMenu.menuX = map.x;
         contextMenu.menuY = map.y;
+    }
+
+    function addToPlaylist(payload, title, uri, thumbUri, type)
+    {
+        miscModel.type = MusicListModel.MusicPlaylist;
+        miscModel.clear();
+        miscModel.playlist = title;
+        miscModel.addItems(payload);
+        miscModel.savePlaylist(title);
+        if(multiSelectMode)
+        {
+            multiSelectModel.clearSelected();
+            multibar.sharing.clearItems();
+            multiSelectMode = false;
+        }
     }
 
     Component {
@@ -799,10 +816,24 @@ Window {
             }
 
             Component.onCompleted: {
+                playqueueView.playlistPicker = playlistPicker;
+                multibar.playlistPicker = playlistPicker
                 playqueueView.parent = playQueuePage.content;
             }
             Component.onDestruction: {
                 playqueueView.parent = parkingLot;
+            }
+            Ux.MusicPicker{
+                id: playlistPicker
+                property variant payload: []
+                showPlaylists: true
+                showAlbums:false
+                onAlbumOrPlaylistSelected: {
+                    addToPlaylist(payload, title, uri, thumbUri, type);
+                }
+        //        onNewPlaylist: {
+        //            scene.showModalDialog(createPlaylistComponent);
+        //        }
             }
         }
     }
@@ -1029,6 +1060,7 @@ Window {
                     musicContextMenu(mouseX, mouseY, payload,
                         [labelOpen, labelPlay, labelAddToPlayQueue, labelAddToPlaylist, labelDelete]);
                     contextMenu.openpage = artistsPage;
+                    contextMenu.playlistPicker = playlistPicker;
                     contextMenu.visible = true;
                 }
             }
@@ -1058,8 +1090,24 @@ Window {
                     musicContextMenu(mouseX, mouseY, payload,
                         [labelOpen, labelPlay, labelAddToPlayQueue, labelAddToPlaylist, labelDelete]);
                     contextMenu.openpage = artistsPage;
+                    contextMenu.playlistPicker = playlistPicker;
                     contextMenu.visible = true;
                 }
+            }
+            Component.onCompleted: {
+                multibar.playlistPicker = playlistPicker
+            }
+            Ux.MusicPicker{
+                id: playlistPicker
+                property variant payload: []
+                showPlaylists: true
+                showAlbums:false
+                onAlbumOrPlaylistSelected: {
+                    addToPlaylist(payload, title, uri, thumbUri, type);
+                }
+        //        onNewPlaylist: {
+        //            scene.showModalDialog(createPlaylistComponent);
+        //        }
             }
         }
     }
@@ -1145,6 +1193,7 @@ Window {
                     musicContextMenu(mouseX, mouseY, payload,
                         [labelOpen, labelPlay, labelAddToPlayQueue, labelAddToPlaylist, labelDelete]);
                     contextMenu.openpage = albumsPage;
+                    contextMenu.playlistPicker = playlistPicker;
                     contextMenu.visible = true;
                 }
             }
@@ -1176,8 +1225,24 @@ Window {
                     musicContextMenu(mouseX, mouseY, payload,
                         [labelOpen, labelPlay, labelAddToPlayQueue, labelAddToPlaylist, labelDelete]);
                     contextMenu.openpage = albumsPage;
+                    contextMenu.playlistPicker = playlistPicker;
                     contextMenu.visible = true;
                 }
+            }
+            Component.onCompleted: {
+                multibar.playlistPicker = playlistPicker
+            }
+            Ux.MusicPicker{
+                id: playlistPicker
+                property variant payload: []
+                showPlaylists: true
+                showAlbums:false
+                onAlbumOrPlaylistSelected: {
+                    addToPlaylist(payload, title, uri, thumbUri, type);
+                }
+        //        onNewPlaylist: {
+        //            scene.showModalDialog(createPlaylistComponent);
+        //        }
             }
         }
     }
@@ -1280,6 +1345,7 @@ Window {
                     musicContextMenu(mouseX, mouseY, payload,
                         [labelPlay, "favorite", labelcShare, labelMultiSelect, labelAddToPlayQueue, labelAddToPlaylist, labelDelete]);
                     multiSelectModel = model;
+                    contextMenu.playlistPicker = playlistPicker;
                     contextMenu.visible = true;
                 }
             }
@@ -1315,8 +1381,24 @@ Window {
                     musicContextMenu(mouseX, mouseY, payload,
                         [labelPlay, "favorite", labelcShare, labelMultiSelect, labelAddToPlayQueue, labelAddToPlaylist, labelDelete]);
                     multiSelectModel = model;
+                    contextMenu.playlistPicker = playlistPicker;
                     contextMenu.visible = true;
                 }
+            }
+            Component.onCompleted: {
+                multibar.playlistPicker = playlistPicker
+            }
+            Ux.MusicPicker{
+                id: playlistPicker
+                property variant payload: []
+                showPlaylists: true
+                showAlbums:false
+                onAlbumOrPlaylistSelected: {
+                    addToPlaylist(payload, title, uri, thumbUri, type);
+                }
+        //        onNewPlaylist: {
+        //            scene.showModalDialog(createPlaylistComponent);
+        //        }
             }
         }
     }
@@ -1430,8 +1512,24 @@ Window {
                     musicContextMenu(mouseX, mouseY, payload,
                         [labelPlay, "favorite", labelcShare, labelMultiSelect, labelAddToPlayQueue, labelAddToPlaylist, labelDelete]);
                     multiSelectModel = model;
+                    contextMenu.playlistPicker = playlistPicker;
                     contextMenu.visible = true;
                 }
+            }
+            Component.onCompleted: {
+                multibar.playlistPicker = playlistPicker
+            }
+            Ux.MusicPicker{
+                id: playlistPicker
+                property variant payload: []
+                showPlaylists: true
+                showAlbums:false
+                onAlbumOrPlaylistSelected: {
+                    addToPlaylist(payload, title, uri, thumbUri, type);
+                }
+        //        onNewPlaylist: {
+        //            scene.showModalDialog(createPlaylistComponent);
+        //        }
             }
         }
     }
@@ -1539,6 +1637,7 @@ Window {
                         musicContextMenu(mouseX, mouseY, payload,
                             [labelOpen, labelPlay, labelAddToPlayQueue, labelAddToPlaylist, labelDelete]);
                         contextMenu.openpage = artistDetailViewPage;
+                        contextMenu.playlistPicker = playlistPicker;
                         contextMenu.visible = true;
                     }
                 }
@@ -1655,12 +1754,12 @@ Window {
                                         musicContextMenu(mouseX, mouseY, dinstance,
                                             [labelOpen, labelPlay, labelAddToPlayQueue, labelAddToPlaylist, labelDelete]);
                                         contextMenu.openpage = artistDetailViewPage;
+                                        contextMenu.playlistPicker = playlistPicker;
                                         contextMenu.visible = true;
                                     }
                                 }
                             }
                         }
-
                         MusicListView{
                             id: songsInAlbumList
                             selectionMode: multiSelectMode
@@ -1695,6 +1794,7 @@ Window {
                                 musicContextMenu(mouseX, mouseY, payload,
                                     [labelPlay, "favorite", labelcShare, labelMultiSelect, labelAddToPlayQueue, labelAddToPlaylist, labelDelete]);
                                 multiSelectModel = model;
+                                contextMenu.playlistPicker = playlistPicker;
                                 contextMenu.visible = true;
                             }
                         }
@@ -1815,6 +1915,21 @@ Window {
                         }
                     }
                 ]
+            }
+            Component.onCompleted: {
+                multibar.playlistPicker = playlistPicker
+            }
+            Ux.MusicPicker{
+                id: playlistPicker
+                property variant payload: []
+                showPlaylists: true
+                showAlbums:false
+                onAlbumOrPlaylistSelected: {
+                    addToPlaylist(payload, title, uri, thumbUri, type);
+                }
+        //        onNewPlaylist: {
+        //            scene.showModalDialog(createPlaylistComponent);
+        //        }
             }
         }
     }
@@ -1973,6 +2088,7 @@ Window {
                         musicContextMenu(mouseX, mouseY, payload,
                             [labelPlay, "favorite", labelcShare, labelMultiSelect, labelAddToPlayQueue, labelAddToPlaylist, labelDelete]);
                         multiSelectModel = model;
+                        contextMenu.playlistPicker = playlistPicker;
                         contextMenu.visible = true;
                     }
                 }
@@ -2058,6 +2174,21 @@ Window {
                     }
                 }
             ]
+            Component.onCompleted: {
+                multibar.playlistPicker = playlistPicker
+            }
+            Ux.MusicPicker{
+                id: playlistPicker
+                property variant payload: []
+                showPlaylists: true
+                showAlbums:false
+                onAlbumOrPlaylistSelected: {
+                    addToPlaylist(payload, title, uri, thumbUri, type);
+                }
+        //        onNewPlaylist: {
+        //            scene.showModalDialog(createPlaylistComponent);
+        //        }
+            }
         }
     }
 
@@ -2167,6 +2298,7 @@ Window {
                             [labelPlay, "favorite", labelcShare, labelMultiSelect, labelAddToPlayQueue, labelAddToPlaylist, labelRemFromPlaylist]);
                         multiSelectModel = model;
                         contextMenu.playlistmodel = playlistList.model;
+                        contextMenu.playlistPicker = playlistPicker;
                         contextMenu.visible = true;
                     }
                 }
@@ -2247,6 +2379,21 @@ Window {
                     }
                 }
             ]
+            Component.onCompleted: {
+                multibar.playlistPicker = playlistPicker
+            }
+            Ux.MusicPicker{
+                id: playlistPicker
+                property variant payload: []
+                showPlaylists: true
+                showAlbums:false
+                onAlbumOrPlaylistSelected: {
+                    addToPlaylist(payload, title, uri, thumbUri, type);
+                }
+        //        onNewPlaylist: {
+        //            scene.showModalDialog(createPlaylistComponent);
+        //        }
+            }
         }
     }
     MusicListView {
@@ -2255,6 +2402,7 @@ Window {
         parent:  parkingLot
         anchors.fill:parent
         model: playqueueModel
+        property variant playlistPicker
         onClicked:{
             if(multiSelectMode)
             {
@@ -2274,31 +2422,8 @@ Window {
             musicContextMenu(mouseX, mouseY, payload,
                 [labelPlay, "favorite", labelcShare, labelMultiSelect, labelAddToPlaylist, labelRemoveFromPlayQueue]);
             multiSelectModel = model;
+            contextMenu.playlistPicker = playlistPicker;
             contextMenu.visible = true;
-        }
-    }
-    MusicPicker{
-        id: playlistPicker
-        parent: content
-        property variant payload;
-        showPlaylists: true;
-        showAlbums:false
-        selectAlbumOrPlaylistOnly: true
-        onAlbumOrPlaylistSelected: {
-            miscModel.type = MusicListModel.MusicPlaylist;
-            miscModel.clear();
-            miscModel.playlist = albumOrPlaylist;
-            miscModel.addItems(payload);
-            miscModel.savePlaylist(albumOrPlaylist);
-            if(multiSelectMode)
-            {
-                multiSelectModel.clearSelected();
-                multibar.sharing.clearItems();
-                multiSelectMode = false;
-            }
-        }
-        onNewPlaylist: {
-            scene.showModalDialog(createPlaylistComponent);
         }
     }
 
@@ -2334,6 +2459,7 @@ Window {
         anchors.left: parent.left
         landscape: scene.isLandscapeView()
         showadd: true
+        property variant playlistPicker
         onCancelPressed: {
             sharing.clearItems();
             multiSelectModel.clearSelected();
