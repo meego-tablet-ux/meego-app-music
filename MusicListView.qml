@@ -57,13 +57,13 @@ Item {
             }
             color:theme_fontColorHighlight
             font.pixelSize: theme_fontPixelSizeLarge
-            font.bold: true
             anchors.left: parent.left
             anchors.leftMargin: thumbWidth + 8
             width: parent.width* (mode !=0? 0.5: 0.35)
             height: parent.height
             horizontalAlignment:Text.Left
             verticalAlignment: Text.AlignVCenter
+            elide: Text.ElideRight
         }
 
         Text {
@@ -71,13 +71,13 @@ Item {
             text: qsTr("Artist")
             color:theme_fontColorHighlight
             font.pixelSize: theme_fontPixelSizeLarge
-            font.bold: true
             anchors.left: nameLabel.right
             width: parent.width*0.2
             height: parent.height
             horizontalAlignment:Text.Left
             verticalAlignment: Text.AlignVCenter
             visible: mode == 0
+            elide: Text.ElideRight
         }
 
         Text {
@@ -85,13 +85,13 @@ Item {
             text: qsTr("Time")
             color:theme_fontColorHighlight
             font.pixelSize: theme_fontPixelSizeLarge
-            font.bold: true
             anchors.left: artistLabel.right
             width: parent.width*0.1
             height: parent.height
             horizontalAlignment:Text.Left
             verticalAlignment: Text.AlignVCenter
             visible: mode == 0
+            elide: Text.ElideRight
         }
 
         Text {
@@ -99,26 +99,26 @@ Item {
             text: qsTr("Album")
             color:theme_fontColorHighlight
             font.pixelSize: theme_fontPixelSizeLarge
-            font.bold: true
             anchors.left: durationLabel.right
             width: parent.width*0.3
             height: parent.height
             horizontalAlignment:Text.Left
             verticalAlignment: Text.AlignVCenter
             visible: mode == 0
+            elide: Text.ElideRight
         }
         Text {
             id: countLabel
             text: qsTr("Number of tracks")
             color:theme_fontColorHighlight
             font.pixelSize: theme_fontPixelSizeLarge
-            font.bold: true
             anchors.left: nameLabel.right
             width: parent.width*0.2
             height: parent.height
             horizontalAlignment:Text.Left
             verticalAlignment: Text.AlignVCenter
             visible: mode != 0
+            elide: Text.ElideRight
         }
 
     }
