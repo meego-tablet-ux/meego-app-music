@@ -7,8 +7,8 @@
  */
 
 import Qt 4.7
-import MeeGo.Labs.Components 0.1
 import MeeGo.Components 0.1 as Ux
+import MeeGo.Labs.Components 0.1
 import MeeGo.Media 0.1
 import QtMultimediaKit 1.1
 import MeeGo.App.Music.MusicPlugin 1.0
@@ -326,7 +326,7 @@ Window {
 
     Timer {
         id: startupTimer
-        interval: 1000
+        interval: 2000
         repeat: false
     }
 
@@ -610,6 +610,7 @@ Window {
             dialogTitle:labelCreateNewPlaylist
             rightButtonText:labelCancel
             leftButtonText:labelCreate
+            z: 1000
             property string playlistTitle: ""
             property bool isvalid: true
             onDialogClicked: {
@@ -831,9 +832,9 @@ Window {
                 onAlbumOrPlaylistSelected: {
                     addToPlaylist(payload, title, uri, thumbUri, type);
                 }
-        //        onNewPlaylist: {
-        //            scene.showModalDialog(createPlaylistComponent);
-        //        }
+//                onNewPlaylist: {
+//                    scene.showModalDialog(createPlaylistComponent);
+//                }
             }
         }
     }
@@ -1105,9 +1106,9 @@ Window {
                 onAlbumOrPlaylistSelected: {
                     addToPlaylist(payload, title, uri, thumbUri, type);
                 }
-        //        onNewPlaylist: {
-        //            scene.showModalDialog(createPlaylistComponent);
-        //        }
+//                onNewPlaylist: {
+//                    scene.showModalDialog(createPlaylistComponent);
+//                }
             }
         }
     }
@@ -1240,9 +1241,9 @@ Window {
                 onAlbumOrPlaylistSelected: {
                     addToPlaylist(payload, title, uri, thumbUri, type);
                 }
-        //        onNewPlaylist: {
-        //            scene.showModalDialog(createPlaylistComponent);
-        //        }
+//                onNewPlaylist: {
+//                    scene.showModalDialog(createPlaylistComponent);
+//                }
             }
         }
     }
@@ -1396,9 +1397,9 @@ Window {
                 onAlbumOrPlaylistSelected: {
                     addToPlaylist(payload, title, uri, thumbUri, type);
                 }
-        //        onNewPlaylist: {
-        //            scene.showModalDialog(createPlaylistComponent);
-        //        }
+//                onNewPlaylist: {
+//                    scene.showModalDialog(createPlaylistComponent);
+//                }
             }
         }
     }
@@ -1527,9 +1528,9 @@ Window {
                 onAlbumOrPlaylistSelected: {
                     addToPlaylist(payload, title, uri, thumbUri, type);
                 }
-        //        onNewPlaylist: {
-        //            scene.showModalDialog(createPlaylistComponent);
-        //        }
+//                onNewPlaylist: {
+//                    scene.showModalDialog(createPlaylistComponent);
+//                }
             }
         }
     }
@@ -1927,9 +1928,9 @@ Window {
                 onAlbumOrPlaylistSelected: {
                     addToPlaylist(payload, title, uri, thumbUri, type);
                 }
-        //        onNewPlaylist: {
-        //            scene.showModalDialog(createPlaylistComponent);
-        //        }
+//                onNewPlaylist: {
+//                    scene.showModalDialog(createPlaylistComponent);
+//                }
             }
         }
     }
@@ -2185,9 +2186,9 @@ Window {
                 onAlbumOrPlaylistSelected: {
                     addToPlaylist(payload, title, uri, thumbUri, type);
                 }
-        //        onNewPlaylist: {
-        //            scene.showModalDialog(createPlaylistComponent);
-        //        }
+//                onNewPlaylist: {
+//                    scene.showModalDialog(createPlaylistComponent);
+//                }
             }
         }
     }
@@ -2390,9 +2391,9 @@ Window {
                 onAlbumOrPlaylistSelected: {
                     addToPlaylist(payload, title, uri, thumbUri, type);
                 }
-        //        onNewPlaylist: {
-        //            scene.showModalDialog(createPlaylistComponent);
-        //        }
+//                onNewPlaylist: {
+//                    scene.showModalDialog(createPlaylistComponent);
+//                }
             }
         }
     }
