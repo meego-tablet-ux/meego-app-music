@@ -308,7 +308,6 @@ function playNextSong() {
             if (loop){
                 playqueueView.currentIndex = 0;
             }else{
-                playqueueView.currentIndex = playqueueView.count;
                 stop();
                 return;
             }
