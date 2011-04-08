@@ -347,6 +347,7 @@ Window {
     ContextMenu {
         id: contextMenu
         menuWidth: 400
+        z: 3000
         property variant openpage
         property variant playlistmodel
         property variant sharemodel
@@ -764,7 +765,7 @@ Window {
             id: playQueuePage
             anchors.top:parent.top
             anchors.left: parent.left
-            height: parent.height - toolbar.height
+            height: parent.height
             width: parent.width
             title:labelPlayqueue
             onApplicationDataChanged: {
@@ -845,7 +846,7 @@ Window {
             id: playlistsPage
             anchors.top:parent.top
             anchors.left: parent.left
-            height: parent.height - toolbar.height
+            height: parent.height
             width: parent.width
             title: labelAllPlaylist
             property bool showGridView: settings.get("PlaylistsView") == 0
@@ -931,6 +932,7 @@ Window {
                 anchors.fill: parent
                 model:gridView.model
                 mode : 1
+                footerHeight: toolbar.height
                 visible: !showGridView
                 onClicked: {
                      Code.openItemInDetailView(playlistsPage,payload);
@@ -959,6 +961,7 @@ Window {
                 anchors.leftMargin: 15
                 anchors.topMargin:3
                 defaultThumbnail: "image://theme/media/music_thumb_med"
+                footerHeight: toolbar.height
                 model: MusicListModel {
                     type: MusicListModel.ListofPlaylists
                     limit:0
@@ -987,7 +990,7 @@ Window {
             id: artistsPage
             anchors.top:parent.top
             anchors.left: parent.left
-            height: parent.height - toolbar.height
+            height: parent.height
             width: parent.width
             title: labelAllArtist
             property bool showGridView: settings.get("AllArtistsView") == 0
@@ -1051,6 +1054,7 @@ Window {
                 visible: !showGridView
                 model:artistsGridView.model
                 mode: 2
+                footerHeight: toolbar.height
                 onClicked: {
                     Code.openItemInDetailView(artistsPage,payload)
                 }
@@ -1076,6 +1080,7 @@ Window {
                 anchors.leftMargin: 15
                 anchors.topMargin:3
                 defaultThumbnail: "image://theme/media/music_thumb_med"
+                footerHeight: toolbar.height
                 model: MusicListModel {
                     type: MusicListModel.ListofArtists
                     limit:0
@@ -1119,7 +1124,7 @@ Window {
             id: albumsPage
             anchors.top:parent.top
             anchors.left: parent.left
-            height: parent.height - toolbar.height
+            height: parent.height
             width: parent.width
             title: labelAllAlbums
             property bool showGridView: settings.get("AllAlbumsView") == 0
@@ -1183,6 +1188,7 @@ Window {
                 visible: !showGridView
                 model:albumsGridView.model
                 mode: 3
+                footerHeight: toolbar.height
                 onClicked: {
                     labelArtist = payload.martist;
                     Code.openItemInDetailView(albumsPage,payload)
@@ -1210,6 +1216,7 @@ Window {
                 anchors.leftMargin: 15
                 anchors.topMargin:3
                 defaultThumbnail: "image://theme/media/music_thumb_med"
+                footerHeight: toolbar.height
                 model: MusicListModel {
                     type: MusicListModel.ListofAlbums
                     limit:0
@@ -1254,7 +1261,7 @@ Window {
             id: allTracksPage
             anchors.top:parent.top
             anchors.left: parent.left
-            height: parent.height - toolbar.height
+            height: parent.height
             width: parent.width
             title: labelAllTracks
             property bool showGridView: settings.get("AllTracksView") == 0
@@ -1327,6 +1334,7 @@ Window {
                 anchors.fill:parent
                 visible: !showGridView
                 model: allTracksModel
+                footerHeight: toolbar.height
                 onClicked: {
                     if(multiSelectMode)
                     {
@@ -1362,6 +1370,7 @@ Window {
                 model: listview.model
                 anchors.leftMargin: 15
                 anchors.topMargin:3
+                footerHeight: toolbar.height
                 defaultThumbnail: "image://theme/media/music_thumb_med"
                 onClicked: {
                     if(multiSelectMode)
@@ -1410,7 +1419,7 @@ Window {
             id: favoritesPage
             anchors.top:parent.top
             anchors.left: parent.left
-            height: parent.height - toolbar.height
+            height: parent.height
             width: parent.width
             title: labelFavorites
             showSearch: false
@@ -1494,6 +1503,7 @@ Window {
                 width: parent.width
                 height: parent.height
                 model: favoritesPage.model
+                footerHeight: toolbar.height
                 onClicked :{
                     if(multiSelectMode)
                     {
@@ -1541,7 +1551,7 @@ Window {
             id: artistDetailViewPage
             anchors.top:parent.top
             anchors.left: parent.left
-            height: parent.height - toolbar.height
+            height: parent.height
             width: parent.width
             title: labelArtist
             showSearch: false
@@ -1626,6 +1636,7 @@ Window {
                     anchors.leftMargin: 15
                     anchors.topMargin:3
                     visible: false
+                    footerHeight: toolbar.height
                     defaultThumbnail: "image://theme/media/music_thumb_med"
                     onClicked: {
                         if(payload.misvirtual) {
@@ -1766,6 +1777,7 @@ Window {
                             selectionMode: multiSelectMode
                             height: 500
                             interactive: false
+                            footerHeight: toolbar.height
                             Component.onCompleted: {
                                 height = model.count * 50 + titleBarHeight;
                             }
@@ -1941,7 +1953,7 @@ Window {
             id: albumDetailViewPage
             anchors.top:parent.top
             anchors.left: parent.left
-            height: parent.height - toolbar.height
+            height: parent.height
             width: parent.width
             title: labelAlbum
 
@@ -2069,6 +2081,7 @@ Window {
                     id: albumSongList
                     selectionMode: multiSelectMode
                     model: albumDetailViewPage.model
+                    footerHeight: toolbar.height
                     onClicked: {
                         if(multiSelectMode)
                         {
@@ -2200,7 +2213,7 @@ Window {
             id: playlistDetailViewPage
             anchors.top:parent.top
             anchors.left: parent.left
-            height: parent.height - toolbar.height
+            height: parent.height
             width: parent.width
             title: labelAllPlaylist
 
@@ -2269,6 +2282,7 @@ Window {
                     id: playlistList
                     selectionMode: multiSelectMode
                     anchors.margins: 3
+                    footerHeight: toolbar.height
                     model: MusicListModel {
                         type: MusicListModel.MusicPlaylist
                         playlist: labelPlaylist
@@ -2403,6 +2417,7 @@ Window {
         parent:  parkingLot
         anchors.fill:parent
         model: playqueueModel
+        footerHeight: toolbar.height
         property variant playlistPicker
         onClicked:{
             if(multiSelectMode)
@@ -2439,7 +2454,7 @@ Window {
 
     MusicToolBar {
         id: toolbar
-        parent:  content
+        z: 1
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         audioItem: audio
@@ -2452,7 +2467,7 @@ Window {
 
     MediaMultiBar {
         id: multibar
-        parent:  content
+        z: 2
         height: 55
         opacity: 0
         width: parent.width
