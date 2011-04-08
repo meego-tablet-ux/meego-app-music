@@ -128,6 +128,7 @@ Item {
         width: parent.width
         height: parent.height - titleBar.height
         clip: true
+        boundsBehavior: Flickable.StopAtBounds
         footer: Item{
             width: listview.width
             height: container.footerHeight
