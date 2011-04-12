@@ -1662,6 +1662,11 @@ Window {
                     anchors.top: artistTitleText.bottom
                     clip: true
                     model: artistDetailViewPage.model
+                    boundsBehavior: Flickable.StopAtBounds
+                    footer: Item{
+                        width: artistAlbumsListView.width
+                        height: toolbar.height
+                    }
                     delegate: Item {
                         id: dinstance
                         width: artistAlbumsListView.width
@@ -2500,6 +2505,10 @@ Window {
                     target: multibar
                     opacity:1
                 }
+                PropertyChanges {
+                    target: toolbar
+                    opacity:0
+                }
             },
             State {
                 name: "hideActionBar"
@@ -2508,16 +2517,27 @@ Window {
                     target: multibar
                     opacity: 0
                 }
+                PropertyChanges {
+                    target: toolbar
+                    opacity:1
+                }
             }
         ]
 
         transitions: [
             Transition {
                 reversible: true
-                PropertyAnimation {
-                    target: multibar
-                    property: "opacity"
-                    duration: 250
+                ParallelAnimation{
+                    PropertyAnimation {
+                        target: multibar
+                        property: "opacity"
+                        duration: 250
+                    }
+                    PropertyAnimation {
+                        target: toolbar
+                        property: "opacity"
+                        duration: 250
+                    }
                 }
             }
         ]

@@ -41,7 +41,7 @@ Item {
     BorderImage {
         id: nowPlayingInfo
         width: parent.width
-        source: "image://theme/media/media_playbar_nowplaying_bg"
+        source: "image://meegotheme/widgets/common/statusbar/statusbar-background"
         height: 0
 
         anchors.bottom: audioToolbar.top
