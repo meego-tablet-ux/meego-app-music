@@ -2480,9 +2480,9 @@ Window {
         anchors.left: parent.left
         landscape: scene.isLandscapeView()
         showadd: true
+        sharing: shareObj
         property variant playlistPicker
         onCancelPressed: {
-            sharing.clearItems();
             multiSelectModel.clearSelected();
             multiSelectMode = false;
         }
