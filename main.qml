@@ -2459,6 +2459,7 @@ Window {
 
     MusicToolBar {
         id: toolbar
+        parent: content
         z: 1
         anchors.bottom: parent.bottom
         anchors.left: parent.left
@@ -2472,6 +2473,7 @@ Window {
 
     MediaMultiBar {
         id: multibar
+        parent: content
         z: 2
         height: 55
         opacity: 0
