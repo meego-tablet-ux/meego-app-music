@@ -7,8 +7,8 @@
  */
 
 import Qt 4.7
-import MeeGo.Components 0.1 as Ux
-import MeeGo.Labs.Components 0.1
+import MeeGo.Components 0.1
+import MeeGo.Labs.Components 0.1 as Labs
 import MeeGo.Media 0.1
 import QtMultimediaKit 1.1
 import MeeGo.App.Music.MusicPlugin 1.0
@@ -16,14 +16,10 @@ import MeeGo.Sharing 0.1
 import "functions.js" as Code
 
 Window {
-    id: scene
-    property string labelRecentlyAdded: qsTr("Recently Added")
-    property string labelRecentlyViewed: qsTr("Recently Viewed")
-    property string labelPlayqueue: qsTr("Play queue")
+    id: window
+    property string labelPlayqueue: qsTr("Play Queue")
     property string labelFavorites: qsTr("Favorites")
     property string labelMusicApp: qsTr("Music")
-    property string labelNowPlaying: qsTr("Now Playing")
-    property string labelRecents: qsTr("Recently played")
     property string labelAllArtist: qsTr("Artists")
     property string labelArtist: ""
     property string labelAllAlbums: qsTr("Albums")
@@ -31,7 +27,7 @@ Window {
     property string labelAllPlaylist: qsTr("Playlists")
     property string labelPlaylist: ""
     property string labelPlaylistURN: ""
-    property string labelAllTracks: qsTr("All tracks")
+    property string labelAllTracks: qsTr("All Tracks")
 
     property string labelUnknownArtist: qsTr("unknown artist")
     property string labelUnknownAlbum: qsTr("unknown album")
@@ -91,40 +87,23 @@ Window {
 
     property string thumbnailUri:""
     property bool multiSelectMode: false
-    property variant multiSelectModel
+    property variant multiSelectModel: allTracksModel
 
-    title: labelMusicApp
-    onSearch: {
-       // contentStrip.activeContent.model.search = needle;
+    property variant bookModel: [labelPlayqueue,labelAllPlaylist,labelFavorites,
+                                 labelAllArtist,labelAllAlbums,labelAllTracks]
+    property variant bookPayload: [playQueueContent,playlistsContent,favoritesContent,
+                                   artistsContent,albumsContent,allTracksContent]
+    bookMenuModel: bookModel
+    bookMenuPayload: bookPayload
+
+    onMultiSelectModeChanged: {
+        if(multiSelectMode)
+            window.setBookMenuData([], []);
+        else
+            window.setBookMenuData(bookModel, bookPayload);
     }
 
-    property variant theFilterModel: [labelPlayqueue,labelAllPlaylist,labelFavorites,
-          labelAllArtist, labelAllAlbums,
-          labelAllTracks]
-    filterModel: (multiSelectMode)?[]:theFilterModel
-
-    onFilterTriggered: {
-        if (index == 0) {
-            scene.applicationPage = playQueueContent;
-        }else if (index == 1)
-        {
-            scene.applicationPage = playlistsContent;
-        }else if (index == 2)
-        {
-            scene.applicationPage = favoritesContent;
-        }else if (index == 3)
-        {
-            scene.applicationPage = artistsContent;
-        }else if (index == 4)
-        {
-            scene.applicationPage = albumsContent;
-        }else if (index == 5)
-        {
-            scene.applicationPage = allTracksContent;
-        }
-    }
-
-    ShareObj {
+    Labs.ShareObj {
         id: shareObj
         shareType: MeeGoUXSharingClientQmlObj.ShareTypeAudio
     }
@@ -171,18 +150,18 @@ Window {
                 // artist
                 console.log("artist loaded");
                 labelArtist = thetitle;
-                scene.applicationPage = artistDetailViewContent;
+                window.addPage(artistDetailViewContent);
             }else if (remoteControlItem.mitemtype == 4) {
                 // album
                 console.log("album loaded");
                 labelAlbum = thetitle;
-                scene.applicationPage = albumDetailViewContent;
+                window.addPage(albumDetailViewContent);
             }else if (remoteControlItem.mitemtype == 5) {
                 // playlist
                 console.log("playlist loaded");
                 labelPlaylist = thetitle;
                 labelPlaylistURN = identifier;
-                scene.applicationPage = playlistDetailViewContent;
+                window.addPage(playlistDetailViewContent);
             }
         }
     }
@@ -191,13 +170,6 @@ Window {
         //  type:MusicListModel.MusicPlaylist
         limit: 0
         sort: MusicListModel.SortByDefault
-    }
-
-    Item {
-        id: proxyItem
-        property string mtitle
-        property int mitemtype
-        property string mitemid
     }
 
     QmlSetting{
@@ -230,17 +202,10 @@ Window {
             }
         }
     }
-   QtObject {
-       id: remoteControlItem
-       property string mitemid
-       property string mitemtype
-   }
-    onApplicationDataChanged: {
-    }
-
-
-    onStatusBarTriggered: {
-        orientation = (orientation+1)%4;
+    QtObject {
+        id: remoteControlItem
+        property string mitemid
+        property string mitemtype
     }
 
     QmlDBusMusic {
@@ -331,144 +296,13 @@ Window {
     }
 
     Component.onCompleted: {
+        switchBook(allTracksContent);
         startupTimer.start();
-        applicationPage = allTracksContent
-    }
-
-    Loader {
-        id: dialogLoader
-        onStatusChanged :{
-            if (status == Loader.Ready){
-                item.parent = content;
-            }
-        }
-    }
-
-    ContextMenu {
-        id: contextMenu
-        menuWidth: 400
-        z: 3000
-        property variant openpage
-        property variant playlistmodel
-        property variant sharemodel
-        property variant playlistPicker
-        onTriggered: {
-            if (model[index] == labelPlay)
-            {
-                // Play
-                if(!multiSelectMode)
-                    Code.addToPlayqueueAndPlay(payload);
-                else if(multiSelectModel.selectionCount() > 0)
-                    Code.addMultipleToPlayqueueAndPlay(multiSelectModel);
-            }
-            else if (model[index] == labelOpen)
-            {
-                // Open
-                Code.openItemInDetailView(openpage,payload);
-            }
-            else if ((model[index] == labelFavorite)||(model[index] == labelUnFavorite))
-            {
-                // Favorite/unfavorite
-                if(!multiSelectMode)
-                    Code.changeItemFavorite(payload, (model[index] == labelFavorite));
-                else if(multiSelectModel.selectionCount() > 0)
-                    Code.changeMultipleItemFavorite(multiSelectModel, (model[index] == labelFavorite));
-            }
-            else if (model[index] == labelAddToPlayQueue)
-            {
-                // Add to play queue
-                if(!multiSelectMode)
-                    Code.addToPlayqueue(payload);
-                else if(multiSelectModel.selectionCount() > 0)
-                    Code.addMultipleToPlayqueue(multiSelectModel);
-            }
-            else if (model[index] == labelRemoveFromPlayQueue)
-            {
-                // Remove from play queue
-                if(!multiSelectMode)
-                    Code.removeFromPlayqueue(payload);
-                else if(multiSelectModel.selectionCount() > 0)
-                    Code.removeMultipleFromPlayqueue(multiSelectModel);
-            }
-            else if (model[index] == labelAddToPlaylist)
-            {
-                // Add to a play list
-                if(!multiSelectMode)
-                {
-                    playlistPicker.payload = [payload.mitemid];
-                    playlistPicker.show();
-                }
-                else if(multiSelectModel.selectionCount() > 0)
-                {
-                    playlistPicker.payload = multiSelectModel.getSelectedIDs()
-                    playlistPicker.show();
-                }
-            }
-            else if (model[index] == labelRemFromPlaylist)
-            {
-                // Remove from a play list
-                if(!multiSelectMode)
-                {
-                    playlistmodel.removeItems(payload.mitemid);
-                    playlistmodel.savePlaylist(playlistmodel.playlist);
-                }
-                else if(multiSelectModel.selectionCount() > 0)
-                {
-                    playlistmodel.removeItems(multiSelectModel.getSelectedIDs());
-                    playlistmodel.savePlaylist(playlistmodel.playlist);
-                    multiSelectModel.clearSelected();
-                    multibar.sharing.clearItems();
-                    multiSelectMode = false;
-                }
-            }
-            else if (model[index] == labelRenamePlaylist)
-            {
-                // Rename playlist
-                scene.showModalDialog(renamePlaylistComponent);
-                dialogLoader.item.currTitle = payload.mtitle;
-                dialogLoader.item.urn = payload.murn;
-                dialogLoader.item.playListModel = playlistmodel;
-            }
-            else if (model[index] == labelDelete)
-            {
-                // Delete
-                if(!multiSelectMode)
-                {
-                    scene.showModalDialog(deleteItemComponent);
-                    dialogLoader.item.payload = payload;
-                }
-                else if(multiSelectModel.selectionCount() > 0)
-                {
-                    scene.showModalDialog(deleteMultipleItemsComponent);
-                }
-            }
-            else if (model[index] == labelMultiSelect)
-            {
-                // Multi Select
-                multiSelectMode = true;
-            }
-            else if (model[index] == labelcShare)
-            {
-                // Share
-                if(!multiSelectMode)
-                {
-                    shareObj.clearItems();
-                    shareObj.addItem(payload.muri) // URI
-                    shareObj.showContextTypes(mouseX, mouseY);
-                }
-                else if(multiSelectModel.selectionCount() > 0)
-                {
-                    shareObj.clearItems();
-                    shareObj.addItems(multiSelectModel.getSelectedURIs()) // URIs
-                    shareObj.showContextTypes(mouseX, mouseY);
-                }
-            }
-        }
     }
 
     function musicContextMenu(mouseX, mouseY, payload, entrylist)
     {
-        var map = payload.mapToItem(scene, mouseX, mouseY);
+        var map = payload.mapToItem(topItem.topItem, mouseX, mouseY);
         var ctxList = [];
         var e, x;
         for (e in entrylist) {
@@ -489,10 +323,10 @@ Window {
                 ctxList = ctxList.concat(entrylist[e]);
             }
         }
-        contextMenu.model = ctxList
+        contextMenu.model = ctxList;
         contextMenu.payload = payload;
-        contextMenu.menuX = map.x;
-        contextMenu.menuY = map.y;
+        topItem.calcTopParent();
+        contextMenu.setPosition( map.x, map.y );
     }
 
     function addToPlaylist(payload, title, uri, thumbUri, type)
@@ -505,255 +339,375 @@ Window {
         if(multiSelectMode)
         {
             multiSelectModel.clearSelected();
-            multibar.sharing.clearItems();
+            shareObj.clearItems();
             multiSelectMode = false;
         }
     }
 
-    Component {
-        id: deleteItemComponent
+    Item {
+        id: globalItems
+        z: 1000
+        anchors.fill: parent
+
+        MusicPicker{
+            id: playlistPicker
+            property variant payload: []
+            showPlaylists: true
+            showAlbums:false
+            onAlbumOrPlaylistSelected: {
+                addToPlaylist(payload, title, uri, thumbUri, type);
+            }
+        }
+
         ModalDialog {
-            dialogTitle: labelDelete
-            leftButtonText: labelConfirmDelete
-            rightButtonText:labelCancel
+            id: deleteItemDialog
+            title: labelDelete
+            acceptButtonText: labelConfirmDelete
+            cancelButtonText:labelCancel
             property variant payload
             onPayloadChanged:{
-                contentLoader.item.artist = payload.martist;
-                contentLoader.item.track = payload.mtitle;
+                deleteItemContents.artist = payload.martist;
+                deleteItemContents.track = payload.mtitle;
             }
-
-            onDialogClicked: {
-                if( button == 1) {
-                    console.log(payload.muri);
-                    editorModel.destroyItemByID(payload.mitemid);
+            onAccepted: {
+                console.log(payload.muri);
+                editorModel.destroyItemByID(payload.mitemid);
+            }
+            content: Item {
+                id: deleteItemContents
+                anchors.fill: parent
+                property alias artist : artistName.text
+                property alias track : trackName.text
+                clip: true
+                Text{
+                    id: artistName
+                    text : qsTr("Artist name")
+                    anchors.top: parent.top
+                    width:  parent.width
+                    horizontalAlignment: Text.AlignHCenter
                 }
-                dialogLoader.sourceComponent = undefined;
-            }
-            Component.onCompleted: {
-                contentLoader.sourceComponent = dialogContent;
-            }
-            Component {
-                id: dialogContent
-                Item {
-                    anchors.fill: parent
-                    property alias artist : artistName.text
-                    property alias track: trackName.text
-                    clip: true
-                    Text{
-                        id: artistName
-                        text : qsTr("Artist name")
-                        anchors.top: parent.top
-                        width:  parent.width
-                        horizontalAlignment: Text.AlignHCenter
-                    }
-                    Text{
-                        id: trackName
-                        text: qsTr("Track name")
-                        anchors.top:artistName.bottom
-                        width:  parent.width
-                        horizontalAlignment: Text.AlignHCenter
-                    }
-
-                    Text {
-                        id:warning
-                        text: qsTr("If you delete this, it will be removed from your device")
-                        anchors.top:trackName.bottom
-                        width:  parent.width
-                        horizontalAlignment: Text.AlignHCenter
-                        font.pixelSize: theme_fontPixelSizeMedium
-                    }
+                Text{
+                    id: trackName
+                    text: qsTr("Track name")
+                    anchors.top:artistName.bottom
+                    width:  parent.width
+                    horizontalAlignment: Text.AlignHCenter
                 }
-
+                Text {
+                    text: qsTr("If you delete this, it will be removed from your device")
+                    anchors.top:trackName.bottom
+                    width:  parent.width
+                    horizontalAlignment: Text.AlignHCenter
+                    font.pixelSize: theme_fontPixelSizeMedium
+                }
             }
         }
-    }
 
-    Component {
-        id: deleteMultipleItemsComponent
         ModalDialog {
+            id: deleteMultipleItemsDialog
             property int deletecount: multiSelectModel.selectionCount()
-            dialogTitle: (deletecount < 2)?qsTr("Permanently delete this song?"):qsTr("Permanently delete these %1 songs?").arg(deletecount)
-            leftButtonText: labelConfirmDelete
-            rightButtonText:labelCancel
-            onDialogClicked: {
-                if( button == 1) {
-                    multiSelectModel.destroyItemsByID(multiSelectModel.getSelectedIDs());
-                    multiSelectModel.clearSelected();
-                    multibar.sharing.clearItems();
-                    multiSelectMode = false;
-                }
-                dialogLoader.sourceComponent = undefined;
+            title: (deletecount < 2)?qsTr("Permanently delete this song?"):qsTr("Permanently delete these %1 songs?").arg(deletecount)
+            acceptButtonText: labelConfirmDelete
+            cancelButtonText: labelCancel
+            onAccepted: {
+                multiSelectModel.destroyItemsByID(multiSelectModel.getSelectedIDs());
+                multiSelectModel.clearSelected();
+                shareObj.clearItems();
+                multiSelectMode = false;
             }
-            Component.onCompleted: {
-                contentLoader.sourceComponent = dialogContent;
-            }
-            Component {
-                id: dialogContent
-                Item {
-                    anchors.fill: parent
-                    clip: true
-                    Text {
-                        id:warning
-                        text: qsTr("If you delete these, they will be removed from your device")
-                        anchors.verticalCenter:parent.verticalCenter
-                        width:  parent.width
-                        horizontalAlignment: Text.AlignHCenter
-                        font.pixelSize: theme_fontPixelSizeMedium
-                    }
+            content: Item {
+                anchors.fill: parent
+                clip: true
+                Text {
+                    text: qsTr("If you delete these, they will be removed from your device")
+                    anchors.verticalCenter:parent.verticalCenter
+                    width:  parent.width
+                    horizontalAlignment: Text.AlignHCenter
+                    font.pixelSize: theme_fontPixelSizeMedium
                 }
             }
         }
-    }
 
-    Component {
-        id: createPlaylistComponent
         ModalDialog {
-            dialogTitle:labelCreateNewPlaylist
-            rightButtonText:labelCancel
-            leftButtonText:labelCreate
+            id: createPlaylistDialog
+            title:labelCreateNewPlaylist
+            cancelButtonText:labelCancel
+            acceptButtonText:labelCreate
             z: 1000
             property string playlistTitle: ""
             property bool isvalid: true
-            onDialogClicked: {
-                if((button == 1)&&isvalid) {
+            onAccepted: {
+                if(isvalid) {
                     miscModel.type = MusicListModel.MusicPlaylist;
                     miscModel.clear();
                     miscModel.savePlaylist(playlistTitle);
-                    dialogLoader.sourceComponent = undefined;
-                }
-                else if(button == 2)
-                {
-                    dialogLoader.sourceComponent = undefined;
                 }
             }
-
-            Component.onCompleted: {
-                contentLoader.sourceComponent = editorComponent;
-            }
-            Component {
-                id: editorComponent
-                Item{
-                    anchors.fill: parent
-                    TextEntry{
-                        id: editor
-                        width: parent.width
-                        anchors.top: parent.top
-                        height: 50
-                        focus: true
-                        defaultText: labelDefaultText
-                        onTextChanged: {
-                            playlistTitle = text
-                            isvalid = Code.playlistNameValidate(text, forbiddenchars);
-                        }
+            content: Item{
+                anchors.fill: parent
+                TextEntry{
+                    id: editorCreate
+                    width: parent.width
+                    anchors.top: parent.top
+                    height: 50
+                    focus: true
+                    defaultText: labelDefaultText
+                    onTextChanged: {
+                        createPlaylistDialog.playlistTitle = text;
+                        createPlaylistDialog.isvalid = Code.playlistNameValidate(text, forbiddenchars);
                     }
-                    Text{
-                        id: warningText
-                        visible: !isvalid
-                        width: parent.width
-                        height: 50
-                        font.pixelSize: theme_fontPixelSizeLarge
-                        color: "red"
-                        anchors.top: editor.bottom
-                        text: qsTr("Invalid Characters: %1").arg(forbiddencharsDisplay);
-                        wrapMode: Text.WordWrap
-                    }
+                }
+                Text{
+                    visible: !createPlaylistDialog.isvalid
+                    width: parent.width
+                    height: 50
+                    font.pixelSize: theme_fontPixelSizeLarge
+                    color: "red"
+                    anchors.top: editorCreate.bottom
+                    text: qsTr("Invalid Characters: %1").arg(forbiddencharsDisplay);
+                    wrapMode: Text.WordWrap
                 }
             }
         }
-    }
 
-    Component {
-        id: renamePlaylistComponent
         ModalDialog {
-            dialogTitle:labelRenamePlaylist
-            rightButtonText:labelCancel
-            leftButtonText:labelRename
+            id: renamePlaylistDialog
+            title:labelRenamePlaylist
+            cancelButtonText:labelCancel
+            acceptButtonText:labelRename
             property string currTitle: ""
             property string urn: ""
             property string newTitle: ""
             property variant playListModel
             property bool isvalid: true
-            onDialogClicked: {
-                if((button == 1)&&isvalid) {
+            onAccepted: {
+                if(isvalid) {
                     playListModel.changeTitleByURN(urn, newTitle);
                     labelPlaylist = newTitle;
-                    dialogLoader.sourceComponent = undefined;
-                }
-                else if(button == 2)
-                {
-                    dialogLoader.sourceComponent = undefined;
                 }
             }
-
-            Component.onCompleted: {
-                contentLoader.sourceComponent = editorComponent;
-            }
-            Component {
-                id: editorComponent
-                Item{
-                    anchors.fill: parent
-                    TextEntry{
-                        id: editor
-                        width: parent.width
-                        anchors.top: parent.top
-                        height: 50
-                        focus: true
-                        text: currTitle
-                        onTextChanged: {
-                            newTitle = text
-                            isvalid = Code.playlistNameValidate(text, forbiddenchars);
-                        }
+            content: Item {
+                anchors.fill: parent
+                TextEntry{
+                    id: editorRename
+                    width: parent.width
+                    anchors.top: parent.top
+                    height: 50
+                    focus: true
+                    text: renamePlaylistDialog.currTitle
+                    onTextChanged: {
+                        renamePlaylistDialog.newTitle = text;
+                        renamePlaylistDialog.isvalid = Code.playlistNameValidate(text, forbiddenchars);
                     }
-                    Text{
-                        id: warningText
-                        visible: !isvalid
-                        width: parent.width
-                        height: 50
-                        font.pixelSize: theme_fontPixelSizeLarge
-                        color: "red"
-                        anchors.top: editor.bottom
-                        text: qsTr("Invalid Characters: %1").arg(forbiddencharsDisplay);
-                        wrapMode: Text.WordWrap
+                }
+                Text{
+                    visible: !renamePlaylistDialog.isvalid
+                    width: parent.width
+                    height: 50
+                    font.pixelSize: theme_fontPixelSizeLarge
+                    color: "red"
+                    anchors.top: editorRename.bottom
+                    text: qsTr("Invalid Characters: %1").arg(forbiddencharsDisplay);
+                    wrapMode: Text.WordWrap
+                }
+            }
+        }
+
+        ModalDialog {
+            id: playqueuePlaylistDialog
+            title:labelCreateNewPlaylist
+            cancelButtonText:labelCancel
+            acceptButtonText:labelCreate
+            property string playlistTitle: ""
+            onAccepted: {
+                miscModel.type = MusicListModel.MusicPlaylist;
+                miscModel.clear();
+                miscModel.addItems(playqueueModel.getAllIDs());
+                miscModel.savePlaylist(playlistTitle);
+            }
+            content: Item{
+                anchors.fill: parent
+                TextEntry{
+                    width: parent.width
+                    height: 50
+                    focus: true
+                    defaultText: labelDefaultText
+                    onTextChanged: {
+                        playqueuePlaylistDialog.playlistTitle = text
                     }
                 }
             }
         }
-    }
 
-    Component {
-        id: playqueuePlaylistComponent
-        ModalDialog {
-            dialogTitle:labelCreateNewPlaylist
-            rightButtonText:labelCancel
-            leftButtonText:labelCreate
-            property string playlistTitle: ""
-            onDialogClicked: {
-                if(button == 1) {
-                    miscModel.type = MusicListModel.MusicPlaylist;
-                    miscModel.clear();
-                    miscModel.addItems(playqueueModel.getAllIDs());
-                    miscModel.savePlaylist(playlistTitle);
-                }
-                dialogLoader.sourceComponent = undefined;
-            }
-
-            Component.onCompleted: {
-                contentLoader.sourceComponent = editorComponent;
-            }
-            Component {
-                id: editorComponent
-                Item{
-                    anchors.fill: parent
-                    TextEntry{
-                        id: editor
-                        width: parent.width
-                        height: 50
-                        focus: true
-                        defaultText: labelDefaultText
-                        onTextChanged: {
-                            playlistTitle = text
+        ModalContextMenu {
+            id: contextShareMenu
+            property alias model: contextShareActionMenu.model
+            content: ActionMenu {
+                id: contextShareActionMenu
+                onTriggered: {
+                    var svcTypes = shareObj.serviceTypes;
+                    for (x in svcTypes) {
+                        if (model[index] == svcTypes[x]) {
+                            shareObj.showContext(model[index], contextShareMenu.x, contextShareMenu.y);
+                            break;
                         }
                     }
+                    contextMenu.hide();
+                }
+            }
+        }
+
+        ModalContextMenu {
+            id: contextMenu
+            property alias payload: contextActionMenu.payload
+            property alias model: contextActionMenu.model
+            property variant shareModel: []
+            property variant openpage
+            property variant playlistmodel
+            property variant sharemodel
+            content: ActionMenu {
+                id: contextActionMenu
+                property variant payload: undefined
+                onTriggered: {
+                    if (model[index] == labelPlay)
+                    {
+                        // Play
+                        if(!multiSelectMode)
+                            Code.addToPlayqueueAndPlay(payload);
+                        else if(multiSelectModel.selectionCount() > 0)
+                            Code.addMultipleToPlayqueueAndPlay(multiSelectModel);
+                        contextMenu.hide();
+                    }
+                    else if (model[index] == labelOpen)
+                    {
+                        // Open
+                        Code.openItemInDetailView(openpage,payload);
+                        contextMenu.hide();
+                    }
+                    else if ((model[index] == labelFavorite)||(model[index] == labelUnFavorite))
+                    {
+                        // Favorite/unfavorite
+                        if(!multiSelectMode)
+                            Code.changeItemFavorite(payload, (model[index] == labelFavorite));
+                        else if(multiSelectModel.selectionCount() > 0)
+                            Code.changeMultipleItemFavorite(multiSelectModel, (model[index] == labelFavorite));
+                        contextMenu.hide();
+                    }
+                    else if (model[index] == labelAddToPlayQueue)
+                    {
+                        // Add to play queue
+                        if(!multiSelectMode)
+                            Code.addToPlayqueue(payload);
+                        else if(multiSelectModel.selectionCount() > 0)
+                            Code.addMultipleToPlayqueue(multiSelectModel);
+                        contextMenu.hide();
+                    }
+                    else if (model[index] == labelRemoveFromPlayQueue)
+                    {
+                        // Remove from play queue
+                        if(!multiSelectMode)
+                            Code.removeFromPlayqueue(payload);
+                        else if(multiSelectModel.selectionCount() > 0)
+                            Code.removeMultipleFromPlayqueue(multiSelectModel);
+                        contextMenu.hide();
+                    }
+                    else if (model[index] == labelAddToPlaylist)
+                    {
+                        // Add to a play list
+                        if(!multiSelectMode)
+                        {
+                            playlistPicker.payload = [payload.mitemid];
+                            playlistPicker.show();
+                        }
+                        else if(multiSelectModel.selectionCount() > 0)
+                        {
+                            playlistPicker.payload = multiSelectModel.getSelectedIDs()
+                            playlistPicker.show();
+                        }
+                        contextMenu.hide();
+                    }
+                    else if (model[index] == labelRemFromPlaylist)
+                    {
+                        // Remove from a play list
+                        if(!multiSelectMode)
+                        {
+                            playlistmodel.removeItems(payload.mitemid);
+                            playlistmodel.savePlaylist(playlistmodel.playlist);
+                        }
+                        else if(multiSelectModel.selectionCount() > 0)
+                        {
+                            playlistmodel.removeItems(multiSelectModel.getSelectedIDs());
+                            playlistmodel.savePlaylist(playlistmodel.playlist);
+                            multiSelectModel.clearSelected();
+                            shareObj.clearItems();
+                            multiSelectMode = false;
+                        }
+                        contextMenu.hide();
+                    }
+                    else if (model[index] == labelRenamePlaylist)
+                    {
+                        // Rename playlist
+                        renamePlaylistDialog.currTitle = payload.mtitle;
+                        renamePlaylistDialog.urn = payload.murn;
+                        renamePlaylistDialog.playListModel = playlistmodel;
+                        renamePlaylistDialog.show();
+                        contextMenu.hide();
+                    }
+                    else if (model[index] == labelDelete)
+                    {
+                        // Delete
+                        if(!multiSelectMode)
+                        {
+                            deleteItemDialog.payload = payload;
+                            deleteItemDialog.show();
+                        }
+                        else if(multiSelectModel.selectionCount() > 0)
+                        {
+                            deleteMultipleItemsDialog.show();
+                        }
+                        contextMenu.hide();
+                    }
+                    else if (model[index] == labelMultiSelect)
+                    {
+                        // Multi Select
+                        multiSelectMode = true;
+                        contextMenu.hide();
+                    }
+                    else if (model[index] == labelcShare)
+                    {
+                        // Share
+                        shareObj.clearItems();
+                        if(!multiSelectMode)
+                        {
+                            shareObj.addItem(payload.muri) // URI
+                        }
+                        else if(multiSelectModel.selectionCount() > 0)
+                        {
+                            shareObj.addItems(multiSelectModel.getSelectedURIs()) // URIs
+                        }
+                        contextMenu.shareModel = shareObj.serviceTypes;
+                        contextMenu.shareModel = contextMenu.shareModel.concat(labelCancel);
+                        contextMenu.subMenuModel = contextMenu.shareModel;
+                        contextMenu.subMenuPayload = contextMenu.shareModel;
+                        contextMenu.subMenuVisible = true;
+                    }
+                }
+            }
+            onSubMenuTriggered: {
+                if (shareModel[index] == labelCancel)
+                {
+                    contextMenu.subMenuVisible = false;
+                }
+                else
+                {
+                    var svcTypes = shareObj.serviceTypes;
+                    for (x in svcTypes) {
+                        if (shareModel[index] == svcTypes[x]) {
+                            shareObj.showContext(shareModel[index], contextMenu.x, contextMenu.y);
+                            break;
+                        }
+                    }
+                    contextMenu.hide();
                 }
             }
         }
@@ -761,44 +715,40 @@ Window {
 
     Component {
         id: playQueueContent
-        ApplicationPage {
+        AppPage {
             id: playQueuePage
-            anchors.top:parent.top
-            anchors.left: parent.left
-            height: parent.height
-            width: parent.width
-            title:labelPlayqueue
-            onApplicationDataChanged: {
-                if(applicationData != undefined)
-                    scene.applicationData = undefined;
+            anchors.fill: parent
+            pageTitle: labelPlayqueue
+            property bool infocus: true
+            onActivated : {
+                infocus = true;
+                window.disableToolBarSearch = false;
             }
-            menuContent: ActionMenu {
-                model: [labelSavePlaylist, labelClearPlaylist]
-                onTriggered: {
-                    if(model[index] == labelSavePlaylist)
-                    {
-                        scene.showModalDialog(playqueuePlaylistComponent)
-                        playQueuePage.closeMenu();
-                    }
-                    else if(model[index] == labelClearPlaylist)
-                    {
-                        Code.stop();
-                        playqueueModel.clear();
-                        playQueuePage.closeMenu();
-                    }
+            onDeactivated : { infocus = false; }
+            actionMenuModel: [labelSavePlaylist, labelClearPlaylist]
+            actionMenuPayload: ["save", "clear"]
+            onActionMenuTriggered: {
+                if(selectedItem == "save")
+                {
+                    playqueuePlaylistDialog.show();
+                }
+                else if(selectedItem == "clear")
+                {
+                    Code.stop();
+                    playqueueModel.clear();
                 }
             }
             Item {
                 id: noMusicScreen
                 anchors.centerIn: parent
                 height: parent.height/2
-                width: (scene.isLandscapeView())?(parent.width/2):(parent.width/1.2)
+                width: (window.inLandscape)?(parent.width/2):(parent.width/1.2)
                 visible: ((allTracksModel.total == 0)&&(!startupTimer.running))
                 Text {
                     id: noMusicScreenText1
                     width: parent.width
                     text: labelNoMusicText1
-                    font.pixelSize: scene.height/17
+                    font.pixelSize: window.height/17
                     anchors.top: parent.top
                     wrapMode: Text.WordWrap
                 }
@@ -806,114 +756,77 @@ Window {
                     id: noMusicScreenText2
                     width: parent.width
                     text: labelNoMusicText2
-                    font.pixelSize: scene.height/21
+                    font.pixelSize: window.height/21
                     anchors.top: noMusicScreenText1.bottom
-                    anchors.topMargin: scene.height/24
+                    anchors.topMargin: window.height/24
                     wrapMode: Text.WordWrap
                 }
             }
 
-            onSearch: {
-                playqueueView.model.search = needle;
+            Connections {
+                target: window
+                onSearch: {
+                    playqueueView.model.search = needle;
+                }
             }
 
             Component.onCompleted: {
-                playqueueView.playlistPicker = playlistPicker;
-                multibar.playlistPicker = playlistPicker
-                playqueueView.parent = playQueuePage.content;
+                playqueueView.parent = playQueuePage;
             }
             Component.onDestruction: {
                 playqueueView.parent = parkingLot;
-            }
-            Ux.MusicPicker{
-                id: playlistPicker
-                property variant payload: []
-                showPlaylists: true
-                showAlbums:false
-                onAlbumOrPlaylistSelected: {
-                    addToPlaylist(payload, title, uri, thumbUri, type);
-                }
-//                onNewPlaylist: {
-//                    scene.showModalDialog(createPlaylistComponent);
-//                }
             }
         }
     }
 
     Component {
         id:playlistsContent
-        ApplicationPage {
+        AppPage {
             id: playlistsPage
-            anchors.top:parent.top
-            anchors.left: parent.left
-            height: parent.height
-            width: parent.width
-            title: labelAllPlaylist
+            anchors.fill: parent
+            pageTitle: labelAllPlaylist
             property bool showGridView: settings.get("PlaylistsView") == 0
-            showSearch: false
-            onSearch: {
-                gridView.model.search = needle;
+            property bool infocus: true
+            onActivated : {
+                infocus = true;
+                window.disableToolBarSearch = false;
             }
-            onApplicationDataChanged: {
-                if(applicationData != undefined)
-                    scene.applicationData = undefined;
+            onDeactivated : { infocus = false; }
+            Connections {
+                target: window
+                onSearch: {
+                    gridView.model.search = needle;
+                }
             }
-            property int highlightindex: (showGridView)?0:1
-            menuContent: Item {
-                width: sortMenu.width
-                height: sortMenu.height + actionMenu.height
-                ActionMenu {
-                    id: sortMenu
-                    title: qsTr("View By")
-                    highlightIndex: highlightindex
-                    model: [labelGrid, labelList]
-                    onTriggered: {
-                        highlightindex = index;
-                        if(model[index] == labelGrid)
-                        {
-                            showGridView = true;
-                            settings.set("PlaylistsView",0);
-                            playlistsPage.closeMenu();
-                        }
-                        else if(model[index] == labelList)
-                        {
-                            showGridView = false;
-                            settings.set("PlaylistsView",1);
-                            playlistsPage.closeMenu();
-                        }
-                    }
+            actionMenuModel: [labelNewList, labelGrid, labelList]
+            actionMenuPayload: ["new", "grid", "list"]
+            onActionMenuTriggered: {
+                if(selectedItem == "new")
+                {
+                    createPlaylistDialog.show();
                 }
-                Image {
-                    id: titleSeperatorImage
-                    anchors.top: sortMenu.bottom
-                    width: sortMenu.width
-                    source: "image://theme/menu_item_separator"
+                else if(selectedItem == "grid")
+                {
+                    showGridView = true;
+                    settings.set("PlaylistsView",0);
                 }
-                ActionMenu {
-                    id: actionMenu
-                    anchors.top: titleSeperatorImage.bottom
-                    title: qsTr("Actions")
-                    model: [labelNewList]
-                    onTriggered: {
-                        if(model[index] == labelNewList)
-                        {
-                            scene.showModalDialog(createPlaylistComponent)
-                            playlistsPage.closeMenu();
-                        }
-                    }
+                else if(selectedItem == "list")
+                {
+                    showGridView = false;
+                    settings.set("PlaylistsView",1);
                 }
             }
             Item {
                 id: noMusicScreen
                 anchors.centerIn: parent
                 height: parent.height/2
-                width: (scene.isLandscapeView())?(parent.width/2):(parent.width/1.2)
+                width: (window.inLandscape)?(parent.width/2):(parent.width/1.2)
                 visible: ((gridView.model.total == 0)&&(allTracksModel.total == 0)&&(!startupTimer.running))
                 Text {
                     id: noMusicScreenText1
                     width: parent.width
                     text: labelNoMusicText1
-                    font.pixelSize: scene.height/17
+                    font.pixelSize: window.height/17
                     anchors.top: parent.top
                     wrapMode: Text.WordWrap
                 }
@@ -921,14 +834,13 @@ Window {
                     id: noMusicScreenText2
                     width: parent.width
                     text: labelNoMusicText2
-                    font.pixelSize: scene.height/21
+                    font.pixelSize: window.height/21
                     anchors.top: noMusicScreenText1.bottom
-                    anchors.topMargin: scene.height/24
+                    anchors.topMargin: window.height/24
                     wrapMode: Text.WordWrap
                 }
             }
             MusicListView {
-                parent: playlistsPage.content
                 anchors.fill: parent
                 model:gridView.model
                 mode : 1
@@ -945,7 +857,7 @@ Window {
                         [labelOpen, labelPlay, labelAddToPlayQueue, labelRenamePlaylist, labelDelete]);
                     contextMenu.openpage = playlistsPage;
                     contextMenu.playlistmodel = gridView.model;
-                    contextMenu.visible = true;
+                    contextMenu.show();
                 }
             }
 
@@ -953,9 +865,8 @@ Window {
             MediaGridView {
                 id: gridView
                 type: musictype // music app = 0
-                parent: playlistsPage.content
                 anchors.fill: parent
-                cellWidth: ((width- 15) / (scene.isLandscapeView() ? 7: 4))
+                cellWidth: ((width- 15) / (window.inLandscape ? 7: 4))
                 cellHeight: cellWidth
                 visible:showGridView
                 anchors.leftMargin: 15
@@ -978,7 +889,7 @@ Window {
                         [labelOpen, labelPlay, labelAddToPlayQueue, labelRenamePlaylist, labelDelete]);
                     contextMenu.openpage = playlistsPage;
                     contextMenu.playlistmodel = gridView.model;
-                    contextMenu.visible = true;
+                    contextMenu.show();
                 }
             }
         }
@@ -986,54 +897,48 @@ Window {
 
     Component {
         id: artistsContent
-        ApplicationPage {
+        AppPage {
             id: artistsPage
-            anchors.top:parent.top
-            anchors.left: parent.left
-            height: parent.height
-            width: parent.width
-            title: labelAllArtist
+            anchors.fill: parent
+            pageTitle: labelAllArtist
             property bool showGridView: settings.get("AllArtistsView") == 0
-            showSearch: false
-            onSearch: {
-                artistsGridView.model.search = needle;
+            property bool infocus: true
+            onActivated : {
+                infocus = true;
+                window.disableToolBarSearch = false;
             }
-            onApplicationDataChanged: {
-                if(applicationData != undefined)
-                    scene.applicationData = undefined;
+            onDeactivated : { infocus = false; }
+            Connections {
+                target: window
+                onSearch: {
+                    artistsGridView.model.search = needle;
+                }
             }
-            property int highlightindex: (showGridView)?0:1
-            menuContent: ActionMenu {
-                title: qsTr("View By")
-                highlightIndex: highlightindex
-                model: [labelGrid, labelList]
-                onTriggered: {
-                    highlightindex = index;
-                    if(model[index] == labelGrid)
-                    {
-                        showGridView = true;
-                        settings.set("AllArtistsView",0);
-                        artistsPage.closeMenu();
-                    }
-                    else if(model[index] == labelList)
-                    {
-                        showGridView= false;
-                        settings.set("AllArtistsView",1);
-                        artistsPage.closeMenu();
-                    }
+            actionMenuModel: [labelGrid, labelList]
+            actionMenuPayload: ["grid", "list"]
+            onActionMenuTriggered: {
+                if(selectedItem == "grid")
+                {
+                    showGridView = true;
+                    settings.set("AllArtistsView",0);
+                }
+                else if(selectedItem == "list")
+                {
+                    showGridView= false;
+                    settings.set("AllArtistsView",1);
                 }
             }
             Item {
                 id: noMusicScreen
                 anchors.centerIn: parent
                 height: parent.height/2
-                width: (scene.isLandscapeView())?(parent.width/2):(parent.width/1.2)
+                width: (window.inLandscape)?(parent.width/2):(parent.width/1.2)
                 visible: ((allTracksModel.total == 0)&&(!startupTimer.running))
                 Text {
                     id: noMusicScreenText1
                     width: parent.width
                     text: labelNoMusicText1
-                    font.pixelSize: scene.height/17
+                    font.pixelSize: window.height/17
                     anchors.top: parent.top
                     wrapMode: Text.WordWrap
                 }
@@ -1041,15 +946,14 @@ Window {
                     id: noMusicScreenText2
                     width: parent.width
                     text: labelNoMusicText2
-                    font.pixelSize: scene.height/21
+                    font.pixelSize: window.height/21
                     anchors.top: noMusicScreenText1.bottom
-                    anchors.topMargin: scene.height/24
+                    anchors.topMargin: window.height/24
                     wrapMode: Text.WordWrap
                 }
             }
             MusicListView {
                 id: artistsListView
-                parent: artistsPage.content
                 anchors.fill:parent
                 visible: !showGridView
                 model:artistsGridView.model
@@ -1065,17 +969,15 @@ Window {
                     musicContextMenu(mouseX, mouseY, payload,
                         [labelOpen, labelPlay, labelAddToPlayQueue, labelAddToPlaylist, labelDelete]);
                     contextMenu.openpage = artistsPage;
-                    contextMenu.playlistPicker = playlistPicker;
-                    contextMenu.visible = true;
+                    contextMenu.show();
                 }
             }
             MediaGridView {
                 id: artistsGridView
                 type: musictype // music app = 0
-                parent: artistsPage.content
                 anchors.fill: parent
                 visible: showGridView
-                cellWidth:(width- 15) / (scene.isLandscapeView() ? 7: 4)
+                cellWidth:(width- 15) / (window.inLandscape ? 7: 4)
                 cellHeight: cellWidth
                 anchors.leftMargin: 15
                 anchors.topMargin:3
@@ -1096,78 +998,56 @@ Window {
                     musicContextMenu(mouseX, mouseY, payload,
                         [labelOpen, labelPlay, labelAddToPlayQueue, labelAddToPlaylist, labelDelete]);
                     contextMenu.openpage = artistsPage;
-                    contextMenu.playlistPicker = playlistPicker;
-                    contextMenu.visible = true;
+                    contextMenu.show();
                 }
-            }
-            Component.onCompleted: {
-                multibar.playlistPicker = playlistPicker
-            }
-            Ux.MusicPicker{
-                id: playlistPicker
-                property variant payload: []
-                showPlaylists: true
-                showAlbums:false
-                onAlbumOrPlaylistSelected: {
-                    addToPlaylist(payload, title, uri, thumbUri, type);
-                }
-//                onNewPlaylist: {
-//                    scene.showModalDialog(createPlaylistComponent);
-//                }
             }
         }
     }
 
     Component {
         id:albumsContent
-        ApplicationPage {
+        AppPage {
             id: albumsPage
-            anchors.top:parent.top
-            anchors.left: parent.left
-            height: parent.height
-            width: parent.width
-            title: labelAllAlbums
+            anchors.fill: parent
+            pageTitle: labelAllAlbums
             property bool showGridView: settings.get("AllAlbumsView") == 0
-            showSearch: false
-            onSearch: {
-                albumsGridView.model.search = needle;
+            property bool infocus: true
+            onActivated : {
+                infocus = true;
+                window.disableToolBarSearch = false;
             }
-            onApplicationDataChanged: {
-                if(applicationData != undefined)
-                    scene.applicationData = undefined;
+            onDeactivated : { infocus = false; }
+            Connections {
+                target: window
+                onSearch: {
+                    albumsGridView.model.search = needle;
+                }
             }
-            property int highlightindex: (showGridView)?0:1
-            menuContent: ActionMenu {
-                title: qsTr("View By")
-                highlightIndex: highlightindex
-                model: [labelGrid, labelList]
-                onTriggered: {
-                    highlightindex = index;
-                    if(model[index] == labelGrid)
-                    {
-                        showGridView = true;
-                        settings.set("AllAlbumsView",0);
-                        albumsPage.closeMenu();
-                    }
-                    else if(model[index] == labelList)
-                    {
-                        showGridView= false;
-                        settings.set("AllAlbumsView",1);
-                        albumsPage.closeMenu();
-                    }
+            actionMenuModel: [labelGrid, labelList]
+            actionMenuPayload: ["grid", "list"]
+            onActionMenuTriggered: {
+                if(selectedItem == "grid")
+                {
+                    showGridView = true;
+                    settings.set("AllAlbumsView",0);
+                }
+                else if(selectedItem == "list")
+                {
+                    showGridView= false;
+                    settings.set("AllAlbumsView",1);
                 }
             }
             Item {
                 id: noMusicScreen
                 anchors.centerIn: parent
                 height: parent.height/2
-                width: (scene.isLandscapeView())?(parent.width/2):(parent.width/1.2)
+                width: (window.inLandscape)?(parent.width/2):(parent.width/1.2)
                 visible: ((allTracksModel.total == 0)&&(!startupTimer.running))
                 Text {
                     id: noMusicScreenText1
                     width: parent.width
                     text: labelNoMusicText1
-                    font.pixelSize: scene.height/17
+                    font.pixelSize: window.height/17
                     anchors.top: parent.top
                     wrapMode: Text.WordWrap
                 }
@@ -1175,15 +1055,14 @@ Window {
                     id: noMusicScreenText2
                     width: parent.width
                     text: labelNoMusicText2
-                    font.pixelSize: scene.height/21
+                    font.pixelSize: window.height/21
                     anchors.top: noMusicScreenText1.bottom
-                    anchors.topMargin: scene.height/24
+                    anchors.topMargin: window.height/24
                     wrapMode: Text.WordWrap
                 }
             }
             MusicListView {
                 id: albumsListView
-                parent: albumsPage.content
                 anchors.fill:parent
                 visible: !showGridView
                 model:albumsGridView.model
@@ -1200,18 +1079,16 @@ Window {
                     musicContextMenu(mouseX, mouseY, payload,
                         [labelOpen, labelPlay, labelAddToPlayQueue, labelAddToPlaylist, labelDelete]);
                     contextMenu.openpage = albumsPage;
-                    contextMenu.playlistPicker = playlistPicker;
-                    contextMenu.visible = true;
+                    contextMenu.show();
                 }
             }
 
             MediaGridView {
                 id: albumsGridView
                 type: musictype // music app = 0
-                parent: albumsPage.content
                 anchors.fill: parent
                 visible: showGridView
-                cellWidth:(width- 15) / (scene.isLandscapeView() ? 7: 4)
+                cellWidth:(width- 15) / (window.inLandscape ? 7: 4)
                 cellHeight: cellWidth
                 anchors.leftMargin: 15
                 anchors.topMargin:3
@@ -1233,87 +1110,65 @@ Window {
                     musicContextMenu(mouseX, mouseY, payload,
                         [labelOpen, labelPlay, labelAddToPlayQueue, labelAddToPlaylist, labelDelete]);
                     contextMenu.openpage = albumsPage;
-                    contextMenu.playlistPicker = playlistPicker;
-                    contextMenu.visible = true;
+                    contextMenu.show();
                 }
-            }
-            Component.onCompleted: {
-                multibar.playlistPicker = playlistPicker
-            }
-            Ux.MusicPicker{
-                id: playlistPicker
-                property variant payload: []
-                showPlaylists: true
-                showAlbums:false
-                onAlbumOrPlaylistSelected: {
-                    addToPlaylist(payload, title, uri, thumbUri, type);
-                }
-//                onNewPlaylist: {
-//                    scene.showModalDialog(createPlaylistComponent);
-//                }
             }
         }
     }
 
     Component {
         id: allTracksContent
-        ApplicationPage {
+        AppPage {
             id: allTracksPage
-            anchors.top:parent.top
-            anchors.left: parent.left
-            height: parent.height
-            width: parent.width
-            title: labelAllTracks
+            anchors.fill: parent
+            pageTitle: labelAllTracks
             property bool showGridView: settings.get("AllTracksView") == 0
-            showSearch: false
-            onSearch: {
-               listview.model.search = needle;
+            property bool infocus: true
+            onActivated : {
+                infocus = true;
+                window.disableToolBarSearch = false;
             }
-            onApplicationDataChanged: {
-                if(applicationData != undefined)
-                {
-                    if(applicationData == "playneedssongs")
-                    {
-                        playqueueModel.clear();
-                        playqueueModel.addItems(listview.model.getAllIDs());
-                        playqueueView.currentIndex = 0;
-                        Code.play();
-                    }
-                    scene.applicationData = undefined;
+            onDeactivated : { infocus = false; }
+            Connections {
+                target: window
+                onSearch: {
+                   listview.model.search = needle;
                 }
             }
-            property int highlightindex: (showGridView)?0:1
-            menuContent: ActionMenu {
-                title: qsTr("View By")
-                highlightIndex: highlightindex
-                model: [labelGrid, labelList]
-                onTriggered: {
-                    highlightindex = index;
-                    if(model[index] == labelGrid)
-                    {
-                        showGridView = true;
-                        settings.set("AllTracksView",0);
-                        allTracksPage.closeMenu();
-                    }
-                    else if(model[index] == labelList)
-                    {
-                        showGridView= false;
-                        settings.set("AllTracksView",1);
-                        allTracksPage.closeMenu();
-                    }
+            Connections {
+                target: toolbar
+                onPlayNeedsSongs: {
+                    playqueueModel.clear();
+                    playqueueModel.addItems(listview.model.getAllIDs());
+                    playqueueView.currentIndex = 0;
+                    Code.play();
+                }
+            }
+            actionMenuModel: [labelGrid, labelList]
+            actionMenuPayload: ["grid", "list"]
+            onActionMenuTriggered: {
+                if(selectedItem == "grid")
+                {
+                    showGridView = true;
+                    settings.set("AllTracksView",0);
+                }
+                else if(selectedItem == "list")
+                {
+                    showGridView= false;
+                    settings.set("AllTracksView",1);
                 }
             }
             Item {
                 id: noMusicScreen
                 anchors.centerIn: parent
                 height: parent.height/2
-                width: (scene.isLandscapeView())?(parent.width/2):(parent.width/1.2)
+                width: (window.inLandscape)?(parent.width/2):(parent.width/1.2)
                 visible: ((allTracksModel.total == 0)&&(!startupTimer.running))
                 Text {
                     id: noMusicScreenText1
                     width: parent.width
                     text: labelNoMusicText1
-                    font.pixelSize: scene.height/17
+                    font.pixelSize: window.height/17
                     anchors.top: parent.top
                     wrapMode: Text.WordWrap
                 }
@@ -1321,16 +1176,15 @@ Window {
                     id: noMusicScreenText2
                     width: parent.width
                     text: labelNoMusicText2
-                    font.pixelSize: scene.height/21
+                    font.pixelSize: window.height/21
                     anchors.top: noMusicScreenText1.bottom
-                    anchors.topMargin: scene.height/24
+                    anchors.topMargin: window.height/24
                     wrapMode: Text.WordWrap
                 }
             }
             MusicListView {
                 id: listview
                 selectionMode: multiSelectMode
-                parent: allTracksPage.content
                 anchors.fill:parent
                 visible: !showGridView
                 model: allTracksModel
@@ -1340,9 +1194,9 @@ Window {
                     {
                         model.setSelected(payload.mitemid, !model.isSelected(payload.mitemid));
                         if (model.isSelected(payload.mitemid))
-                            multibar.sharing.addItem(payload.muri);
+                            shareObj.addItem(payload.muri);
                         else
-                            multibar.sharing.delItem(payload.muri);
+                            shareObj.delItem(payload.muri);
                     }
                     else
                     {
@@ -1354,18 +1208,16 @@ Window {
                     musicContextMenu(mouseX, mouseY, payload,
                         [labelPlay, "favorite", labelcShare, labelMultiSelect, labelAddToPlayQueue, labelAddToPlaylist, labelDelete]);
                     multiSelectModel = model;
-                    contextMenu.playlistPicker = playlistPicker;
-                    contextMenu.visible = true;
+                    contextMenu.show();
                 }
             }
             MediaGridView {
                 id: gridView
                 type: musictype // music app = 0
                 selectionMode: multiSelectMode
-                parent: allTracksPage.content
                 anchors.fill:parent
                 visible: showGridView
-                cellWidth:(width- 15) / (scene.isLandscapeView() ? 7: 4)
+                cellWidth:(width- 15) / (window.inLandscape ? 7: 4)
                 cellHeight: cellWidth
                 model: listview.model
                 anchors.leftMargin: 15
@@ -1377,9 +1229,9 @@ Window {
                     {
                         model.setSelected(payload.mitemid, !model.isSelected(payload.mitemid));
                         if (model.isSelected(payload.mitemid))
-                            multibar.sharing.addItem(payload.muri);
+                            shareObj.addItem(payload.muri);
                         else
-                            multibar.sharing.delItem(payload.muri);
+                            shareObj.delItem(payload.muri);
                     }
                     else
                     {
@@ -1391,96 +1243,73 @@ Window {
                     musicContextMenu(mouseX, mouseY, payload,
                         [labelPlay, "favorite", labelcShare, labelMultiSelect, labelAddToPlayQueue, labelAddToPlaylist, labelDelete]);
                     multiSelectModel = model;
-                    contextMenu.playlistPicker = playlistPicker;
-                    contextMenu.visible = true;
+                    contextMenu.show();
                 }
-            }
-            Component.onCompleted: {
-                multibar.playlistPicker = playlistPicker
-            }
-            Ux.MusicPicker{
-                id: playlistPicker
-                property variant payload: []
-                showPlaylists: true
-                showAlbums:false
-                onAlbumOrPlaylistSelected: {
-                    addToPlaylist(payload, title, uri, thumbUri, type);
-                }
-//                onNewPlaylist: {
-//                    scene.showModalDialog(createPlaylistComponent);
-//                }
             }
         }
     }
 
     Component {
         id: favoritesContent
-        ApplicationPage {
+        AppPage {
             id: favoritesPage
-            anchors.top:parent.top
-            anchors.left: parent.left
-            height: parent.height
-            width: parent.width
-            title: labelFavorites
-            showSearch: false
+            anchors.fill: parent
+            pageTitle: labelFavorites
+            property bool infocus: true
+            onActivated : {
+                infocus = true;
+                window.disableToolBarSearch = false;
+            }
+            onDeactivated : { infocus = false; }
             property variant model: MusicListModel {
                 type: MusicListModel.ListofSongs
                 limit: 0
                 filter:MusicListModel.FilterFavorite // favorite
                 sort:(settings.get("FavoriteView") == 1? MusicListModel.SortByAddedTime:MusicListModel.SortByTitle)
             }
-            onSearch: {
-               listView.model.search = needle;
-                if (!needle ) {
-                    listView.model.filter=MusicListModel.FilterFavorite
+            Connections {
+                target: window
+                onSearch: {
+                   listView.model.search = needle;
+                    if (!needle ) {
+                        listView.model.filter=MusicListModel.FilterFavorite
+                    }
                 }
             }
-            onApplicationDataChanged: {
-                if(applicationData != undefined)
+            Connections {
+                target: toolbar
+                onPlayNeedsSongs: {
+                    playqueueModel.clear();
+                    playqueueModel.addItems(model.getAllIDs());
+                    playqueueView.currentIndex = 0;
+                    Code.play();
+                }
+            }
+            actionMenuModel: [labelAlphabetical, labelDateOrder]
+            actionMenuPayload: ["title", "date"]
+            onActionMenuTriggered: {
+                if(selectedItem == "title")
                 {
-                    if(applicationData == "playneedssongs")
-                    {
-                        playqueueModel.clear();
-                        playqueueModel.addItems(model.getAllIDs());
-                        playqueueView.currentIndex = 0;
-                        Code.play();
-                    }
-                    scene.applicationData = undefined;
+                    listView.model.sort = MusicListModel.SortByTitle;
+                    settings.set("FavoriteView",0);
                 }
-            }
-            property int highlightindex: (settings.get("FavoriteView") == 1)?1:0
-            menuContent: ActionMenu {
-                title: qsTr("Sort")
-                highlightIndex: highlightindex
-                model: [labelAlphabetical, labelDateOrder]
-                minWidth: parent.width
-                onTriggered: {
-                    highlightindex = index;
-                    if(model[index] == labelAlphabetical)
-                    {
-                        listView.model.sort = MusicListModel.SortByTitle;
-                        settings.set("FavoriteView",0);
-                        favoritesPage.closeMenu();
-                    }
-                    else if(model[index] == labelDateOrder)
-                    {
-                        listView.model.sort = MusicListModel.SortByAddedTime;
-                        settings.set("FavoriteView",1);
-                        favoritesPage.closeMenu();
-                    }
+                else if(selectedItem == "date")
+                {
+                    listView.model.sort = MusicListModel.SortByAddedTime;
+                    settings.set("FavoriteView",1);
                 }
             }
             Item {
                 id: noMusicScreen
                 anchors.centerIn: parent
                 height: parent.height/2
-                width: (scene.isLandscapeView())?(parent.width/2):(parent.width/1.2)
+                width: (window.inLandscape)?(parent.width/2):(parent.width/1.2)
                 visible: ((allTracksModel.total == 0)&&(!startupTimer.running))
                 Text {
                     id: noMusicScreenText1
                     width: parent.width
                     text: labelNoMusicText1
-                    font.pixelSize: scene.height/17
+                    font.pixelSize: window.height/17
                     anchors.top: parent.top
                     wrapMode: Text.WordWrap
                 }
@@ -1488,16 +1317,15 @@ Window {
                     id: noMusicScreenText2
                     width: parent.width
                     text: labelNoMusicText2
-                    font.pixelSize: scene.height/21
+                    font.pixelSize: window.height/21
                     anchors.top: noMusicScreenText1.bottom
-                    anchors.topMargin: scene.height/24
+                    anchors.topMargin: window.height/24
                     wrapMode: Text.WordWrap
                 }
             }
             MusicListView {
                 id: listView
                 selectionMode: multiSelectMode
-                parent:favoritesPage.content
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.top:parent.top
                 width: parent.width
@@ -1509,9 +1337,9 @@ Window {
                     {
                         model.setSelected(payload.mitemid, !model.isSelected(payload.mitemid));
                         if (model.isSelected(payload.mitemid))
-                            multibar.sharing.addItem(payload.muri);
+                            shareObj.addItem(payload.muri);
                         else
-                            multibar.sharing.delItem(payload.muri);
+                            shareObj.delItem(payload.muri);
                     }
                     else
                     {
@@ -1523,38 +1351,24 @@ Window {
                     musicContextMenu(mouseX, mouseY, payload,
                         [labelPlay, "favorite", labelcShare, labelMultiSelect, labelAddToPlayQueue, labelAddToPlaylist, labelDelete]);
                     multiSelectModel = model;
-                    contextMenu.playlistPicker = playlistPicker;
-                    contextMenu.visible = true;
+                    contextMenu.show();
                 }
-            }
-            Component.onCompleted: {
-                multibar.playlistPicker = playlistPicker
-            }
-            Ux.MusicPicker{
-                id: playlistPicker
-                property variant payload: []
-                showPlaylists: true
-                showAlbums:false
-                onAlbumOrPlaylistSelected: {
-                    addToPlaylist(payload, title, uri, thumbUri, type);
-                }
-//                onNewPlaylist: {
-//                    scene.showModalDialog(createPlaylistComponent);
-//                }
             }
         }
     }
 
     Component {
         id: artistDetailViewContent
-        ApplicationPage {
+        AppPage {
             id: artistDetailViewPage
-            anchors.top:parent.top
-            anchors.left: parent.left
-            height: parent.height
-            width: parent.width
-            title: labelArtist
-            showSearch: false
+            anchors.fill: parent
+            pageTitle: labelArtist
+            property bool infocus: true
+            onActivated : {
+                infocus = true;
+                window.disableToolBarSearch = true;
+            }
+            onDeactivated : { infocus = false; }
             property variant model: MusicListModel {
                 type: MusicListModel.ListofAlbumsForArtist
                 artist: labelArtist
@@ -1566,51 +1380,38 @@ Window {
             }
             property bool showList: settings.get("ArtistDetailView") == 0
 
-            onApplicationDataChanged: {
-                if(applicationData != undefined)
-                {
-                    if(applicationData == "playneedssongs")
-                    {
-                        playqueueModel.clear();
-                        playqueueModel.addItems(model.getAllIDs());
-                        playqueueView.currentIndex = 0;
-                        Code.play();
-                    }
-                    scene.applicationData = undefined;
+            Connections {
+                target: toolbar
+                onPlayNeedsSongs: {
+                    playqueueModel.clear();
+                    playqueueModel.addItems(model.getAllIDs());
+                    playqueueView.currentIndex = 0;
+                    Code.play();
                 }
             }
-
-            property int highlightindex: (showList)?1:0
-            menuContent: ActionMenu {
-                title: qsTr("View By")
-                highlightIndex: highlightindex
-                model: [labelGrid, labelList]
-                onTriggered: {
-                    highlightindex = index;
-                    if(model[index] == labelGrid)
-                    {
-                        artistDetailViewPage.showList = false;
-                        settings.set("ArtistDetailView",1);
-                        artistDetailViewPage.closeMenu();
-                    }
-                    else if(model[index] == labelList)
-                    {
-                        artistDetailViewPage.showList = true;
-                        settings.set("ArtistDetailView",0);
-                        artistDetailViewPage.closeMenu();
-                    }
+            actionMenuModel: [labelGrid, labelList]
+            actionMenuPayload: ["grid", "list"]
+            onActionMenuTriggered: {
+                if(selectedItem == "grid")
+                {
+                    artistDetailViewPage.showList = false;
+                    settings.set("ArtistDetailView",1);
+                }
+                else if(selectedItem == "list")
+                {
+                    artistDetailViewPage.showList = true;
+                    settings.set("ArtistDetailView",0);
                 }
             }
 
             Item {
                 id: artistDetailViewMain
-                parent:artistDetailViewPage.content
                 anchors.fill: parent
 
                 BorderImage {
                     id: artistTitleText
                     width: parent.width
-                    source: (scene.isLandscapeView())?"image://theme/media/subtitle_landscape_bar":"image://theme/media/subtitle_portrait_bar"
+                    source: (window.inLandscape)?"image://theme/media/subtitle_landscape_bar":"image://theme/media/subtitle_portrait_bar"
                     Text {
                         text: labelArtist
                         font.pixelSize: theme_fontPixelSizeLarge
@@ -1631,7 +1432,7 @@ Window {
                     width: parent.width
                     height: parent.height - artistTitleText.height
                     anchors.top: artistTitleText.bottom
-                    cellWidth:(width- 15) / (scene.isLandscapeView() ? 7: 4)
+                    cellWidth:(width- 15) / (window.inLandscape ? 7: 4)
                     cellHeight: cellWidth
                     anchors.leftMargin: 15
                     anchors.topMargin:3
@@ -1649,8 +1450,7 @@ Window {
                         musicContextMenu(mouseX, mouseY, payload,
                             [labelOpen, labelPlay, labelAddToPlayQueue, labelAddToPlaylist, labelDelete]);
                         contextMenu.openpage = artistDetailViewPage;
-                        contextMenu.playlistPicker = playlistPicker;
-                        contextMenu.visible = true;
+                        contextMenu.show();
                     }
                 }
 
@@ -1747,16 +1547,11 @@ Window {
                                 source: "image://theme/media/music_border_lrg"
                                 smooth:misvirtual? true: false
                                 anchors.leftMargin: 15
-                                RoundedItem {
-                                    anchors.fill: parent
-                                    radius: 8
-                                    clip: true
+                                Image {
                                     z: -10
-                                    Image {
-                                        anchors.fill: parent
-                                        fillMode:Image.PreserveAspectFit
-                                        source:(thumburi == ""|thumburi == undefined)?"image://theme/media/music_thumb_med":thumburi
-                                    }
+                                    anchors.fill: parent
+                                    fillMode:Image.PreserveAspectFit
+                                    source:(thumburi == ""|thumburi == undefined)?"image://theme/media/music_thumb_med":thumburi
                                 }
 
                                 MouseArea {
@@ -1771,8 +1566,7 @@ Window {
                                         musicContextMenu(mouseX, mouseY, dinstance,
                                             [labelOpen, labelPlay, labelAddToPlayQueue, labelAddToPlaylist, labelDelete]);
                                         contextMenu.openpage = artistDetailViewPage;
-                                        contextMenu.playlistPicker = playlistPicker;
-                                        contextMenu.visible = true;
+                                        contextMenu.show();
                                     }
                                 }
                             }
@@ -1798,9 +1592,9 @@ Window {
                                 {
                                     model.setSelected(payload.mitemid, !model.isSelected(payload.mitemid));
                                     if (model.isSelected(payload.mitemid))
-                                        multibar.sharing.addItem(payload.muri);
+                                        shareObj.addItem(payload.muri);
                                     else
-                                        multibar.sharing.delItem(payload.muri);
+                                        shareObj.delItem(payload.muri);
                                 }
                                 else
                                 {
@@ -1812,15 +1606,14 @@ Window {
                                 musicContextMenu(mouseX, mouseY, payload,
                                     [labelPlay, "favorite", labelcShare, labelMultiSelect, labelAddToPlayQueue, labelAddToPlaylist, labelDelete]);
                                 multiSelectModel = model;
-                                contextMenu.playlistPicker = playlistPicker;
-                                contextMenu.visible = true;
+                                contextMenu.show();
                             }
                         }
 
                         states: [
                             State {
                                 name: "landscapeArtistDetailView"
-                                when: scene.isLandscapeView()
+                                when: window.inLandscape
                                 PropertyChanges {
                                     target: dinstance
                                     height: Math.max(albumDetailBackground.height, songsInAlbumList.height)
@@ -1862,7 +1655,7 @@ Window {
                             },
                             State {
                                 name: "portraitArtistDetailView"
-                                when: !scene.isLandscapeView()
+                                when: !window.inLandscape
                                 PropertyChanges {
                                     target: dinstance
                                     height: albumDetailBackground.height + songsInAlbumList.height
@@ -1934,33 +1727,21 @@ Window {
                     }
                 ]
             }
-            Component.onCompleted: {
-                multibar.playlistPicker = playlistPicker
-            }
-            Ux.MusicPicker{
-                id: playlistPicker
-                property variant payload: []
-                showPlaylists: true
-                showAlbums:false
-                onAlbumOrPlaylistSelected: {
-                    addToPlaylist(payload, title, uri, thumbUri, type);
-                }
-//                onNewPlaylist: {
-//                    scene.showModalDialog(createPlaylistComponent);
-//                }
-            }
         }
     }
 
     Component {
         id:albumDetailViewContent
-        ApplicationPage {
+        AppPage {
             id: albumDetailViewPage
-            anchors.top:parent.top
-            anchors.left: parent.left
-            height: parent.height
-            width: parent.width
-            title: labelAlbum
+            anchors.fill: parent
+            pageTitle: labelAlbum
+            property bool infocus: true
+            onActivated : {
+                infocus = true;
+                window.disableToolBarSearch = true;
+            }
+            onDeactivated : { infocus = false; }
 
             property variant model: MusicListModel {
                 type: MusicListModel.ListofSongsForAlbum
@@ -1971,29 +1752,24 @@ Window {
                     albumSongList.currentIndex = -1;
                 }
             }
-            onApplicationDataChanged: {
-                if(applicationData != undefined)
-                {
-                    if(applicationData == "playneedssongs")
-                    {
-                        playqueueModel.clear();
-                        playqueueModel.addItems(model.getAllIDs());
-                        playqueueView.currentIndex = 0;
-                        Code.play();
-                    }
-                    scene.applicationData = undefined;
+            Connections {
+                target: toolbar
+                onPlayNeedsSongs: {
+                    playqueueModel.clear();
+                    playqueueModel.addItems(model.getAllIDs());
+                    playqueueView.currentIndex = 0;
+                    Code.play();
                 }
             }
             Item {
                 id: box
-                parent: albumDetailViewPage.content
                 anchors.fill: parent
 
                 BorderImage {
                     id: artistTitleText
                     width: parent.width
                     anchors.top: parent.top
-                    source: (scene.isLandscapeView())?"image://theme/media/subtitle_landscape_bar":"image://theme/media/subtitle_portrait_bar"
+                    source: (window.inLandscape)?"image://theme/media/subtitle_landscape_bar":"image://theme/media/subtitle_portrait_bar"
                     Text {
                         text: labelArtist
                         font.pixelSize: theme_fontPixelSizeLarge
@@ -2068,16 +1844,11 @@ Window {
                         height:width
                         source: "image://theme/media/music_border_lrg"
                         anchors.leftMargin: 15
-                        RoundedItem {
-                            anchors.fill: parent
-                            radius: 8
-                            clip: true
+                        Image {
                             z: -10
-                            Image {
-                                anchors.fill: parent
-                                fillMode:Image.PreserveAspectFit
-                                source:thumbnailUri
-                            }
+                            anchors.fill: parent
+                            fillMode:Image.PreserveAspectFit
+                            source:thumbnailUri
                         }
                     }
                 }
@@ -2092,9 +1863,9 @@ Window {
                         {
                             model.setSelected(payload.mitemid, !model.isSelected(payload.mitemid));
                             if (model.isSelected(payload.mitemid))
-                                multibar.sharing.addItem(payload.muri);
+                                shareObj.addItem(payload.muri);
                             else
-                                multibar.sharing.delItem(payload.muri);
+                                shareObj.delItem(payload.muri);
                         }
                         else
                         {
@@ -2107,15 +1878,14 @@ Window {
                         musicContextMenu(mouseX, mouseY, payload,
                             [labelPlay, "favorite", labelcShare, labelMultiSelect, labelAddToPlayQueue, labelAddToPlaylist, labelDelete]);
                         multiSelectModel = model;
-                        contextMenu.playlistPicker = playlistPicker;
-                        contextMenu.visible = true;
+                        contextMenu.show();
                     }
                 }
             }
             states: [
                 State {
                     name: "landscapeAlbumDetailsView"
-                    when: scene.isLandscapeView()
+                    when: window.inLandscape
                     PropertyChanges {
                         target: albumDetailBackground
                         width: albumThumbnail.width + 30
@@ -2154,7 +1924,7 @@ Window {
                 },
                 State {
                     name: "portraitAlbumDetailView"
-                    when: !scene.isLandscapeView()
+                    when: !window.inLandscape
                     PropertyChanges {
                         target: albumDetailBackground
                         width: parent.width
@@ -2193,63 +1963,45 @@ Window {
                     }
                 }
             ]
-            Component.onCompleted: {
-                multibar.playlistPicker = playlistPicker
-            }
-            Ux.MusicPicker{
-                id: playlistPicker
-                property variant payload: []
-                showPlaylists: true
-                showAlbums:false
-                onAlbumOrPlaylistSelected: {
-                    addToPlaylist(payload, title, uri, thumbUri, type);
-                }
-//                onNewPlaylist: {
-//                    scene.showModalDialog(createPlaylistComponent);
-//                }
-            }
         }
     }
 
-
     Component {
         id: playlistDetailViewContent
-        ApplicationPage {
+        AppPage {
             id: playlistDetailViewPage
-            anchors.top:parent.top
-            anchors.left: parent.left
-            height: parent.height
-            width: parent.width
-            title: labelAllPlaylist
+            anchors.fill: parent
+            pageTitle: labelAllPlaylist
+            property bool infocus: true
+            onActivated : {
+                infocus = true;
+                window.disableToolBarSearch = true;
+            }
+            onDeactivated : { infocus = false; }
 
             property alias model: playlistList.model
-            onApplicationDataChanged: {
-                if(applicationData != undefined)
-                {
-                    if(applicationData == "playneedssongs")
-                    {
-                        playqueueModel.clear();
-                        playqueueModel.addItems(model.getAllIDs());
-                        playqueueView.currentIndex = 0;
-                        Code.play();
-                    }
-                    scene.applicationData = undefined;
+            Connections {
+                target: toolbar
+                onPlayNeedsSongs: {
+                    playqueueModel.clear();
+                    playqueueModel.addItems(model.getAllIDs());
+                    playqueueView.currentIndex = 0;
+                    Code.play();
                 }
             }
-            menuContent: ActionMenu {
-                model: [labelRenamePlaylist]
-                onTriggered: {
-                    // Rename playlist
-                    scene.showModalDialog(renamePlaylistComponent);
-                    dialogLoader.item.currTitle = labelPlaylist;
-                    dialogLoader.item.urn = labelPlaylistURN;
-                    dialogLoader.item.playListModel = playlistList.model;
-                    playlistDetailViewPage.closeMenu();
+            actionMenuModel: [labelRenamePlaylist]
+            actionMenuPayload: ["rename"]
+            onActionMenuTriggered: {
+                if(selectedItem == "rename")
+                {
+                    renamePlaylistDialog.currTitle = labelPlaylist;
+                    renamePlaylistDialog.urn = labelPlaylistURN;
+                    renamePlaylistDialog.playListModel = playlistList.model;
+                    renamePlaylistDialog.show();
                 }
             }
             Item {
                 id: box
-                parent: playlistDetailViewPage.content
                 anchors.fill: parent
                 Text {
                     id: tPlaylist
@@ -2271,16 +2023,11 @@ Window {
                     height: width
                     anchors.leftMargin: 15
                     source: "image://theme/media/music_border_lrg"
-                    RoundedItem {
-                        anchors.fill: parent
-                        radius: 8
-                        clip: true
+                    Image {
                         z: -10
-                        Image {
-                            anchors.fill: parent
-                            fillMode:Image.PreserveAspectFit
-                            source:thumbnailUri
-                        }
+                        anchors.fill: parent
+                        fillMode:Image.PreserveAspectFit
+                        source:thumbnailUri
                     }
                 }
                 MusicListView {
@@ -2303,9 +2050,9 @@ Window {
                         {
                             model.setSelected(payload.mitemid, !model.isSelected(payload.mitemid));
                             if (model.isSelected(payload.mitemid))
-                                multibar.sharing.addItem(payload.muri);
+                                shareObj.addItem(payload.muri);
                             else
-                                multibar.sharing.delItem(payload.muri);
+                                shareObj.delItem(payload.muri);
                         }
                         else
                         {
@@ -2318,15 +2065,14 @@ Window {
                             [labelPlay, "favorite", labelcShare, labelMultiSelect, labelAddToPlayQueue, labelAddToPlaylist, labelRemFromPlaylist]);
                         multiSelectModel = model;
                         contextMenu.playlistmodel = playlistList.model;
-                        contextMenu.playlistPicker = playlistPicker;
-                        contextMenu.visible = true;
+                        contextMenu.show();
                     }
                 }
             }
             states: [
                 State {
                     name: "landscapePlaylistDetailView"
-                    when: scene.isLandscapeView()
+                    when: window.inLandscape
                     PropertyChanges {
                         target: tPlaylist
                         width:parent.width -15
@@ -2363,7 +2109,7 @@ Window {
                 },
                 State {
                     name: "portraitPlaylistDetailView"
-                    when: !scene.isLandscapeView()
+                    when: !window.inLandscape
                     PropertyChanges {
                         target: tPlaylist
                         width:parent.width - playlistThumbnail.width -5
@@ -2399,21 +2145,6 @@ Window {
                     }
                 }
             ]
-            Component.onCompleted: {
-                multibar.playlistPicker = playlistPicker
-            }
-            Ux.MusicPicker{
-                id: playlistPicker
-                property variant payload: []
-                showPlaylists: true
-                showAlbums:false
-                onAlbumOrPlaylistSelected: {
-                    addToPlaylist(payload, title, uri, thumbUri, type);
-                }
-//                onNewPlaylist: {
-//                    scene.showModalDialog(createPlaylistComponent);
-//                }
-            }
         }
     }
     MusicListView {
@@ -2423,15 +2154,14 @@ Window {
         anchors.fill:parent
         model: playqueueModel
         footerHeight: toolbar.height
-        property variant playlistPicker
         onClicked:{
             if(multiSelectMode)
             {
                 model.setSelected(payload.mitemid, !model.isSelected(payload.mitemid));
                 if (model.isSelected(payload.mitemid))
-                    multibar.sharing.addItem(payload.muri);
+                    shareObj.addItem(payload.muri);
                 else
-                    multibar.sharing.delItem(payload.muri);
+                    shareObj.delItem(payload.muri);
             }
             else
             {
@@ -2443,15 +2173,14 @@ Window {
             musicContextMenu(mouseX, mouseY, payload,
                 [labelPlay, "favorite", labelcShare, labelMultiSelect, labelAddToPlaylist, labelRemoveFromPlayQueue]);
             multiSelectModel = model;
-            contextMenu.playlistPicker = playlistPicker;
-            contextMenu.visible = true;
+            contextMenu.show();
         }
     }
 
     Item {
         id: parkingLot
-        x: content.width
-        y: content.y
+        x: window.width
+        y: window.y
         width: 0
         height: 0
         clip:true
@@ -2459,44 +2188,49 @@ Window {
 
     MusicToolBar {
         id: toolbar
-        parent: content
         z: 1
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         audioItem: audio
         playing: false
-        landscape: scene.isLandscapeView()
-        onPlayNeedsSongs: {
-            applicationData = "playneedssongs";
-        }
+        landscape: window.inLandscape
     }
 
     MediaMultiBar {
         id: multibar
-        parent: content
         z: 2
         height: 55
         opacity: 0
         width: parent.width
         anchors.bottom: parent.bottom
         anchors.left: parent.left
-        landscape: scene.isLandscapeView()
+        landscape: window.inLandscape
         showadd: true
-        sharing: shareObj
-        property variant playlistPicker
         onCancelPressed: {
             multiSelectModel.clearSelected();
             multiSelectMode = false;
         }
         onDeletePressed: {
             if(multiSelectModel.selectionCount() > 0)
-                scene.showModalDialog(deleteMultipleItemsComponent);
+            {
+                deleteMultipleItemsDialog.show();
+            }
         }
         onAddPressed: {
             if(multiSelectModel.selectionCount() > 0)
             {
                 playlistPicker.payload = multiSelectModel.getSelectedIDs()
                 playlistPicker.show();
+            }
+        }
+        onSharePressed: {
+            if(shareObj.shareCount > 0)
+            {
+                var map = mapToItem(topItem.topItem, fingerX, fingerY);
+                contextShareMenu.model = shareObj.serviceTypes;
+                topItem.calcTopParent()
+                contextShareMenu.setPosition( map.x, map.y );
+                contextShareMenu.show();
             }
         }
         states: [
@@ -2548,4 +2282,6 @@ Window {
     Component.onDestruction: {
         Code.stop();
     }
+
+    TopItem { id: topItem }
 }
