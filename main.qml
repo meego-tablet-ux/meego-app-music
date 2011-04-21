@@ -15,7 +15,7 @@ import MeeGo.App.Music.MusicPlugin 1.0
 import MeeGo.Sharing 0.1
 import "functions.js" as Code
 
-Window {
+Labs.Window {
     id: window
     property string labelPlayqueue: qsTr("Play Queue")
     property string labelFavorites: qsTr("Favorites")
@@ -89,12 +89,33 @@ Window {
     property bool multiSelectMode: false
     property variant multiSelectModel: allTracksModel
 
-    property variant bookModel: [labelPlayqueue,labelAllPlaylist,labelFavorites,
-                                 labelAllArtist,labelAllAlbums,labelAllTracks]
-    property variant bookPayload: [playQueueContent,playlistsContent,favoritesContent,
-                                   artistsContent,albumsContent,allTracksContent]
-    bookMenuModel: bookModel
-    bookMenuPayload: bookPayload
+    title: labelMusicApp
+
+    property variant theFilterModel: [labelPlayqueue,labelAllPlaylist,labelFavorites,
+          labelAllArtist, labelAllAlbums,
+          labelAllTracks]
+    filterModel: (multiSelectMode)?[]:theFilterModel
+
+    onFilterTriggered: {
+        if (index == 0) {
+            window.applicationPage = playQueueContent;
+        }else if (index == 1)
+        {
+            window.applicationPage = playlistsContent;
+        }else if (index == 2)
+        {
+            window.applicationPage = favoritesContent;
+        }else if (index == 3)
+        {
+            window.applicationPage = artistsContent;
+        }else if (index == 4)
+        {
+            window.applicationPage = albumsContent;
+        }else if (index == 5)
+        {
+            window.applicationPage = allTracksContent;
+        }
+    }
 
     onMultiSelectModeChanged: {
         if(multiSelectMode)
@@ -296,7 +317,7 @@ Window {
     }
 
     Component.onCompleted: {
-        switchBook(allTracksContent);
+        applicationPage = allTracksContent
         startupTimer.start();
     }
 
@@ -347,7 +368,101 @@ Window {
     Item {
         id: globalItems
         z: 1000
+        parent: content
         anchors.fill: parent
+
+        MusicToolBar {
+            id: toolbar
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
+            audioItem: audio
+            playing: false
+            landscape: window.isLandscapeView()
+        }
+
+        MediaMultiBar {
+            id: multibar
+            height: 55
+            opacity: 0
+            width: parent.width
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
+            landscape: window.isLandscapeView()
+            showadd: true
+            onCancelPressed: {
+                multiSelectModel.clearSelected();
+                shareObj.clearItems();
+                multiSelectMode = false;
+            }
+            onDeletePressed: {
+                if(multiSelectModel.selectionCount() > 0)
+                {
+                    deleteMultipleItemsDialog.deletecount = multiSelectModel.selectionCount();
+                    deleteMultipleItemsDialog.show();
+                }
+            }
+            onAddPressed: {
+                if(multiSelectModel.selectionCount() > 0)
+                {
+                    playlistPicker.payload = multiSelectModel.getSelectedIDs()
+                    playlistPicker.show();
+                }
+            }
+            onSharePressed: {
+                if(shareObj.shareCount > 0)
+                {
+                    var map = mapToItem(topItem.topItem, fingerX, fingerY);
+                    contextShareMenu.model = shareObj.serviceTypes;
+                    topItem.calcTopParent()
+                    contextShareMenu.setPosition( map.x, map.y );
+                    contextShareMenu.show();
+                }
+            }
+            states: [
+                State {
+                    name: "showActionBar"
+                    when: multiSelectMode
+                    PropertyChanges {
+                        target: multibar
+                        opacity:1
+                    }
+                    PropertyChanges {
+                        target: toolbar
+                        opacity:0
+                    }
+                },
+                State {
+                    name: "hideActionBar"
+                    when: !multiSelectMode
+                    PropertyChanges {
+                        target: multibar
+                        opacity: 0
+                    }
+                    PropertyChanges {
+                        target: toolbar
+                        opacity:1
+                    }
+                }
+            ]
+
+            transitions: [
+                Transition {
+                    reversible: true
+                    ParallelAnimation{
+                        PropertyAnimation {
+                            target: multibar
+                            property: "opacity"
+                            duration: 250
+                        }
+                        PropertyAnimation {
+                            target: toolbar
+                            property: "opacity"
+                            duration: 250
+                        }
+                    }
+                }
+            ]
+        }
 
         MusicPicker{
             id: playlistPicker
@@ -564,7 +679,6 @@ Window {
             property variant shareModel: []
             property variant openpage
             property variant playlistmodel
-            property variant sharemodel
             content: ActionMenu {
                 id: contextActionMenu
                 property variant payload: undefined
@@ -581,7 +695,7 @@ Window {
                     else if (model[index] == labelOpen)
                     {
                         // Open
-                        Code.openItemInDetailView(openpage,payload);
+                        Code.openItemInDetailView(contextMenu.openpage,payload);
                         contextMenu.hide();
                     }
                     else if ((model[index] == labelFavorite)||(model[index] == labelUnFavorite))
@@ -631,13 +745,13 @@ Window {
                         // Remove from a play list
                         if(!multiSelectMode)
                         {
-                            playlistmodel.removeItems(payload.mitemid);
-                            playlistmodel.savePlaylist(playlistmodel.playlist);
+                            contextMenu.playlistmodel.removeItems(payload.mitemid);
+                            contextMenu.playlistmodel.savePlaylist(contextMenu.playlistmodel.playlist);
                         }
                         else if(multiSelectModel.selectionCount() > 0)
                         {
-                            playlistmodel.removeItems(multiSelectModel.getSelectedIDs());
-                            playlistmodel.savePlaylist(playlistmodel.playlist);
+                            contextMenu.playlistmodel.removeItems(multiSelectModel.getSelectedIDs());
+                            contextMenu.playlistmodel.savePlaylist(contextMenu.playlistmodel.playlist);
                             multiSelectModel.clearSelected();
                             shareObj.clearItems();
                             multiSelectMode = false;
@@ -649,7 +763,7 @@ Window {
                         // Rename playlist
                         renamePlaylistDialog.currTitle = payload.mtitle;
                         renamePlaylistDialog.urn = payload.murn;
-                        renamePlaylistDialog.playListModel = playlistmodel;
+                        renamePlaylistDialog.playListModel = contextMenu.playlistmodel;
                         renamePlaylistDialog.show();
                         contextMenu.hide();
                     }
@@ -663,6 +777,7 @@ Window {
                         }
                         else if(multiSelectModel.selectionCount() > 0)
                         {
+                            deleteMultipleItemsDialog.deletecount = multiSelectModel.selectionCount();
                             deleteMultipleItemsDialog.show();
                         }
                         contextMenu.hide();
@@ -711,38 +826,37 @@ Window {
                 }
             }
         }
+
+        TopItem { id: topItem }
     }
 
     Component {
         id: playQueueContent
-        AppPage {
+        Labs.ApplicationPage {
             id: playQueuePage
             anchors.fill: parent
-            pageTitle: labelPlayqueue
-            property bool infocus: true
-            onActivated : {
-                infocus = true;
-                window.disableToolBarSearch = false;
-            }
-            onDeactivated : { infocus = false; }
-            actionMenuModel: [labelSavePlaylist, labelClearPlaylist]
-            actionMenuPayload: ["save", "clear"]
-            onActionMenuTriggered: {
-                if(selectedItem == "save")
-                {
-                    playqueuePlaylistDialog.show();
-                }
-                else if(selectedItem == "clear")
-                {
-                    Code.stop();
-                    playqueueModel.clear();
+            title: labelPlayqueue
+            menuContent: Labs.ActionMenu {
+                model: [labelSavePlaylist, labelClearPlaylist]
+                onTriggered: {
+                    if(model[index] == labelSavePlaylist)
+                    {
+                        playqueuePlaylistDialog.show();
+                        playQueuePage.closeMenu();
+                    }
+                    else if(model[index] == labelClearPlaylist)
+                    {
+                        Code.stop();
+                        playqueueModel.clear();
+                        playQueuePage.closeMenu();
+                    }
                 }
             }
             Item {
                 id: noMusicScreen
                 anchors.centerIn: parent
                 height: parent.height/2
-                width: (window.inLandscape)?(parent.width/2):(parent.width/1.2)
+                width: (window.isLandscapeView())?(parent.width/2):(parent.width/1.2)
                 visible: ((allTracksModel.total == 0)&&(!startupTimer.running))
                 Text {
                     id: noMusicScreenText1
@@ -763,15 +877,12 @@ Window {
                 }
             }
 
-            Connections {
-                target: window
-                onSearch: {
-                    playqueueView.model.search = needle;
-                }
+            onSearch: {
+                playqueueView.model.search = needle;
             }
 
             Component.onCompleted: {
-                playqueueView.parent = playQueuePage;
+                playqueueView.parent = playQueuePage.content;
             }
             Component.onDestruction: {
                 playqueueView.parent = parkingLot;
@@ -781,46 +892,65 @@ Window {
 
     Component {
         id:playlistsContent
-        AppPage {
+        Labs.ApplicationPage {
             id: playlistsPage
             anchors.fill: parent
-            pageTitle: labelAllPlaylist
+            title: labelAllPlaylist
             property bool showGridView: settings.get("PlaylistsView") == 0
-            property bool infocus: true
-            onActivated : {
-                infocus = true;
-                window.disableToolBarSearch = false;
+            showSearch: false
+            onSearch: {
+                gridView.model.search = needle;
             }
-            onDeactivated : { infocus = false; }
-            Connections {
-                target: window
-                onSearch: {
-                    gridView.model.search = needle;
+            property int highlightindex: (showGridView)?0:1
+            menuContent: Item {
+                width: sortMenu.width
+                height: sortMenu.height + actionMenu.height
+                Labs.ActionMenu {
+                    id: sortMenu
+                    title: qsTr("View By")
+                    highlightIndex: highlightindex
+                    model: [labelGrid, labelList]
+                    onTriggered: {
+                        highlightindex = index;
+                        if(model[index] == labelGrid)
+                        {
+                            showGridView = true;
+                            settings.set("PlaylistsView",0);
+                            playlistsPage.closeMenu();
+                        }
+                        else if(model[index] == labelList)
+                        {
+                            showGridView = false;
+                            settings.set("PlaylistsView",1);
+                            playlistsPage.closeMenu();
+                        }
+                    }
                 }
-            }
-            actionMenuModel: [labelNewList, labelGrid, labelList]
-            actionMenuPayload: ["new", "grid", "list"]
-            onActionMenuTriggered: {
-                if(selectedItem == "new")
-                {
-                    createPlaylistDialog.show();
+                Image {
+                    id: titleSeperatorImage
+                    anchors.top: sortMenu.bottom
+                    width: sortMenu.width
+                    source: "image://theme/menu_item_separator"
                 }
-                else if(selectedItem == "grid")
-                {
-                    showGridView = true;
-                    settings.set("PlaylistsView",0);
-                }
-                else if(selectedItem == "list")
-                {
-                    showGridView = false;
-                    settings.set("PlaylistsView",1);
+                Labs.ActionMenu {
+                    id: actionMenu
+                    anchors.top: titleSeperatorImage.bottom
+                    title: qsTr("Actions")
+                    model: [labelNewList]
+                    onTriggered: {
+                        if(model[index] == labelNewList)
+                        {
+                            createPlaylistDialog.show();
+                            playlistsPage.closeMenu();
+                        }
+                    }
                 }
             }
             Item {
                 id: noMusicScreen
                 anchors.centerIn: parent
                 height: parent.height/2
-                width: (window.inLandscape)?(parent.width/2):(parent.width/1.2)
+                width: (window.isLandscapeView())?(parent.width/2):(parent.width/1.2)
                 visible: ((gridView.model.total == 0)&&(allTracksModel.total == 0)&&(!startupTimer.running))
                 Text {
                     id: noMusicScreenText1
@@ -841,6 +971,7 @@ Window {
                 }
             }
             MusicListView {
+                parent: parent.content
                 anchors.fill: parent
                 model:gridView.model
                 mode : 1
@@ -865,8 +996,9 @@ Window {
             MediaGridView {
                 id: gridView
                 type: musictype // music app = 0
+                parent: parent.content
                 anchors.fill: parent
-                cellWidth: ((width- 15) / (window.inLandscape ? 7: 4))
+                cellWidth: ((width- 15) / (window.isLandscapeView() ? 7: 4))
                 cellHeight: cellWidth
                 visible:showGridView
                 anchors.leftMargin: 15
@@ -897,42 +1029,41 @@ Window {
 
     Component {
         id: artistsContent
-        AppPage {
+        Labs.ApplicationPage {
             id: artistsPage
             anchors.fill: parent
-            pageTitle: labelAllArtist
+            title: labelAllArtist
             property bool showGridView: settings.get("AllArtistsView") == 0
-            property bool infocus: true
-            onActivated : {
-                infocus = true;
-                window.disableToolBarSearch = false;
+            showSearch: false
+            onSearch: {
+                artistsGridView.model.search = needle;
             }
-            onDeactivated : { infocus = false; }
-            Connections {
-                target: window
-                onSearch: {
-                    artistsGridView.model.search = needle;
-                }
-            }
-            actionMenuModel: [labelGrid, labelList]
-            actionMenuPayload: ["grid", "list"]
-            onActionMenuTriggered: {
-                if(selectedItem == "grid")
-                {
-                    showGridView = true;
-                    settings.set("AllArtistsView",0);
-                }
-                else if(selectedItem == "list")
-                {
-                    showGridView= false;
-                    settings.set("AllArtistsView",1);
+            property int highlightindex: (showGridView)?0:1
+            menuContent: Labs.ActionMenu {
+                title: qsTr("View By")
+                highlightIndex: highlightindex
+                model: [labelGrid, labelList]
+                onTriggered: {
+                    highlightindex = index;
+                    if(model[index] == labelGrid)
+                    {
+                        showGridView = true;
+                        settings.set("AllArtistsView",0);
+                        artistsPage.closeMenu();
+                    }
+                    else if(model[index] == labelList)
+                    {
+                        showGridView= false;
+                        settings.set("AllArtistsView",1);
+                        artistsPage.closeMenu();
+                    }
                 }
             }
             Item {
                 id: noMusicScreen
                 anchors.centerIn: parent
                 height: parent.height/2
-                width: (window.inLandscape)?(parent.width/2):(parent.width/1.2)
+                width: (window.isLandscapeView())?(parent.width/2):(parent.width/1.2)
                 visible: ((allTracksModel.total == 0)&&(!startupTimer.running))
                 Text {
                     id: noMusicScreenText1
@@ -954,6 +1085,7 @@ Window {
             }
             MusicListView {
                 id: artistsListView
+                parent: parent.content
                 anchors.fill:parent
                 visible: !showGridView
                 model:artistsGridView.model
@@ -975,9 +1107,10 @@ Window {
             MediaGridView {
                 id: artistsGridView
                 type: musictype // music app = 0
+                parent: parent.content
                 anchors.fill: parent
                 visible: showGridView
-                cellWidth:(width- 15) / (window.inLandscape ? 7: 4)
+                cellWidth:(width- 15) / (window.isLandscapeView() ? 7: 4)
                 cellHeight: cellWidth
                 anchors.leftMargin: 15
                 anchors.topMargin:3
@@ -1006,42 +1139,41 @@ Window {
 
     Component {
         id:albumsContent
-        AppPage {
+        Labs.ApplicationPage {
             id: albumsPage
             anchors.fill: parent
-            pageTitle: labelAllAlbums
+            title: labelAllAlbums
             property bool showGridView: settings.get("AllAlbumsView") == 0
-            property bool infocus: true
-            onActivated : {
-                infocus = true;
-                window.disableToolBarSearch = false;
+            showSearch: false
+            onSearch: {
+                albumsGridView.model.search = needle;
             }
-            onDeactivated : { infocus = false; }
-            Connections {
-                target: window
-                onSearch: {
-                    albumsGridView.model.search = needle;
-                }
-            }
-            actionMenuModel: [labelGrid, labelList]
-            actionMenuPayload: ["grid", "list"]
-            onActionMenuTriggered: {
-                if(selectedItem == "grid")
-                {
-                    showGridView = true;
-                    settings.set("AllAlbumsView",0);
-                }
-                else if(selectedItem == "list")
-                {
-                    showGridView= false;
-                    settings.set("AllAlbumsView",1);
+            property int highlightindex: (showGridView)?0:1
+            menuContent: Labs.ActionMenu {
+                title: qsTr("View By")
+                highlightIndex: highlightindex
+                model: [labelGrid, labelList]
+                onTriggered: {
+                    highlightindex = index;
+                    if(model[index] == labelGrid)
+                    {
+                        showGridView = true;
+                        settings.set("AllAlbumsView",0);
+                        albumsPage.closeMenu();
+                    }
+                    else if(model[index] == labelList)
+                    {
+                        showGridView= false;
+                        settings.set("AllAlbumsView",1);
+                        albumsPage.closeMenu();
+                    }
                 }
             }
             Item {
                 id: noMusicScreen
                 anchors.centerIn: parent
                 height: parent.height/2
-                width: (window.inLandscape)?(parent.width/2):(parent.width/1.2)
+                width: (window.isLandscapeView())?(parent.width/2):(parent.width/1.2)
                 visible: ((allTracksModel.total == 0)&&(!startupTimer.running))
                 Text {
                     id: noMusicScreenText1
@@ -1063,6 +1195,7 @@ Window {
             }
             MusicListView {
                 id: albumsListView
+                parent: parent.content
                 anchors.fill:parent
                 visible: !showGridView
                 model:albumsGridView.model
@@ -1086,9 +1219,10 @@ Window {
             MediaGridView {
                 id: albumsGridView
                 type: musictype // music app = 0
+                parent: parent.content
                 anchors.fill: parent
                 visible: showGridView
-                cellWidth:(width- 15) / (window.inLandscape ? 7: 4)
+                cellWidth:(width- 15) / (window.isLandscapeView() ? 7: 4)
                 cellHeight: cellWidth
                 anchors.leftMargin: 15
                 anchors.topMargin:3
@@ -1118,23 +1252,11 @@ Window {
 
     Component {
         id: allTracksContent
-        AppPage {
+        Labs.ApplicationPage {
             id: allTracksPage
             anchors.fill: parent
-            pageTitle: labelAllTracks
+            title: labelAllTracks
             property bool showGridView: settings.get("AllTracksView") == 0
-            property bool infocus: true
-            onActivated : {
-                infocus = true;
-                window.disableToolBarSearch = false;
-            }
-            onDeactivated : { infocus = false; }
-            Connections {
-                target: window
-                onSearch: {
-                   listview.model.search = needle;
-                }
-            }
             Connections {
                 target: toolbar
                 onPlayNeedsSongs: {
@@ -1144,25 +1266,36 @@ Window {
                     Code.play();
                 }
             }
-            actionMenuModel: [labelGrid, labelList]
-            actionMenuPayload: ["grid", "list"]
-            onActionMenuTriggered: {
-                if(selectedItem == "grid")
-                {
-                    showGridView = true;
-                    settings.set("AllTracksView",0);
-                }
-                else if(selectedItem == "list")
-                {
-                    showGridView= false;
-                    settings.set("AllTracksView",1);
+            showSearch: false
+            onSearch: {
+               listview.model.search = needle;
+            }
+            property int highlightindex: (showGridView)?0:1
+            menuContent: Labs.ActionMenu {
+                title: qsTr("View By")
+                highlightIndex: highlightindex
+                model: [labelGrid, labelList]
+                onTriggered: {
+                    highlightindex = index;
+                    if(model[index] == labelGrid)
+                    {
+                        showGridView = true;
+                        settings.set("AllTracksView",0);
+                        allTracksPage.closeMenu();
+                    }
+                    else if(model[index] == labelList)
+                    {
+                        showGridView= false;
+                        settings.set("AllTracksView",1);
+                        allTracksPage.closeMenu();
+                    }
                 }
             }
             Item {
                 id: noMusicScreen
                 anchors.centerIn: parent
                 height: parent.height/2
-                width: (window.inLandscape)?(parent.width/2):(parent.width/1.2)
+                width: (window.isLandscapeView())?(parent.width/2):(parent.width/1.2)
                 visible: ((allTracksModel.total == 0)&&(!startupTimer.running))
                 Text {
                     id: noMusicScreenText1
@@ -1185,6 +1318,7 @@ Window {
             MusicListView {
                 id: listview
                 selectionMode: multiSelectMode
+                parent: parent.content
                 anchors.fill:parent
                 visible: !showGridView
                 model: allTracksModel
@@ -1215,9 +1349,10 @@ Window {
                 id: gridView
                 type: musictype // music app = 0
                 selectionMode: multiSelectMode
+                parent: parent.content
                 anchors.fill:parent
                 visible: showGridView
-                cellWidth:(width- 15) / (window.inLandscape ? 7: 4)
+                cellWidth:(width- 15) / (window.isLandscapeView() ? 7: 4)
                 cellHeight: cellWidth
                 model: listview.model
                 anchors.leftMargin: 15
@@ -1251,30 +1386,15 @@ Window {
 
     Component {
         id: favoritesContent
-        AppPage {
+        Labs.ApplicationPage {
             id: favoritesPage
             anchors.fill: parent
-            pageTitle: labelFavorites
-            property bool infocus: true
-            onActivated : {
-                infocus = true;
-                window.disableToolBarSearch = false;
-            }
-            onDeactivated : { infocus = false; }
+            title: labelFavorites
             property variant model: MusicListModel {
                 type: MusicListModel.ListofSongs
                 limit: 0
                 filter:MusicListModel.FilterFavorite // favorite
                 sort:(settings.get("FavoriteView") == 1? MusicListModel.SortByAddedTime:MusicListModel.SortByTitle)
-            }
-            Connections {
-                target: window
-                onSearch: {
-                   listView.model.search = needle;
-                    if (!needle ) {
-                        listView.model.filter=MusicListModel.FilterFavorite
-                    }
-                }
             }
             Connections {
                 target: toolbar
@@ -1285,25 +1405,40 @@ Window {
                     Code.play();
                 }
             }
-            actionMenuModel: [labelAlphabetical, labelDateOrder]
-            actionMenuPayload: ["title", "date"]
-            onActionMenuTriggered: {
-                if(selectedItem == "title")
-                {
-                    listView.model.sort = MusicListModel.SortByTitle;
-                    settings.set("FavoriteView",0);
+            showSearch: false
+            onSearch: {
+               listView.model.search = needle;
+                if (!needle ) {
+                    listView.model.filter=MusicListModel.FilterFavorite
                 }
-                else if(selectedItem == "date")
-                {
-                    listView.model.sort = MusicListModel.SortByAddedTime;
-                    settings.set("FavoriteView",1);
+            }
+            property int highlightindex: (settings.get("FavoriteView") == 1)?1:0
+            menuContent: Labs.ActionMenu {
+                title: qsTr("Sort")
+                highlightIndex: highlightindex
+                model: [labelAlphabetical, labelDateOrder]
+                minWidth: parent.width
+                onTriggered: {
+                    highlightindex = index;
+                    if(model[index] == labelAlphabetical)
+                    {
+                        listView.model.sort = MusicListModel.SortByTitle;
+                        settings.set("FavoriteView",0);
+                        favoritesPage.closeMenu();
+                    }
+                    else if(model[index] == labelDateOrder)
+                    {
+                        listView.model.sort = MusicListModel.SortByAddedTime;
+                        settings.set("FavoriteView",1);
+                        favoritesPage.closeMenu();
+                    }
                 }
             }
             Item {
                 id: noMusicScreen
                 anchors.centerIn: parent
                 height: parent.height/2
-                width: (window.inLandscape)?(parent.width/2):(parent.width/1.2)
+                width: (window.isLandscapeView())?(parent.width/2):(parent.width/1.2)
                 visible: ((allTracksModel.total == 0)&&(!startupTimer.running))
                 Text {
                     id: noMusicScreenText1
@@ -1326,6 +1461,7 @@ Window {
             MusicListView {
                 id: listView
                 selectionMode: multiSelectMode
+                parent: parent.content
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.top:parent.top
                 width: parent.width
@@ -1359,16 +1495,10 @@ Window {
 
     Component {
         id: artistDetailViewContent
-        AppPage {
+        Labs.ApplicationPage {
             id: artistDetailViewPage
             anchors.fill: parent
-            pageTitle: labelArtist
-            property bool infocus: true
-            onActivated : {
-                infocus = true;
-                window.disableToolBarSearch = true;
-            }
-            onDeactivated : { infocus = false; }
+            title: labelArtist
             property variant model: MusicListModel {
                 type: MusicListModel.ListofAlbumsForArtist
                 artist: labelArtist
@@ -1389,29 +1519,38 @@ Window {
                     Code.play();
                 }
             }
-            actionMenuModel: [labelGrid, labelList]
-            actionMenuPayload: ["grid", "list"]
-            onActionMenuTriggered: {
-                if(selectedItem == "grid")
-                {
-                    artistDetailViewPage.showList = false;
-                    settings.set("ArtistDetailView",1);
-                }
-                else if(selectedItem == "list")
-                {
-                    artistDetailViewPage.showList = true;
-                    settings.set("ArtistDetailView",0);
+            showSearch: false
+            property int highlightindex: (showList)?1:0
+            menuContent: Labs.ActionMenu {
+                title: qsTr("View By")
+                highlightIndex: highlightindex
+                model: [labelGrid, labelList]
+                onTriggered: {
+                    highlightindex = index;
+                    if(model[index] == labelGrid)
+                    {
+                        artistDetailViewPage.showList = false;
+                        settings.set("ArtistDetailView",1);
+                        artistDetailViewPage.closeMenu();
+                    }
+                    else if(model[index] == labelList)
+                    {
+                        artistDetailViewPage.showList = true;
+                        settings.set("ArtistDetailView",0);
+                        artistDetailViewPage.closeMenu();
+                    }
                 }
             }
 
             Item {
                 id: artistDetailViewMain
+                parent: parent.content
                 anchors.fill: parent
 
                 BorderImage {
                     id: artistTitleText
                     width: parent.width
-                    source: (window.inLandscape)?"image://theme/media/subtitle_landscape_bar":"image://theme/media/subtitle_portrait_bar"
+                    source: (window.isLandscapeView())?"image://theme/media/subtitle_landscape_bar":"image://theme/media/subtitle_portrait_bar"
                     Text {
                         text: labelArtist
                         font.pixelSize: theme_fontPixelSizeLarge
@@ -1432,7 +1571,7 @@ Window {
                     width: parent.width
                     height: parent.height - artistTitleText.height
                     anchors.top: artistTitleText.bottom
-                    cellWidth:(width- 15) / (window.inLandscape ? 7: 4)
+                    cellWidth:(width- 15) / (window.isLandscapeView() ? 7: 4)
                     cellHeight: cellWidth
                     anchors.leftMargin: 15
                     anchors.topMargin:3
@@ -1613,7 +1752,7 @@ Window {
                         states: [
                             State {
                                 name: "landscapeArtistDetailView"
-                                when: window.inLandscape
+                                when: window.isLandscapeView()
                                 PropertyChanges {
                                     target: dinstance
                                     height: Math.max(albumDetailBackground.height, songsInAlbumList.height)
@@ -1655,7 +1794,7 @@ Window {
                             },
                             State {
                                 name: "portraitArtistDetailView"
-                                when: !window.inLandscape
+                                when: !window.isLandscapeView()
                                 PropertyChanges {
                                     target: dinstance
                                     height: albumDetailBackground.height + songsInAlbumList.height
@@ -1732,16 +1871,10 @@ Window {
 
     Component {
         id:albumDetailViewContent
-        AppPage {
+        Labs.ApplicationPage {
             id: albumDetailViewPage
             anchors.fill: parent
-            pageTitle: labelAlbum
-            property bool infocus: true
-            onActivated : {
-                infocus = true;
-                window.disableToolBarSearch = true;
-            }
-            onDeactivated : { infocus = false; }
+            title: labelAlbum
 
             property variant model: MusicListModel {
                 type: MusicListModel.ListofSongsForAlbum
@@ -1763,13 +1896,14 @@ Window {
             }
             Item {
                 id: box
+                parent: parent.content
                 anchors.fill: parent
 
                 BorderImage {
                     id: artistTitleText
                     width: parent.width
                     anchors.top: parent.top
-                    source: (window.inLandscape)?"image://theme/media/subtitle_landscape_bar":"image://theme/media/subtitle_portrait_bar"
+                    source: (window.isLandscapeView())?"image://theme/media/subtitle_landscape_bar":"image://theme/media/subtitle_portrait_bar"
                     Text {
                         text: labelArtist
                         font.pixelSize: theme_fontPixelSizeLarge
@@ -1885,7 +2019,7 @@ Window {
             states: [
                 State {
                     name: "landscapeAlbumDetailsView"
-                    when: window.inLandscape
+                    when: window.isLandscapeView()
                     PropertyChanges {
                         target: albumDetailBackground
                         width: albumThumbnail.width + 30
@@ -1924,7 +2058,7 @@ Window {
                 },
                 State {
                     name: "portraitAlbumDetailView"
-                    when: !window.inLandscape
+                    when: !window.isLandscapeView()
                     PropertyChanges {
                         target: albumDetailBackground
                         width: parent.width
@@ -1968,16 +2102,10 @@ Window {
 
     Component {
         id: playlistDetailViewContent
-        AppPage {
+        Labs.ApplicationPage {
             id: playlistDetailViewPage
             anchors.fill: parent
-            pageTitle: labelAllPlaylist
-            property bool infocus: true
-            onActivated : {
-                infocus = true;
-                window.disableToolBarSearch = true;
-            }
-            onDeactivated : { infocus = false; }
+            title: labelAllPlaylist
 
             property alias model: playlistList.model
             Connections {
@@ -1989,19 +2117,20 @@ Window {
                     Code.play();
                 }
             }
-            actionMenuModel: [labelRenamePlaylist]
-            actionMenuPayload: ["rename"]
-            onActionMenuTriggered: {
-                if(selectedItem == "rename")
-                {
+            menuContent: Labs.ActionMenu {
+                model: [labelRenamePlaylist]
+                onTriggered: {
+                    // Rename playlist
                     renamePlaylistDialog.currTitle = labelPlaylist;
                     renamePlaylistDialog.urn = labelPlaylistURN;
                     renamePlaylistDialog.playListModel = playlistList.model;
                     renamePlaylistDialog.show();
+                    playlistDetailViewPage.closeMenu();
                 }
             }
             Item {
                 id: box
+                parent: parent.content
                 anchors.fill: parent
                 Text {
                     id: tPlaylist
@@ -2072,7 +2201,7 @@ Window {
             states: [
                 State {
                     name: "landscapePlaylistDetailView"
-                    when: window.inLandscape
+                    when: window.isLandscapeView()
                     PropertyChanges {
                         target: tPlaylist
                         width:parent.width -15
@@ -2109,7 +2238,7 @@ Window {
                 },
                 State {
                     name: "portraitPlaylistDetailView"
-                    when: !window.inLandscape
+                    when: !window.isLandscapeView()
                     PropertyChanges {
                         target: tPlaylist
                         width:parent.width - playlistThumbnail.width -5
@@ -2186,102 +2315,7 @@ Window {
         clip:true
     }
 
-    MusicToolBar {
-        id: toolbar
-        z: 1
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        audioItem: audio
-        playing: false
-        landscape: window.inLandscape
-    }
-
-    MediaMultiBar {
-        id: multibar
-        z: 2
-        height: 55
-        opacity: 0
-        width: parent.width
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        landscape: window.inLandscape
-        showadd: true
-        onCancelPressed: {
-            multiSelectModel.clearSelected();
-            multiSelectMode = false;
-        }
-        onDeletePressed: {
-            if(multiSelectModel.selectionCount() > 0)
-            {
-                deleteMultipleItemsDialog.show();
-            }
-        }
-        onAddPressed: {
-            if(multiSelectModel.selectionCount() > 0)
-            {
-                playlistPicker.payload = multiSelectModel.getSelectedIDs()
-                playlistPicker.show();
-            }
-        }
-        onSharePressed: {
-            if(shareObj.shareCount > 0)
-            {
-                var map = mapToItem(topItem.topItem, fingerX, fingerY);
-                contextShareMenu.model = shareObj.serviceTypes;
-                topItem.calcTopParent()
-                contextShareMenu.setPosition( map.x, map.y );
-                contextShareMenu.show();
-            }
-        }
-        states: [
-            State {
-                name: "showActionBar"
-                when: multiSelectMode
-                PropertyChanges {
-                    target: multibar
-                    opacity:1
-                }
-                PropertyChanges {
-                    target: toolbar
-                    opacity:0
-                }
-            },
-            State {
-                name: "hideActionBar"
-                when: !multiSelectMode
-                PropertyChanges {
-                    target: multibar
-                    opacity: 0
-                }
-                PropertyChanges {
-                    target: toolbar
-                    opacity:1
-                }
-            }
-        ]
-
-        transitions: [
-            Transition {
-                reversible: true
-                ParallelAnimation{
-                    PropertyAnimation {
-                        target: multibar
-                        property: "opacity"
-                        duration: 250
-                    }
-                    PropertyAnimation {
-                        target: toolbar
-                        property: "opacity"
-                        duration: 250
-                    }
-                }
-            }
-        ]
-    }
-
     Component.onDestruction: {
         Code.stop();
     }
-
-    TopItem { id: topItem }
 }
