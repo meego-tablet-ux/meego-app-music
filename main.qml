@@ -74,6 +74,7 @@ Labs.Window {
     property string labelNoMusicText2:qsTr("Buy, download or copy your music onto your table, then you can enjoy listening to it from here.")
     property string forbiddenchars: qsTr("\n\'\t\"\\");
     property string forbiddencharsDisplay: qsTr("<return>, <tab>, \', \", \\");
+    property string defaultThumbnail: "image://theme/media/music_thumb_med"
 
     property int animationDuration: 500
 
@@ -153,35 +154,34 @@ Labs.Window {
             var thetitle;
             if(editorModel.isURN(identifier))
             {
-                remoteControlItem.mitemid = editorModel.getIDfromURN(identifier);
-                remoteControlItem.mitemtype = editorModel.getTypefromURN(identifier);
-                thetitle = editorModel.getTitlefromURN(identifier);
+                remoteControlItem.mitemid = editorModel.datafromURN(identifier, MediaItem.ID);
+                remoteControlItem.mitemtype = editorModel.datafromURN(identifier, MediaItem.ItemType);
+                thetitle = editorModel.datafromURN(identifier, MediaItem.Title);
             }
             else
             {
                 remoteControlItem.mitemid = identifier;
-                remoteControlItem.mitemtype = editorModel.getTypefromID(identifier);
-                thetitle = editorModel.getTitlefromID(identifier);
+                remoteControlItem.mitemtype = editorModel.datafromID(identifier, MediaItem.ItemType);
+                thetitle = editorModel.datafromID(identifier, MediaItem.Title);
             }
-            if (remoteControlItem.mitemtype == 2) {
-                // song
+            if (remoteControlItem.mitemtype == MediaItem.SongItem) {
                 console.log("song loaded");
                 Code.addToPlayqueueAndPlay(remoteControlItem);
-            }else if (remoteControlItem.mitemtype == 3) {
-                // artist
+            }else if (remoteControlItem.mitemtype == MediaItem.MusicArtistItem) {
                 console.log("artist loaded");
                 labelArtist = thetitle;
                 window.applicationPage = artistDetailViewContent;
-            }else if (remoteControlItem.mitemtype == 4) {
-                // album
+            }else if (remoteControlItem.mitemtype == MediaItem.MusicAlbumItem) {
                 console.log("album loaded");
                 labelAlbum = thetitle;
                 window.applicationPage = albumDetailViewContent;
-            }else if (remoteControlItem.mitemtype == 5) {
-                // playlist
+            }else if (remoteControlItem.mitemtype == MediaItem.MusicPlaylistItem) {
                 console.log("playlist loaded");
                 labelPlaylist = thetitle;
                 labelPlaylistURN = identifier;
+                thumbnailUri = editorModel.datafromURN(identifier, MediaItem.ThumbURI)
+                if (thumbnailUri == "" | thumbnailUri == undefined)
+                    thumbnailUri = defaultThumbnail;
                 window.applicationPage = playlistDetailViewContent;
             }
         }
@@ -199,7 +199,7 @@ Labs.Window {
         application:"meego-app-music"
     }
 
-   Connections {
+    Connections {
         target: mainWindow
         onCall: {
             var cmd = parameters[0];
@@ -211,15 +211,13 @@ Labs.Window {
             } else if (cmd == "stop") {
                 Code.stop();
             } else if (cmd == "playSong") {
-	        editorModel.requestItem(2, cdata);
+                editorModel.requestItem(MediaItem.SongItem, cdata);
             } else if (cmd == "playArtist") {
-	        editorModel.requestItem(3, cdata);
+                editorModel.requestItem(MediaItem.MusicArtistItem, cdata);
             } else if (cmd == "playAlbum") {
-	        editorModel.requestItem(4, cdata);
+                editorModel.requestItem(MediaItem.MusicAlbumItem, cdata);
             } else if (cmd == "playPlaylist") {
-	        editorModel.requestItem(5, cdata);
-            } else if(cmd == "orientation") {
-                orientation = (orientation+1)%4;
+                editorModel.requestItem(MediaItem.MusicPlaylistItem, cdata);
             }
         }
     }
@@ -2168,7 +2166,7 @@ Labs.Window {
                         type: MusicListModel.MusicPlaylist
                         playlist: labelPlaylist
                         limit: 0
-                        sort:MusicListModel.SortByCreationTime
+                        sort:MusicListModel.SortByDefault
                         onPlaylistChanged: {
                             numberOfTrack = count;
                             playlistList.currentIndex = -1;

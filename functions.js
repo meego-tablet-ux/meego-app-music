@@ -423,22 +423,22 @@ function openItemInDetailView(fromPage, item)
         break;
     case 3:
         // type is artist
-        fromPage.addApplicationPage(artistDetailViewContent);
         labelArtist = item.mtitle;
+        fromPage.addApplicationPage(artistDetailViewContent);
         break;
     case 4:
         // type is album
         thumbnailUri = item.mthumburi;
-        fromPage.addApplicationPage(albumDetailViewContent);
         labelAlbum = item.mtitle;
         albumLength = item.mlength;
+        fromPage.addApplicationPage(albumDetailViewContent);
         break;
     case 5:
         // type is playlist
-        fromPage.addApplicationPage(playlistDetailViewContent);
         thumbnailUri = item.mthumburi;
         labelPlaylist = item.mtitle;
         labelPlaylistURN = item.murn;
+        fromPage.addApplicationPage(playlistDetailViewContent);
         break;
     default:
         break;
