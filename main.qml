@@ -171,18 +171,18 @@ Labs.Window {
                 // artist
                 console.log("artist loaded");
                 labelArtist = thetitle;
-                window.addPage(artistDetailViewContent);
+                window.applicationPage = artistDetailViewContent;
             }else if (remoteControlItem.mitemtype == 4) {
                 // album
                 console.log("album loaded");
                 labelAlbum = thetitle;
-                window.addPage(albumDetailViewContent);
+                window.applicationPage = albumDetailViewContent;
             }else if (remoteControlItem.mitemtype == 5) {
                 // playlist
                 console.log("playlist loaded");
                 labelPlaylist = thetitle;
                 labelPlaylistURN = identifier;
-                window.addPage(playlistDetailViewContent);
+                window.applicationPage = playlistDetailViewContent;
             }
         }
     }
