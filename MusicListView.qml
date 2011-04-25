@@ -47,12 +47,12 @@ Item {
             id: nameLabel
             text:{
                 if (mode == 1)
-                    return qsTr("Playlist Name");
+                    return qsTr("Playlist name");
                 else if (mode == 2)
-                    return qsTr("Artist Name");
+                    return qsTr("Artist name");
                 else if (mode == 3)
-                    return qsTr("Album Name");
-                return qsTr("Track Name");
+                    return qsTr("Album name");
+                return qsTr("Track name");
             }
             color:theme_fontColorHighlight
             font.pixelSize: theme_fontPixelSizeLarge

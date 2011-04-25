@@ -17,7 +17,7 @@ import "functions.js" as Code
 
 Labs.Window {
     id: window
-    property string labelPlayqueue: qsTr("Play Queue")
+    property string labelPlayqueue: qsTr("Play queue")
     property string labelFavorites: qsTr("Favorites")
     property string labelMusicApp: qsTr("Music")
     property string labelAllArtist: qsTr("Artists")
@@ -27,14 +27,14 @@ Labs.Window {
     property string labelAllPlaylist: qsTr("Playlists")
     property string labelPlaylist: ""
     property string labelPlaylistURN: ""
-    property string labelAllTracks: qsTr("All Tracks")
+    property string labelAllTracks: qsTr("All tracks")
 
     property string labelUnknownArtist: qsTr("unknown artist")
     property string labelUnknownAlbum: qsTr("unknown album")
 
     property string labelPlay: qsTr("Play")
     property string labelOpen: qsTr("Open")
-    property string labelOpenAlbum: qsTr("Open Album")
+    property string labelOpenAlbum: qsTr("Open album")
     property string labelFavorite: qsTr("Favorite")
     property string labelUnFavorite: qsTr("Unfavorite")
     property string labelAddToPlayQueue: qsTr("Add to play queue")
@@ -47,28 +47,28 @@ Labs.Window {
     property string labelEdit: qsTr("Edit")
     property string labelcShare: qsTr("Share")
     property string labelDelete: qsTr("Delete")
-    property string labelRemoveFromPlayQueue: qsTr("Remove From Queue")
+    property string labelRemoveFromPlayQueue: qsTr("Remove from queue")
     property string labelCreate: qsTr("Create")
     property string labelSavePlaylist: qsTr("Save as playlist")
     property string labelClearPlaylist: qsTr("Clear play queue")
 
-    property string labelItemCount: qsTr("%1 Items")
-    property string labelAlbumCount: qsTr("%1 Album")
-    property string labelTrackCount: qsTr("%1 Tracks")
+    property string labelItemCount: qsTr("%1 items")
+    property string labelAlbumCount: qsTr("%1 album")
+    property string labelTrackCount: qsTr("%1 tracks")
 
     property string labelGrid: qsTr("Grid")
     property string labelList: qsTr("List")
 
     property string labelAlphabetical: qsTr("Alphabetically")
-    property string labelDateOrder: qsTr("By Date")
+    property string labelDateOrder: qsTr("By date")
 
     property string labelCreateNewPlaylist: qsTr("Create new playlist")
     property string labelRenamePlaylist: qsTr("Rename playlist")
 
-    property string labelConfirmDelete: qsTr("Yes, Delete")
+    property string labelConfirmDelete: qsTr("Delete")
     property string labelCancel: qsTr("Cancel")
     property string labelDefaultText:qsTr("Type playlist name here.")
-    property string labelMultiSelect:qsTr("Select Multiple Songs")
+    property string labelMultiSelect:qsTr("Select multiple songs")
 
     property string labelNoMusicText1:qsTr("Where is all the music?")
     property string labelNoMusicText2:qsTr("Buy, download or copy your music onto your table, then you can enjoy listening to it from here.")
@@ -577,7 +577,7 @@ Labs.Window {
                     font.pixelSize: theme_fontPixelSizeLarge
                     color: "red"
                     anchors.top: editorCreate.bottom
-                    text: qsTr("Invalid Characters: %1").arg(forbiddencharsDisplay);
+                    text: qsTr("Invalid characters: %1").arg(forbiddencharsDisplay);
                     wrapMode: Text.WordWrap
                 }
             }
@@ -620,7 +620,7 @@ Labs.Window {
                     font.pixelSize: theme_fontPixelSizeLarge
                     color: "red"
                     anchors.top: editorRename.bottom
-                    text: qsTr("Invalid Characters: %1").arg(forbiddencharsDisplay);
+                    text: qsTr("Invalid characters: %1").arg(forbiddencharsDisplay);
                     wrapMode: Text.WordWrap
                 }
             }
@@ -905,7 +905,7 @@ Labs.Window {
                 height: sortMenu.height + actionMenu.height
                 Labs.ActionMenu {
                     id: sortMenu
-                    title: qsTr("View By")
+                    title: qsTr("View by")
                     highlightIndex: highlightindex
                     model: [labelGrid, labelList]
                     onTriggered: {
@@ -1038,7 +1038,7 @@ Labs.Window {
             }
             property int highlightindex: (showGridView)?0:1
             menuContent: Labs.ActionMenu {
-                title: qsTr("View By")
+                title: qsTr("View by")
                 highlightIndex: highlightindex
                 model: [labelGrid, labelList]
                 onTriggered: {
@@ -1148,7 +1148,7 @@ Labs.Window {
             }
             property int highlightindex: (showGridView)?0:1
             menuContent: Labs.ActionMenu {
-                title: qsTr("View By")
+                title: qsTr("View by")
                 highlightIndex: highlightindex
                 model: [labelGrid, labelList]
                 onTriggered: {
@@ -1270,7 +1270,7 @@ Labs.Window {
             }
             property int highlightindex: (showGridView)?0:1
             menuContent: Labs.ActionMenu {
-                title: qsTr("View By")
+                title: qsTr("View by")
                 highlightIndex: highlightindex
                 model: [labelGrid, labelList]
                 onTriggered: {
@@ -1520,7 +1520,7 @@ Labs.Window {
             showSearch: false
             property int highlightindex: (showList)?1:0
             menuContent: Labs.ActionMenu {
-                title: qsTr("View By")
+                title: qsTr("View by")
                 highlightIndex: highlightindex
                 model: [labelGrid, labelList]
                 onTriggered: {
@@ -1663,9 +1663,9 @@ Labs.Window {
                                         anchors.top: albumTrackcountText.bottom
                                         height: albumThumbnail.height/10
                                         width: parent.width
-                                        text: (length < 60)?(qsTr("%1 Seconds").arg(Code.formatLength(length))):
-                                                ((length < 3600)?(qsTr("%1 Minutes").arg(Code.formatLength(length/60))):
-                                                 (qsTr("%1 Hours").arg(Code.formatLength(length/3600))))
+                                        text: (length < 60)?(qsTr("%1 seconds").arg(Code.formatLength(length))):
+                                                ((length < 3600)?(qsTr("%1 minutes").arg(Code.formatLength(length/60))):
+                                                 (qsTr("%1 hours").arg(Code.formatLength(length/3600))))
                                         color: theme_fontColorMediaHighlight
                                         font.pixelSize: theme_fontPixelSizeLarge-3
                                         verticalAlignment:Text.AlignVCenter
@@ -1956,9 +1956,9 @@ Labs.Window {
                                 anchors.top: albumTrackcountText.bottom
                                 height: albumThumbnail.height/10
                                 width: parent.width
-                                text: (albumLength < 60)?(qsTr("%1 Seconds").arg(Code.formatLength(albumLength))):
-                                        ((albumLength < 3600)?(qsTr("%1 Minutes").arg(Code.formatLength(albumLength/60))):
-                                         (qsTr("%1 Hours").arg(Code.formatLength(albumLength/3600))))
+                                text: (albumLength < 60)?(qsTr("%1 seconds").arg(Code.formatLength(albumLength))):
+                                        ((albumLength < 3600)?(qsTr("%1 minutes").arg(Code.formatLength(albumLength/60))):
+                                         (qsTr("%1 hours").arg(Code.formatLength(albumLength/3600))))
                                 color: theme_fontColorMediaHighlight
                                 font.pixelSize: theme_fontPixelSizeLarge-3
                                 verticalAlignment:Text.AlignVCenter
