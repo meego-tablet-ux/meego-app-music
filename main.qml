@@ -78,8 +78,6 @@ Labs.Window {
 
     property int animationDuration: 500
 
-    property int numberOfTrack: 0
-    property int numberOfAlbum: 0
     property string artistName: ""
     property int tabContentWidth: 300
     property int albumLength: 0
@@ -168,12 +166,18 @@ Labs.Window {
                 console.log("song loaded");
                 Code.addToPlayqueueAndPlay(remoteControlItem);
             }else if (remoteControlItem.mitemtype == MediaItem.MusicArtistItem) {
-                console.log("artist loaded");
                 labelArtist = thetitle;
+                thumbnailUri = editorModel.datafromURN(identifier, MediaItem.ThumbURI)
+                if (thumbnailUri == "" | thumbnailUri == undefined)
+                    thumbnailUri = defaultThumbnail;
+                console.log("artist loaded: " + labelArtist + ", " + thumbnailUri);
                 window.applicationPage = artistDetailViewContent;
             }else if (remoteControlItem.mitemtype == MediaItem.MusicAlbumItem) {
-                console.log("album loaded");
                 labelAlbum = thetitle;
+                thumbnailUri = editorModel.datafromURN(identifier, MediaItem.ThumbURI)
+                if (thumbnailUri == "" | thumbnailUri == undefined)
+                    thumbnailUri = defaultThumbnail;
+                console.log("album loaded: " + labelAlbum + ", " + thumbnailUri);
                 window.applicationPage = albumDetailViewContent;
             }else if (remoteControlItem.mitemtype == MediaItem.MusicPlaylistItem) {
                 console.log("playlist loaded");
@@ -182,6 +186,7 @@ Labs.Window {
                 thumbnailUri = editorModel.datafromURN(identifier, MediaItem.ThumbURI)
                 if (thumbnailUri == "" | thumbnailUri == undefined)
                     thumbnailUri = defaultThumbnail;
+                console.log("playlist loaded: " + labelPlaylist + ", " + thumbnailUri);
                 window.applicationPage = playlistDetailViewContent;
             }
         }
@@ -1502,9 +1507,6 @@ Labs.Window {
                 artist: labelArtist
                 limit: 0
                 sort:MusicListModel.SortByDefault
-                onArtistChanged: {
-                    numberOfAlbum = count;
-                }
             }
             property bool showList: settings.get("ArtistDetailView") == 0
 
@@ -1723,6 +1725,9 @@ Labs.Window {
                                 album:misvirtual? "":mtitle
                                 limit:0
                                 sort:MusicListModel.SortByDefault
+                                onCountChanged: {
+                                    songsInAlbumList.height = count * 50 + songsInAlbumList.titleBarHeight;
+                                }
                             }
                             onClicked: {
                                 if(multiSelectMode)
@@ -2168,7 +2173,6 @@ Labs.Window {
                         limit: 0
                         sort:MusicListModel.SortByDefault
                         onPlaylistChanged: {
-                            numberOfTrack = count;
                             playlistList.currentIndex = -1;
                         }
                     }
