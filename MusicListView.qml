@@ -21,7 +21,7 @@ Item {
     property string labelUnknownAlbum: qsTr("unknown album")
     property string labelItemCount: qsTr("%1")
     property alias interactive: listview.interactive
-    property string defaultThumbnail: "image://theme/media/music_thumb_med"
+    property string defaultThumbnail: "image://meegotheme/images/media/music_thumb_med"
     property bool selectionMode: false
     property int frameBorderWidth: 0
     property int thumbWidth: 50
@@ -39,7 +39,7 @@ Item {
     signal doubleClicked(real mouseX, real mouseY, variant payload)
     Image {
         id: titleBar
-        source: "image://theme/media/subtitle_landscape_bar"
+        source: "image://meegotheme/images/media/subtitle_landscape_bar"
         anchors.top:parent.top
         anchors.left:parent.left
         width: parent.width
@@ -141,9 +141,9 @@ Item {
             border.right: 5; border.bottom: 5
             source: {
                 if (playstatus== 2) {
-                    return "image://theme/media/music_row_highlight_landscape"; // need confirm from UI designer
+                    return "image://meegotheme/images/media/music_row_highlight_landscape"; // need confirm from UI designer
                 }else if ((index%2) == 0) {
-                    return "image://theme/media/music_row_landscape";
+                    return "image://meegotheme/images/media/music_row_landscape";
                 }
                 return "";
 
@@ -255,7 +255,7 @@ Item {
             }
             Image {
                 id: playingIcon
-                source: "image://theme/media/icn_currentlyplaying-albumoverlay"
+                source: "image://meegotheme/images/media/icn_currentlyplaying-albumoverlay"
                 fillMode:Image.PreserveAspectFit
                 width:height
                 height:parent.height -2
@@ -368,7 +368,7 @@ Item {
                     when: !selectionMode && !mouseArea.pressed
                     PropertyChanges {
                         target: frame
-                        source: "image://theme/media/photos_thumb_med"
+                        source: "image://meegotheme/images/media/photos_thumb_med"
                     }
                 },
                 State {
@@ -384,7 +384,7 @@ Item {
                     when: selectionMode && !listview.model.isSelected(itemid)
                     PropertyChanges {
                         target: frame
-                        source: "image://theme/media/photos_thumb_med"
+                        source: "image://meegotheme/images/media/photos_thumb_med"
                     }
                 },
                 State {
@@ -392,7 +392,7 @@ Item {
                     when: selectionMode && listview.model.isSelected(itemid)
                     PropertyChanges {
                         target: frame
-                        source: "image://theme/media/photos_selected_tick"
+                        source: "image://meegotheme/images/media/photos_selected_tick"
                     }
                 }
 

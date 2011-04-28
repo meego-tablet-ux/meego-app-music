@@ -74,7 +74,7 @@ Labs.Window {
     property string labelNoMusicText2:qsTr("Buy, download or copy your music onto your table, then you can enjoy listening to it from here.")
     property string forbiddenchars: qsTr("\n\'\t\"\\");
     property string forbiddencharsDisplay: qsTr("<return>, <tab>, \', \", \\");
-    property string defaultThumbnail: "image://theme/media/music_thumb_med"
+    property string defaultThumbnail: "image://meegotheme/images/media/music_thumb_med"
 
     property int animationDuration: 500
 
@@ -114,13 +114,6 @@ Labs.Window {
         {
             window.applicationPage = allTracksContent;
         }
-    }
-
-    onMultiSelectModeChanged: {
-        if(multiSelectMode)
-            window.setBookMenuData([], []);
-        else
-            window.setBookMenuData(bookModel, bookPayload);
     }
 
     Labs.ShareObj {
@@ -175,6 +168,7 @@ Labs.Window {
                 window.applicationPage = artistDetailViewContent;
             }else if (remoteControlItem.mitemtype == MediaItem.MusicAlbumItem) {
                 labelAlbum = thetitle;
+                labelArtist = editorModel.datafromURN(identifier, MediaItem.Artist)[0];
                 thumbnailUri = editorModel.datafromURN(identifier, MediaItem.ThumbURI)
                 if (thumbnailUri == "" | thumbnailUri == undefined)
                     thumbnailUri = defaultThumbnail;
@@ -942,7 +936,7 @@ Labs.Window {
                     id: titleSeperatorImage
                     anchors.top: sortMenu.bottom
                     width: sortMenu.width
-                    source: "image://theme/menu_item_separator"
+                    source: "image://meegotheme/images/menu_item_separator"
                 }
                 Labs.ActionMenu {
                     id: actionMenu
@@ -1015,7 +1009,7 @@ Labs.Window {
                 visible:showGridView
                 anchors.leftMargin: 15
                 anchors.topMargin:3
-                defaultThumbnail: "image://theme/media/music_thumb_med"
+                defaultThumbnail: "image://meegotheme/images/media/music_thumb_med"
                 footerHeight: toolbar.height
                 model: MusicListModel {
                     type: MusicListModel.ListofPlaylists
@@ -1126,7 +1120,7 @@ Labs.Window {
                 cellHeight: cellWidth
                 anchors.leftMargin: 15
                 anchors.topMargin:3
-                defaultThumbnail: "image://theme/media/music_thumb_med"
+                defaultThumbnail: "image://meegotheme/images/media/music_thumb_med"
                 footerHeight: toolbar.height
                 model: MusicListModel {
                     type: MusicListModel.ListofArtists
@@ -1238,7 +1232,7 @@ Labs.Window {
                 cellHeight: cellWidth
                 anchors.leftMargin: 15
                 anchors.topMargin:3
-                defaultThumbnail: "image://theme/media/music_thumb_med"
+                defaultThumbnail: "image://meegotheme/images/media/music_thumb_med"
                 footerHeight: toolbar.height
                 model: MusicListModel {
                     type: MusicListModel.ListofAlbums
@@ -1370,7 +1364,7 @@ Labs.Window {
                 anchors.leftMargin: 15
                 anchors.topMargin:3
                 footerHeight: toolbar.height
-                defaultThumbnail: "image://theme/media/music_thumb_med"
+                defaultThumbnail: "image://meegotheme/images/media/music_thumb_med"
                 onClicked: {
                     if(multiSelectMode)
                     {
@@ -1551,15 +1545,16 @@ Labs.Window {
                 }
             }
 
-            Item {
+            Image {
                 id: artistDetailViewMain
                 parent: parent.content
                 anchors.fill: parent
-
+                fillMode: Image.Tile
+                source: "image://meegotheme/images/bg_application_p"
                 BorderImage {
                     id: artistTitleText
                     width: parent.width
-                    source: (window.isLandscapeView())?"image://theme/media/subtitle_landscape_bar":"image://theme/media/subtitle_portrait_bar"
+                    source: (window.isLandscapeView())?"image://meegotheme/images/media/subtitle_landscape_bar":"image://theme/media/subtitle_portrait_bar"
                     Text {
                         text: labelArtist
                         font.pixelSize: theme_fontPixelSizeLarge
@@ -1586,7 +1581,7 @@ Labs.Window {
                     anchors.topMargin:3
                     visible: false
                     footerHeight: toolbar.height
-                    defaultThumbnail: "image://theme/media/music_thumb_med"
+                    defaultThumbnail: "image://meegotheme/images/media/music_thumb_med"
                     onClicked: {
                         if(payload.misvirtual) {
                             return;
@@ -1692,14 +1687,14 @@ Labs.Window {
                                 border.right: 10; border.bottom: 10
                                 width:400
                                 height:width
-                                source: "image://theme/media/music_border_lrg"
+                                source: "image://meegotheme/images/media/music_border_lrg"
                                 smooth:misvirtual? true: false
                                 anchors.leftMargin: 15
                                 Image {
                                     z: -10
                                     anchors.fill: parent
                                     fillMode:Image.PreserveAspectFit
-                                    source:(thumburi == ""|thumburi == undefined)?"image://theme/media/music_thumb_med":thumburi
+                                    source:(thumburi == ""|thumburi == undefined)?"image://meegotheme/images/media/music_thumb_med":thumburi
                                 }
 
                                 MouseArea {
@@ -1906,16 +1901,17 @@ Labs.Window {
                     Code.play();
                 }
             }
-            Item {
+            Image {
                 id: box
                 parent: parent.content
                 anchors.fill: parent
-
+                fillMode: Image.Tile
+                source: "image://meegotheme/images/bg_application_p"
                 BorderImage {
                     id: artistTitleText
                     width: parent.width
                     anchors.top: parent.top
-                    source: (window.isLandscapeView())?"image://theme/media/subtitle_landscape_bar":"image://theme/media/subtitle_portrait_bar"
+                    source: (window.isLandscapeView())?"image://meegotheme/images/media/subtitle_landscape_bar":"image://theme/media/subtitle_portrait_bar"
                     Text {
                         text: labelArtist
                         font.pixelSize: theme_fontPixelSizeLarge
@@ -1988,7 +1984,7 @@ Labs.Window {
                         border.right: 10; border.bottom: 10
                         width:400
                         height:width
-                        source: "image://theme/media/music_border_lrg"
+                        source: "image://meegotheme/images/media/music_border_lrg"
                         anchors.leftMargin: 15
                         Image {
                             z: -10
@@ -2140,10 +2136,12 @@ Labs.Window {
                     playlistDetailViewPage.closeMenu();
                 }
             }
-            Item {
+            Image {
                 id: box
                 parent: parent.content
                 anchors.fill: parent
+                fillMode: Image.Tile
+                source: "image://meegotheme/images/bg_application_p"
                 Text {
                     id: tPlaylist
                     text: labelPlaylist
@@ -2163,7 +2161,7 @@ Labs.Window {
                     width: 400
                     height: width
                     anchors.leftMargin: 15
-                    source: "image://theme/media/music_border_lrg"
+                    source: "image://meegotheme/images/media/music_border_lrg"
                     Image {
                         z: -10
                         anchors.fill: parent
