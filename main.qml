@@ -147,8 +147,8 @@ Labs.Window {
         limit: 0
         mixtypes:MusicListModel.Songs|MusicListModel.Albums|MusicListModel.Artists|MusicListModel.Playlists
         sort: MusicListModel.SortByDefault
+        property int songnum: 0
         onItemAvailable: {
-            console.log("Item Available: " + identifier);
             var thetitle;
             if(editorModel.isURN(identifier))
             {
@@ -171,6 +171,7 @@ Labs.Window {
                 if (thumbnailUri == "" | thumbnailUri == undefined)
                     thumbnailUri = defaultThumbnail;
                 console.log("artist loaded: " + labelArtist + ", " + thumbnailUri);
+                editorModel.setViewed(remoteControlItem.mitemid);
                 window.applicationPage = artistDetailViewContent;
             }else if (remoteControlItem.mitemtype == MediaItem.MusicAlbumItem) {
                 labelAlbum = thetitle;
@@ -178,17 +179,27 @@ Labs.Window {
                 if (thumbnailUri == "" | thumbnailUri == undefined)
                     thumbnailUri = defaultThumbnail;
                 console.log("album loaded: " + labelAlbum + ", " + thumbnailUri);
+                editorModel.setViewed(remoteControlItem.mitemid);
                 window.applicationPage = albumDetailViewContent;
             }else if (remoteControlItem.mitemtype == MediaItem.MusicPlaylistItem) {
-                console.log("playlist loaded");
                 labelPlaylist = thetitle;
                 labelPlaylistURN = identifier;
                 thumbnailUri = editorModel.datafromURN(identifier, MediaItem.ThumbURI)
                 if (thumbnailUri == "" | thumbnailUri == undefined)
                     thumbnailUri = defaultThumbnail;
                 console.log("playlist loaded: " + labelPlaylist + ", " + thumbnailUri);
+                editorModel.setViewed(remoteControlItem.mitemid);
                 window.applicationPage = playlistDetailViewContent;
             }
+        }
+        onSongItemAvailable: {
+            remoteControlItem.mitemid = editorModel.datafromURN(identifier, MediaItem.ID);
+            remoteControlItem.mitemtype = MediaItem.SongItem;
+            if(songnum == 0)
+                Code.addToPlayqueueAndPlay(remoteControlItem);
+            else
+                Code.addToPlayqueue(remoteControlItem);
+            songnum++
         }
     }
 
@@ -207,6 +218,7 @@ Labs.Window {
     Connections {
         target: mainWindow
         onCall: {
+            editorModel.songnum = 0;
             var cmd = parameters[0];
             var cdata = parameters[1];
             if (cmd == "play") {
@@ -248,12 +260,9 @@ Labs.Window {
                     playqueueModel.getURNFromIndex(nextItem1),
                     playqueueModel.getURNFromIndex(nextItem2)
                 ]
-            console.log("here's my list: " + newNowNext);
-            console.log("from nI1: " + nextItem1 + ", nI2: " + nextItem2);
             dbusControl.nowNextTracks = newNowNext;
         }
         onStateChanged: {
-            console.log("State changed, new state: " + state);
             Code.updateNowNextPlaying();
         }
 
