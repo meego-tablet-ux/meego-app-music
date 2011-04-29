@@ -660,7 +660,7 @@ Labs.Window {
             }
         }
 
-        ModalContextMenu {
+        ContextMenu {
             id: contextShareMenu
             property alias model: contextShareActionMenu.model
             content: ActionMenu {
@@ -678,7 +678,7 @@ Labs.Window {
             }
         }
 
-        ModalContextMenu {
+        ContextMenu {
             id: contextMenu
             property alias payload: contextActionMenu.payload
             property alias model: contextActionMenu.model
