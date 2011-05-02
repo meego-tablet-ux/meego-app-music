@@ -182,7 +182,6 @@ function endDrag(mouse,item) {
 
 function addToPlayqueue(item) {
     playqueueModel.addItems(item.mitemid);
-    editorModel.setViewed(item.mitemid);
     updateNowNextPlaying();
 }
 
@@ -233,7 +232,6 @@ function addMultipleToPlayqueueAndPlay(list)
 {
     var ids = list.getSelectedIDs();
     playqueueModel.addItems(ids);
-    editorModel.setViewed(ids[0]);
     playqueueView.currentIndex = playqueueModel.itemIndex(ids[0]);
     playNewSong();
     updateNowNextPlaying();
@@ -291,6 +289,7 @@ function playNewSong() {
 
     audio.source = item.muri;
     audio.playing = true;
+    editorModel.setViewed(item.mitemid);
     return true;
 }
 
