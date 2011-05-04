@@ -152,7 +152,7 @@ Window {
                     thumbnailUri = defaultThumbnail;
                 console.log("artist loaded: " + labelArtist + ", " + thumbnailUri);
                 editorModel.setViewed(remoteControlItem.mitemid);
-                window.applicationPage = artistDetailViewContent;
+                window.addPage(artistDetailViewContent);
             }else if (remoteControlItem.mitemtype == MediaItem.MusicAlbumItem) {
                 labelAlbum = thetitle;
                 labelArtist = editorModel.datafromURN(identifier, MediaItem.Artist)[0];
@@ -161,7 +161,7 @@ Window {
                     thumbnailUri = defaultThumbnail;
                 console.log("album loaded: " + labelAlbum + ", " + thumbnailUri);
                 editorModel.setViewed(remoteControlItem.mitemid);
-                window.applicationPage = albumDetailViewContent;
+                window.addPage(albumDetailViewContent);
             }else if (remoteControlItem.mitemtype == MediaItem.MusicPlaylistItem) {
                 labelPlaylist = thetitle;
                 labelPlaylistURN = identifier;
@@ -170,7 +170,7 @@ Window {
                     thumbnailUri = defaultThumbnail;
                 console.log("playlist loaded: " + labelPlaylist + ", " + thumbnailUri);
                 editorModel.setViewed(remoteControlItem.mitemid);
-                window.applicationPage = playlistDetailViewContent;
+                window.addPage(playlistDetailViewContent);
             }
         }
         onSongItemAvailable: {
