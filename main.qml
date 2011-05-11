@@ -1646,9 +1646,7 @@ Window {
                                         anchors.top: albumTrackcountText.bottom
                                         height: albumThumbnail.height/10
                                         width: parent.width
-                                        text: (length < 60)?(qsTr("%1 seconds").arg(Code.formatLength(length))):
-                                                ((length < 3600)?(qsTr("%1 minutes").arg(Code.formatLength(length/60))):
-                                                 (qsTr("%1 hours").arg(Code.formatLength(length/3600))))
+                                        text: Code.formatAlbumLength(albumLength);
                                         color: theme_fontColorMediaHighlight
                                         font.pixelSize: theme_fontPixelSizeLarge-3
                                         verticalAlignment:Text.AlignVCenter
@@ -1948,9 +1946,7 @@ Window {
                                 anchors.top: albumTrackcountText.bottom
                                 height: albumThumbnail.height/10
                                 width: parent.width
-                                text: (albumLength < 60)?(qsTr("%1 seconds").arg(Code.formatLength(albumLength))):
-                                        ((albumLength < 3600)?(qsTr("%1 minutes").arg(Code.formatLength(albumLength/60))):
-                                         (qsTr("%1 hours").arg(Code.formatLength(albumLength/3600))))
+                                text: Code.formatAlbumLength(albumLength)
                                 color: theme_fontColorMediaHighlight
                                 font.pixelSize: theme_fontPixelSizeLarge-3
                                 verticalAlignment:Text.AlignVCenter

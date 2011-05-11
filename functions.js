@@ -406,6 +406,37 @@ function formatLength(time)
     return (dec == 0)?val:(val + "." + dec)
 }
 
+function formatAlbumLength(length)
+{
+    var hours = parseInt(length/3600);
+    var mins = parseInt( (length%3600)/60 );
+    var time = "";
+    if( hours == 0 && mins == 0 )
+    {//only show seconds
+        var secs = parseInt( length%3600 );
+        time = (secs==1) ? qsTr("1 second") : qsTr("%1 seconds").arg(secs);
+    }
+    else
+    {
+        if( hours == 0 )
+        {//only show minutes
+            time = (mins==1) ? qsTr("1 minute") : qsTr("%1 minutes").arg(mins);
+        }
+        else
+        {
+            if( mins == 0 )
+            {//only show hours
+                time = ((hours == 1) ? qsTr("1 hour") : qsTr("%1 hours").arg(hours));
+            }
+            else
+            {//show hours and minutes
+                time = ((hours == 1) ? qsTr("1 hour") : qsTr("%1 hours").arg(hours)) + ((mins == 1) ? qsTr(" 1 minute") : qsTr(" %1 minutes").arg(mins));
+            }
+        }
+    }
+    return time
+}
+
 function formatTime(time)
 {
     var min = parseInt(time/60);
