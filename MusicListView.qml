@@ -21,10 +21,10 @@ Item {
     property string labelUnknownAlbum: qsTr("unknown album")
     property string labelItemCount: qsTr("%1")
     property alias interactive: listview.interactive
-    property string defaultThumbnail: "image://meegotheme/images/media/music_thumb_med"
+    property string defaultThumbnail: "image://themedimage/images/media/music_thumb_med"
     property bool selectionMode: false
     property int frameBorderWidth: 0
-    property int thumbWidth: 50
+    property int entryHeight: 50
 
     property int footerHeight: 50
     property bool showPlayIcon: false
@@ -39,7 +39,7 @@ Item {
     signal doubleClicked(real mouseX, real mouseY, variant payload)
     Image {
         id: titleBar
-        source: "image://meegotheme/images/media/subtitle_landscape_bar"
+        source: "image://themedimage/images/media/subtitle_landscape_bar"
         anchors.top:parent.top
         anchors.left:parent.left
         width: parent.width
@@ -57,7 +57,7 @@ Item {
             color:theme_fontColorHighlight
             font.pixelSize: theme_fontPixelSizeLarge
             anchors.left: parent.left
-            anchors.leftMargin: thumbWidth + 8
+            anchors.leftMargin: entryHeight + 8
             width: parent.width* (mode !=0? 0.5: 0.35)
             height: parent.height
             horizontalAlignment:Text.Left
@@ -132,21 +132,22 @@ Item {
             width: listview.width
             height: container.footerHeight
         }
-
+        onCurrentIndexChanged: {
+            positionViewAtIndex(currentIndex, ListView.Beginning);
+        }
         delegate:  BorderImage {
             id: dinstance
             width: parent.width
-            height: thumbWidth
+            height: entryHeight
             border.left: 5; border.top: 5
             border.right: 5; border.bottom: 5
             source: {
                 if (playstatus== 2) {
-                    return "image://meegotheme/images/media/music_row_highlight_landscape"; // need confirm from UI designer
+                    return "image://themedimage/images/media/music_row_highlight_landscape"; // need confirm from UI designer
                 }else if ((index%2) == 0) {
-                    return "image://meegotheme/images/media/music_row_landscape";
+                    return "image://themedimage/images/media/music_row_landscape";
                 }
                 return "";
-
             }
 
             property string mtitle
@@ -255,7 +256,7 @@ Item {
             }
             Image {
                 id: playingIcon
-                source: "image://meegotheme/images/media/icn_currentlyplaying-albumoverlay"
+                source: "image://themedimage/images/media/icn_currentlyplaying-albumoverlay"
                 fillMode:Image.PreserveAspectFit
                 width:height
                 height:parent.height -2
@@ -368,7 +369,7 @@ Item {
                     when: !selectionMode && !mouseArea.pressed
                     PropertyChanges {
                         target: frame
-                        source: "image://meegotheme/images/media/photos_thumb_med"
+                        source: "image://themedimage/images/media/photos_thumb_med"
                     }
                 },
                 State {
@@ -384,7 +385,7 @@ Item {
                     when: selectionMode && !listview.model.isSelected(itemid)
                     PropertyChanges {
                         target: frame
-                        source: "image://meegotheme/images/media/photos_thumb_med"
+                        source: "image://themedimage/images/media/photos_thumb_med"
                     }
                 },
                 State {
@@ -392,7 +393,7 @@ Item {
                     when: selectionMode && listview.model.isSelected(itemid)
                     PropertyChanges {
                         target: frame
-                        source: "image://meegotheme/images/media/photos_selected_tick"
+                        source: "image://themedimage/images/media/photos_selected_tick"
                     }
                 }
 

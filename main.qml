@@ -8,7 +8,6 @@
 
 import Qt 4.7
 import MeeGo.Components 0.1
-import MeeGo.Labs.Components 0.1 as Labs
 import MeeGo.Media 0.1
 import QtMultimediaKit 1.1
 import MeeGo.App.Music.MusicPlugin 1.0
@@ -76,7 +75,7 @@ Window {
     property string labelNoMusicText2:qsTr("Buy, download or copy your music onto your table, then you can enjoy listening to it from here.")
     property string forbiddenchars: qsTr("\n\'\t\"\\");
     property string forbiddencharsDisplay: qsTr("<return>, <tab>, \', \", \\");
-    property string defaultThumbnail: "image://meegotheme/images/media/music_thumb_med"
+    property string defaultThumbnail: "image://themedimage/images/media/music_thumb_med"
 
     property int animationDuration: 500
 
@@ -994,7 +993,7 @@ Window {
                 visible:showGridView
                 anchors.leftMargin: 15
                 anchors.topMargin:3
-                defaultThumbnail: "image://meegotheme/images/media/music_thumb_med"
+                defaultThumbnail: "image://themedimage/images/media/music_thumb_med"
                 footerHeight: toolbar.height
                 model: MusicListModel {
                     type: MusicListModel.ListofPlaylists
@@ -1104,7 +1103,7 @@ Window {
                 cellHeight: cellWidth
                 anchors.leftMargin: 15
                 anchors.topMargin:3
-                defaultThumbnail: "image://meegotheme/images/media/music_thumb_med"
+                defaultThumbnail: "image://themedimage/images/media/music_thumb_med"
                 footerHeight: toolbar.height
                 model: MusicListModel {
                     type: MusicListModel.ListofArtists
@@ -1215,7 +1214,7 @@ Window {
                 cellHeight: cellWidth
                 anchors.leftMargin: 15
                 anchors.topMargin:3
-                defaultThumbnail: "image://meegotheme/images/media/music_thumb_med"
+                defaultThumbnail: "image://themedimage/images/media/music_thumb_med"
                 footerHeight: toolbar.height
                 model: MusicListModel {
                     type: MusicListModel.ListofAlbums
@@ -1346,7 +1345,7 @@ Window {
                 anchors.leftMargin: 15
                 anchors.topMargin:3
                 footerHeight: toolbar.height
-                defaultThumbnail: "image://meegotheme/images/media/music_thumb_med"
+                defaultThumbnail: "image://themedimage/images/media/music_thumb_med"
                 onClicked: {
                     if(multiSelectMode)
                     {
@@ -1527,11 +1526,11 @@ Window {
                 id: artistDetailViewMain
                 anchors.fill: parent
                 fillMode: Image.Tile
-                source: "image://meegotheme/images/bg_application_p"
+                source: "image://themedimage/images/bg_application_p"
                 BorderImage {
                     id: artistTitleText
                     width: parent.width
-                    source: (window.inLandscape)?"image://meegotheme/images/media/subtitle_landscape_bar":"image://theme/media/subtitle_portrait_bar"
+                    source: (window.inLandscape)?"image://themedimage/images/media/subtitle_landscape_bar":"image://theme/media/subtitle_portrait_bar"
                     Text {
                         text: labelArtist
                         font.pixelSize: theme_fontPixelSizeLarge
@@ -1558,7 +1557,7 @@ Window {
                     anchors.topMargin:3
                     visible: false
                     footerHeight: toolbar.height
-                    defaultThumbnail: "image://meegotheme/images/media/music_thumb_med"
+                    defaultThumbnail: "image://themedimage/images/media/music_thumb_med"
                     onClicked: {
                         if(payload.misvirtual) {
                             return;
@@ -1607,7 +1606,7 @@ Window {
 
                         BorderImage {
                             id: albumDetailBackground
-                            source: "image://meegotheme/widgets/apps/media/gradient-albumview"
+                            source: "image://themedimage/widgets/apps/media/gradient-albumview"
                             Item {
                                 id: albumDetailText
                                 height: albumThumbnail.height/3
@@ -1662,14 +1661,14 @@ Window {
                                 border.right: 10; border.bottom: 10
                                 width:400
                                 height:width
-                                source: "image://meegotheme/images/media/music_border_lrg"
+                                source: "image://themedimage/images/media/music_border_lrg"
                                 smooth:misvirtual? true: false
                                 anchors.leftMargin: 15
                                 Image {
                                     z: -10
                                     anchors.fill: parent
                                     fillMode:Image.PreserveAspectFit
-                                    source:(thumburi == ""|thumburi == undefined)?"image://meegotheme/images/media/music_thumb_med":thumburi
+                                    source:(thumburi == ""|thumburi == undefined)?"image://themedimage/images/media/music_thumb_med":thumburi
                                 }
 
                                 MouseArea {
@@ -1696,7 +1695,7 @@ Window {
                             interactive: false
                             footerHeight: toolbar.height
                             Component.onCompleted: {
-                                height = model.count * 50 + titleBarHeight;
+                                height = model.count * entryHeight + titleBarHeight;
                             }
                             model: MusicListModel {
                                 type: misvirtual? MusicListModel.ListofOrphanSongsForArtist: MusicListModel.ListofSongsForAlbum
@@ -1886,12 +1885,12 @@ Window {
                 id: box
                 anchors.fill: parent
                 fillMode: Image.Tile
-                source: "image://meegotheme/images/bg_application_p"
+                source: "image://themedimage/images/bg_application_p"
                 BorderImage {
                     id: artistTitleText
                     width: parent.width
                     anchors.top: parent.top
-                    source: (window.inLandscape)?"image://meegotheme/images/media/subtitle_landscape_bar":"image://theme/media/subtitle_portrait_bar"
+                    source: (window.inLandscape)?"image://themedimage/images/media/subtitle_landscape_bar":"image://theme/media/subtitle_portrait_bar"
                     Text {
                         text: labelArtist
                         font.pixelSize: theme_fontPixelSizeLarge
@@ -1907,7 +1906,7 @@ Window {
                 BorderImage {
                     id: albumDetailBackground
                     anchors.top: artistTitleText.bottom
-                    source: "image://meegotheme/widgets/apps/media/gradient-albumview"
+                    source: "image://themedimage/widgets/apps/media/gradient-albumview"
                     Item {
                         id: albumDetailText
                         height: albumThumbnail.height/3
@@ -1962,7 +1961,7 @@ Window {
                         border.right: 10; border.bottom: 10
                         width:400
                         height:width
-                        source: "image://meegotheme/images/media/music_border_lrg"
+                        source: "image://themedimage/images/media/music_border_lrg"
                         anchors.leftMargin: 15
                         Image {
                             z: -10
@@ -2129,7 +2128,7 @@ Window {
                 id: box
                 anchors.fill: parent
                 fillMode: Image.Tile
-                source: "image://meegotheme/images/bg_application_p"
+                source: "image://themedimage/images/bg_application_p"
                 Text {
                     id: tPlaylist
                     text: labelPlaylist
@@ -2149,7 +2148,7 @@ Window {
                     width: 400
                     height: width
                     anchors.leftMargin: 15
-                    source: "image://meegotheme/images/media/music_border_lrg"
+                    source: "image://themedimage/images/media/music_border_lrg"
                     Image {
                         z: -10
                         anchors.fill: parent
@@ -2273,13 +2272,14 @@ Window {
             ]
         }
     }
+
     MusicListView {
         id: playqueueView
         selectionMode: multiSelectMode
         parent:  parkingLot
         anchors.fill:parent
         model: playqueueModel
-        footerHeight: toolbar.height
+        footerHeight: parent.height - entryHeight - titleBarHeight
         onClicked:{
             if(multiSelectMode)
             {
