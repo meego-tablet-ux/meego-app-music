@@ -1646,7 +1646,7 @@ Window {
                                         anchors.top: albumTrackcountText.bottom
                                         height: albumThumbnail.height/10
                                         width: parent.width
-                                        text: Code.formatAlbumLength(albumLength);
+                                        text: Code.formatAlbumLength(length);
                                         color: theme_fontColorMediaHighlight
                                         font.pixelSize: theme_fontPixelSizeLarge-3
                                         verticalAlignment:Text.AlignVCenter
