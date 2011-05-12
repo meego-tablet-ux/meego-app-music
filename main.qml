@@ -260,10 +260,12 @@ Window {
         onResumed: {
             dbusControl.updateNowNextTracks();
             dbusControl.state = "playing";
+            playqueueView.songPlaying();
         }
         onStarted: {
             dbusControl.updateNowNextTracks();
             dbusControl.state = "playing";
+            playqueueView.songPlaying();
         }
         onStopped: {
             dbusControl.updateNowNextTracks();

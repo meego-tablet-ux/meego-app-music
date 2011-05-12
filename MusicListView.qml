@@ -14,6 +14,7 @@ Item {
     width: 640
     height: 480
     property alias model: listview.model
+    property alias listView: listview
     property alias currentItem: listview.currentItem
     property alias currentIndex: listview.currentIndex
     property alias count: listview.count
@@ -37,6 +38,12 @@ Item {
     signal clicked(real mouseX, real mouseY, variant payload)
     signal longPressAndHold(real mouseX, real mouseY, variant payload)
     signal doubleClicked(real mouseX, real mouseY, variant payload)
+
+    function songPlaying()
+    {
+        listview.positionViewAtIndex(listview.currentIndex, ListView.Beginning);
+    }
+
     Image {
         id: titleBar
         source: "image://themedimage/images/media/subtitle_landscape_bar"
