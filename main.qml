@@ -119,6 +119,13 @@ Window {
         type: MusicListModel.NowPlaying
         limit: 0
         sort: MusicListModel.SortByDefault
+        onPlayIndexChanged: {
+            playqueueView.currentIndex = playindex;
+        }
+        onPlayStatusChanged: {
+            if(playstatus == MusicListModel.Playing)
+                playqueueView.currentIndex = playqueueModel.playindex;
+        }
     }
 
     // an editor model, it is used to do things like tag arbitrary items as favorite/viewed
@@ -237,7 +244,7 @@ Window {
 
         function updateNowNextTracks() {
             var newNowNext = [
-                    playqueueView.currentItem.murn,
+                    playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.URN),
                     playqueueModel.getURNFromIndex(nextItem1),
                     playqueueModel.getURNFromIndex(nextItem2)
                 ]
@@ -260,12 +267,10 @@ Window {
         onResumed: {
             dbusControl.updateNowNextTracks();
             dbusControl.state = "playing";
-            playqueueView.songPlaying();
         }
         onStarted: {
             dbusControl.updateNowNextTracks();
             dbusControl.state = "playing";
-            playqueueView.songPlaying();
         }
         onStopped: {
             dbusControl.updateNowNextTracks();
@@ -278,28 +283,26 @@ Window {
             }
         }
         onPlayingChanged: {
-            var id = playqueueView.currentItem.mitemid;
             if (!playing) {
-                playqueueModel.setPlayStatus(id, MusicListModel.Stopped);
+                playqueueModel.playstatus = MusicListModel.Stopped;
                 toolbar.playing = false;
             }else {
-                playqueueModel.setPlayStatus(id, MusicListModel.Playing);
+                playqueueModel.playstatus = MusicListModel.Playing;
                 toolbar.playing = true;
             }
         }
         onPausedChanged: {
-            var id = playqueueView.currentItem.mitemid;
             if (playing) {
                if(paused){
-                   playqueueModel.setPlayStatus(id, MusicListModel.Paused);
+                   playqueueModel.playstatus = MusicListModel.Paused;
                    toolbar.playing = false;
-               }else{
-                   playqueueModel.setPlayStatus(id, MusicListModel.Playing);
+               } else {
+                   playqueueModel.playstatus = MusicListModel.Playing;
                    toolbar.playing = true;
                }
             }
             else{
-                playqueueModel.setPlayStatus(id, MusicListModel.Stopped);
+                playqueueModel.playstatus = MusicListModel.Stopped;
                 toolbar.playing = false;
             }
         }
@@ -554,6 +557,7 @@ Window {
                 if(isvalid) {
                     playlistEditor.clear();
                     playlistEditor.savePlaylist(playlistTitle);
+                    editorCreate.text = "";
                 }
             }
             content: Item{
@@ -636,10 +640,13 @@ Window {
                 playlistEditor.clear();
                 playlistEditor.addItems(playqueueModel.getAllIDs());
                 playlistEditor.savePlaylist(playlistTitle);
+                playqueuePlaylistDialogTextEntry.text = "";
+
             }
             content: Item{
                 anchors.fill: parent
                 TextEntry{
+                    id: playqueuePlaylistDialogTextEntry
                     width: parent.width
                     height: 50
                     focus: true
@@ -1264,7 +1271,7 @@ Window {
                 onPlayNeedsSongs: {
                     playqueueModel.clear();
                     playqueueModel.addItems(listview.model.getAllIDs());
-                    playqueueView.currentIndex = 0;
+                    playqueueModel.playindex = 0;
                     Code.play();
                 }
             }
@@ -1324,7 +1331,6 @@ Window {
                     }
                     else
                     {
-                        listview.currentIndex = model.itemIndex(payload.mitemid);
                         Code.addToPlayqueueAndPlay(payload);
                     }
                 }
@@ -1359,7 +1365,6 @@ Window {
                     }
                     else
                     {
-                        listview.currentIndex = model.itemIndex(payload.mitemid);
                         Code.addToPlayqueueAndPlay(payload);
                     }
                 }
@@ -1405,7 +1410,7 @@ Window {
                 onPlayNeedsSongs: {
                     playqueueModel.clear();
                     playqueueModel.addItems(model.getAllIDs());
-                    playqueueView.currentIndex = 0;
+                    playqueueModel.playindex = 0;
                     Code.play();
                 }
             }
@@ -1467,7 +1472,6 @@ Window {
                     }
                     else
                     {
-                        listView.currentIndex = model.itemIndex(payload.mitemid);
                         Code.addToPlayqueueAndPlay(payload);
                     }
                 }
@@ -1506,7 +1510,7 @@ Window {
                 onPlayNeedsSongs: {
                     playqueueModel.clear();
                     playqueueModel.addItems(model.getAllIDs());
-                    playqueueView.currentIndex = 0;
+                    playqueueModel.playindex = 0;
                     Code.play();
                 }
             }
@@ -1720,7 +1724,6 @@ Window {
                                 }
                                 else
                                 {
-                                    songsInAlbumList.currentIndex = model.itemIndex(payload.mitemid);
                                     Code.addToPlayqueueAndPlay(payload);
                                 }
                             }
@@ -1879,7 +1882,7 @@ Window {
                 onPlayNeedsSongs: {
                     playqueueModel.clear();
                     playqueueModel.addItems(model.getAllIDs());
-                    playqueueView.currentIndex = 0;
+                    playqueueModel.playindex = 0;
                     Code.play();
                 }
             }
@@ -1990,12 +1993,10 @@ Window {
                         }
                         else
                         {
-                            albumSongList.currentIndex = model.itemIndex(payload.mitemid);
                             Code.addToPlayqueueAndPlay(payload);
                         }
                     }
                     onLongPressAndHold: {
-                        albumSongList.currentIndex = model.itemIndex(payload.mitemid);
                         musicContextMenu(mouseX, mouseY, payload,
                             [labelPlay, "favorite", labelcShare, labelMultiSelect, labelAddToPlayQueue, labelAddToPlaylist, labelDelete]);
                         multiSelectModel = model;
@@ -2106,7 +2107,7 @@ Window {
                 onPlayNeedsSongs: {
                     playqueueModel.clear();
                     playqueueModel.addItems(model.getAllIDs());
-                    playqueueView.currentIndex = 0;
+                    playqueueModel.playindex = 0;
                     Code.play();
                 }
             }
@@ -2183,7 +2184,6 @@ Window {
                         }
                         else
                         {
-                            playlistList.currentIndex = model.itemIndex(payload.mitemid);
                             Code.addToPlayqueueAndPlay(payload);
                         }
                     }
@@ -2278,22 +2278,24 @@ Window {
     MusicListView {
         id: playqueueView
         selectionMode: multiSelectMode
-        parent:  parkingLot
-        anchors.fill:parent
+        parent: parkingLot
+        anchors.fill: parent
         model: playqueueModel
-        footerHeight: parent.height - entryHeight - titleBarHeight
+        selectbyindex: true
+        footerHeight: parent.height - titleBarHeight
         onClicked:{
             if(multiSelectMode)
             {
-                model.setSelected(payload.mitemid, !model.isSelected(payload.mitemid));
-                if (model.isSelected(payload.mitemid))
+                model.setSelectedIndex(index, !model.isSelectedIndex(index));
+                if (model.isSelectedIndex(index))
                     shareObj.addItem(payload.muri);
                 else
                     shareObj.delItem(payload.muri);
             }
             else
             {
-                playqueueView.currentIndex = model.itemIndex(payload.mitemid);
+                playqueueModel.playindex = index;
+                playqueueView.currentIndex = index;
                 Code.playNewSong();
             }
         }

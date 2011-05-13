@@ -14,8 +14,6 @@ Item {
     width: 640
     height: 480
     property alias model: listview.model
-    property alias listView: listview
-    property alias currentItem: listview.currentItem
     property alias currentIndex: listview.currentIndex
     property alias count: listview.count
     property string labelUnknownArtist: qsTr("unknown artist")
@@ -30,19 +28,14 @@ Item {
     property int footerHeight: 50
     property bool showPlayIcon: false
     property color textColor: theme_fontColorNormal
-    // property bool playlistMode: false
     property int mode: 0
     property bool showNowPlayingIcon: true
     property alias titleBarHeight: titleBar.height
+    property bool selectbyindex: false
 
-    signal clicked(real mouseX, real mouseY, variant payload)
-    signal longPressAndHold(real mouseX, real mouseY, variant payload)
-    signal doubleClicked(real mouseX, real mouseY, variant payload)
-
-    function songPlaying()
-    {
-        listview.positionViewAtIndex(listview.currentIndex, ListView.Beginning);
-    }
+    signal clicked(real mouseX, real mouseY, variant payload, int index)
+    signal longPressAndHold(real mouseX, real mouseY, variant payload, int index)
+    signal doubleClicked(real mouseX, real mouseY, variant payload, int index)
 
     Image {
         id: titleBar
@@ -135,12 +128,11 @@ Item {
         height: parent.height - titleBar.height
         clip: true
         boundsBehavior: Flickable.StopAtBounds
+        highlightMoveSpeed: 1000
+        highlightRangeMode: ListView.StrictlyEnforceRange
         footer: Item{
             width: listview.width
             height: container.footerHeight
-        }
-        onCurrentIndexChanged: {
-            positionViewAtIndex(currentIndex, ListView.Beginning);
         }
         delegate:  BorderImage {
             id: dinstance
@@ -149,8 +141,8 @@ Item {
             border.left: 5; border.top: 5
             border.right: 5; border.bottom: 5
             source: {
-                if (playstatus== 2) {
-                    return "image://themedimage/images/media/music_row_highlight_landscape"; // need confirm from UI designer
+                if ((listview.model.playindex == index)&&(listview.model.playstatus == MusicListModel.Playing)) {
+                    return "image://themedimage/images/media/music_row_highlight_landscape";
                 }else if ((index%2) == 0) {
                     return "image://themedimage/images/media/music_row_landscape";
                 }
@@ -269,8 +261,7 @@ Item {
                 height:parent.height -2
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.left: parent.left
-                visible: (playstatus== 2) && showNowPlayingIcon
-                //opacity: dinstance.ListView.isCurrentItem? 1: 0
+                visible: showNowPlayingIcon && ((listview.model.playindex == index)&&(listview.model.playstatus == MusicListModel.Playing))
             }
             BorderImage {
                 id: frame
@@ -360,13 +351,13 @@ Item {
                 id: mouseArea
                 anchors.fill:parent
                 onClicked: {
-                    container.clicked(mouseX, mouseY, dinstance);
+                    container.clicked(mouseX, mouseY, dinstance, index);
                 }
                 onPressAndHold:{
-                    container.longPressAndHold(mouseX, mouseY, dinstance);
+                    container.longPressAndHold(mouseX, mouseY, dinstance, index);
                 }
                 onDoubleClicked: {
-                    container.doubleClicked(mouseX, mouseY, dinstance);
+                    container.doubleClicked(mouseX, mouseY, dinstance, index);
                 }
             }
 
@@ -389,7 +380,7 @@ Item {
                 },
                 State {
                     name: "selectionNotSelected"
-                    when: selectionMode && !listview.model.isSelected(itemid)
+                    when: selectionMode && (selectbyindex)?(!listview.model.isSelectedIndex(index)):(!listview.model.isSelected(itemid))
                     PropertyChanges {
                         target: frame
                         source: "image://themedimage/images/media/photos_thumb_med"
@@ -397,7 +388,7 @@ Item {
                 },
                 State {
                     name: "selectionSelected"
-                    when: selectionMode && listview.model.isSelected(itemid)
+                    when: selectionMode && (selectbyindex)?(listview.model.isSelectedIndex(index)):(listview.model.isSelected(itemid))
                     PropertyChanges {
                         target: frame
                         source: "image://themedimage/images/media/photos_selected_tick"

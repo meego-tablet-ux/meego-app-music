@@ -6,178 +6,12 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-var dragComponent = null;
-var dragitem = null;
-var currentView = null;
-var currentItem = null
-var startPos = null;
-
 function playlistNameValidate(parm,val) {
     if (parm == "") return true;
     for (var i=0; i<parm.length; i++) {
         if (val.indexOf(parm.charAt(i),0) != -1) return false;
     }
     return true;
-}
-
-function startDrag(mouse,view,item) {
-    if (view == null || item == null)
-        return;
-
-    if (dragitem != null) {
-        dragitem.destroy();
-        dragitem = null;
-    }
-
-     dragComponent = view.delegate;
-
-    currentView = view;
-    currentItem = item;
-    startPos = item.mapToItem(scene,mouse.x, mouse.y);
-
-    if (dragComponent.status == Component.Loading) {
-        component.statusChanged.connect(createItem);
-    }else{
-        createItem();
-    }
-}
-
-// this function will return type SONG(2),ARTIST(3),ALBUM(4) or PLAYLIST(5) from MediaItem
-// depending on the input type, which is one of the ModelType
-// we can't access MediaItem from here, so hardcoded the enum value
-function convertListType(type) {
-    switch (type) {
-    case MusicListModel.ListofSongs:
-            return 2;
-
-    case MusicListModel.ListofAlbums:
-            return 4;
-
-    case MusicListModel.ListofArtists:
-            return 3;
-
-    case MusicListModel.ListofPlaylists:
-            return 5;
-
-    case MusicListModel.ListofAlbumsForArtist:
-            return 4;
-
-    case MusicListModel.ListofSongsForAlbum:
-            return 2;
-
-    case MusicListModel.ListofSongsForArtist:
-            return 2;
-
-    case MusicListModel.ListofRecentlyPlayed:
-            // special case
-            return currentItem.mtype;
-
-    case MusicListModel.MusicPlaylist:
-            return 5;
-
-    default:
-            return -1;
-    }
-}
-
-function createItem() {
-    dragitem = dragComponent.createObject(scene);
-    // set dragitem position:
-
-    dragitem.x = startPos.x;
-    dragitem.y = startPos.y;
-
-    dragitem.mtitle = currentItem.mtitle;
-    dragitem.mthumburi = currentItem.mthumburi;
-    dragitem.mitemid = currentItem.mitemid;
-    dragitem.mitemtype = currentItem.mitemtype;
-    dragitem.opacity = 0.8;
-    dragitem.mcount = currentItem.mcount;
-    dragitem.martist = currentItem.martist;
-}
-
-// return true if the point is in item's area,
-// the point should be in the item's coordinate system.
-function itemContainsPoint(item, point) {
-    if ( point.x >=0 && point.x < item.width
-         && point.y >= 0 && point.y < item.height) {
-        return true;
-    }
-    return false;
-}
-
-function moveDragItem(mouse,item) {
-
-    if (dragitem == null)
-        return;
-
-    var pos = item.mapToItem(scene,mouse.x, mouse.y);
-    dragitem.x = pos.x;
-    dragitem.y = pos.y;
-
-    if (sideContentStrip.activeContent.tabs) {
-        for (var i = 0;  i < sideContentStrip.activeContent.tabs.length -1; i++) {
-            var it = sideContentStrip.activeContent.tabs[i];
-            var pt = item.mapToItem(it,mouse.x, mouse.y);
-            if (itemContainsPoint(it,pt)) {
-                sideContentStrip.activeContent.selectTabAtIndex(i);
-                sideContentStrip.activeContent.open();
-                return;
-            }
-        }
-
-        // specific code for landingscreen side content
-        if (sideContentStrip.activeContent.currentTabIndex == 1) {
-            var view = sideContentStrip.activeContent.currentTab.playlistList;
-            var map = item.mapToItem(view, mouse.x, mouse.y);
-            var targetIndex = view.indexAt(map.x  , map.y + view.contentY);
-            if (targetIndex != -1) {
-                view.currentIndex = targetIndex;
-
-               view.highlightItem.opacity = 0.4;
-            }else {
-               view.highlightItem.opacity = 0;
-            }
-        }
-    }
-
-}
-
-function endDrag(mouse,item) {
-    if (!dragitem) {
-        return;
-    }
-
-    // check if dropped at now playing button,
-    // if yes, add to now playing list
-    var dropPos = item.mapToItem(npRect,mouse.x,mouse.y);
-    if (dropPos.x > 0 && dropPos.x < npRect.width
-        && dropPos.y > 0 && dropPos.y < npRect.height)
-    {
-        addToPlayqueue(item);
-    }else {
-        if (sideContentStrip.activeContent.currentTabIndex == 1) {
-            var view = sideContentStrip.activeContent.currentTab.playlistList;
-            var map = item.mapToItem(view, mouse.x, mouse.y) ;
-            var targetIndex = view.indexAt(map.x  , map.y + view.contentY);
-            if (targetIndex != -1) {
-                appendItemToPlaylist(item,view.currentItem);
-            }
-            view.highlightItem.opacity = 0;
-        }
-    }
-
-    if (dragitem != null) {
-        dragitem.destroy(dragitem.animation == true? 500: 0);
-        dragitem = null;
-        currentView = null;
-        currentItem = null;
-        startPos = null;
-        dragComponent == null
-    }else {
-        return;
-    }
-    updateNowNextPlaying();
 }
 
 function addToPlayqueue(item) {
@@ -189,7 +23,7 @@ function addMultipleToPlayqueue(list) {
     playqueueModel.addItems(list.getSelectedIDs());
     updateNowNextPlaying();
     list.clearSelected();
-    multibar.sharing.clearItems();
+    shareObj.clearItems();
     multiSelectMode = false;
 }
 
@@ -215,15 +49,15 @@ function removeMultipleFromPlayqueue(list) {
     playqueueModel.removeItems(ids);
     updateNowNextPlaying();
     list.clearSelected();
-    multibar.sharing.clearItems();
+    shareObj.clearItems();
     multiSelectMode = false;
 }
 
 function addToPlayqueueAndPlay(item)
 {
+    var idx = playqueueModel.count;
     addToPlayqueue(item);
-    playqueueView.currentIndex = playqueueModel.itemIndex(item.mitemid);
-    console.log("Item Index is: " + playqueueModel.itemIndex(item.mitemid) + " " + item.mtitle);
+    playqueueModel.playindex = idx;
     playNewSong();
     updateNowNextPlaying();
 }
@@ -231,12 +65,13 @@ function addToPlayqueueAndPlay(item)
 function addMultipleToPlayqueueAndPlay(list)
 {
     var ids = list.getSelectedIDs();
+    var idx = playqueueModel.count;
     playqueueModel.addItems(ids);
-    playqueueView.currentIndex = playqueueModel.itemIndex(ids[0]);
+    playqueueModel.playindex = idx;
     playNewSong();
     updateNowNextPlaying();
     list.clearSelected();
-    multibar.sharing.clearItems();
+    shareObj.clearItems();
     multiSelectMode = false;
 }
 
@@ -251,7 +86,7 @@ function changeMultipleItemFavorite(list, val) {
         editorModel.setFavorite(ids[i], val);
     }
     list.clearSelected();
-    multibar.sharing.clearItems();
+    shareObj.clearItems();
     multiSelectMode = false;
 }
 
@@ -270,42 +105,36 @@ function playNewSong() {
 
     // if there are no songs or the index is out of range, do nothing
     if((playqueueView.count <= 0)||
-       (playqueueView.currentIndex >= playqueueView.count))
+       (playqueueModel.playindex >= playqueueView.count))
     {
         return false;
     }
 
-    if (playqueueView.currentIndex == -1)
-        playqueueView.currentIndex = 0;
+    if (playqueueModel.playindex == -1)
+        playqueueModel.playindex = 0;
 
-    var item = playqueueView.currentItem;
+    toolbar.trackName = playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.Title);
+    toolbar.artistName = playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.Artist)[0];
 
-    if (item == undefined){
-        return false;
-    }
-
-    toolbar.trackName = item.mtitle;
-    toolbar.artistName = item.martist;
-
-    audio.source = item.muri;
+    audio.source = playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.URI);
     audio.playing = true;
-    editorModel.setViewed(item.mitemid);
+    editorModel.setViewed(playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.ID));
     return true;
 }
 
 function playNextSong() {
     if (shuffle) {
-        playqueueView.currentIndex = playqueueModel.shuffleIndex(0);
+        playqueueModel.playindex = playqueueModel.shuffleIndex(0);
         playqueueModel.shuffleIncrement();
     }else {
-        if (playqueueView.currentIndex < (playqueueView.count -1))
+        if (playqueueModel.playindex < (playqueueView.count -1))
         {
-            playqueueView.currentIndex++;
+            playqueueModel.playindex++;
         }
         else
         {
             if (loop){
-                playqueueView.currentIndex = 0;
+                playqueueModel.playindex = 0;
             }else{
                 stop();
                 return;
@@ -319,13 +148,13 @@ function playNextSong() {
 
 function playPrevSong() {
     if (shuffle) {
-        playqueueView.currentIndex = playqueueModel.shuffleIndex(0);
+        playqueueModel.playindex = playqueueModel.shuffleIndex(0);
         playqueueModel.shuffleIncrement();
     }else {
-        if (playqueueView.currentIndex == 0)
+        if (playqueueModel.playindex == 0)
         {
             if (loop) {
-                playqueueView.currentIndex = playqueueView.count - 1;
+                playqueueModel.playindex = playqueueView.count - 1;
             }else {
                 stop();
                 return;
@@ -333,7 +162,7 @@ function playPrevSong() {
         }
         else
         {
-            playqueueView.currentIndex--;
+            playqueueModel.playindex--;
         }
     }
     audio.source = "";
@@ -349,7 +178,7 @@ function updateNowNextPlaying()
     } else if (shuffle) {
         dbusControl.nextItem1 = playqueueModel.shuffleIndex(1);
         dbusControl.nextItem2 = playqueueModel.shuffleIndex(2);
-    } else  if (playqueueView.currentIndex == 0) {
+    } else  if (playqueueModel.playindex == 0) {
         if (playqueueView.count == 1) {
             dbusControl.nextItem1 = -1;
             dbusControl.nextItem2 = -1;
@@ -361,8 +190,8 @@ function updateNowNextPlaying()
             dbusControl.nextItem2 = 2;
         }
     } else {
-        if (playqueueView.currentIndex+1 < playqueueView.count) {
-            dbusControl.nextItem1 = playqueueView.currentIndex+1;
+        if (playqueueModel.playindex+1 < playqueueView.count) {
+            dbusControl.nextItem1 = playqueueModel.playindex+1;
 
             if (dbusControl.nextItem1+1 < playqueueView.count) {
                 dbusControl.nextItem2 = dbusControl.nextItem1+1;
