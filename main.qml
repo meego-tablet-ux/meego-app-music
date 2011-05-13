@@ -533,15 +533,19 @@ Window {
                 shareObj.clearItems();
                 multiSelectMode = false;
             }
-            content: Item {
-                anchors.fill: parent
+            content: Column {
+                anchors.left:parent.left
+                anchors.right: parent.right
                 clip: true
                 Text {
                     text: qsTr("If you delete these, they will be removed from your device")
-                    anchors.verticalCenter:parent.verticalCenter
-                    width:  parent.width
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    height: paintedHeight
                     horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
                     font.pixelSize: theme_fontPixelSizeMedium
+                    wrapMode: Text.WordWrap
                 }
             }
         }
@@ -561,7 +565,8 @@ Window {
                 }
             }
             content: Item{
-                anchors.fill: parent
+                anchors.left:parent.left
+                anchors.right: parent.right
                 TextEntry{
                     id: editorCreate
                     width: parent.width
