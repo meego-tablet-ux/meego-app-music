@@ -509,8 +509,14 @@ Window {
                     anchors.right: parent.right
                     height: paintedHeight
                 }
+                Item{
+                    anchors.left:parent.left
+                    anchors.right: parent.right
+                    height: theme_dialogContentAreaTopAndBottomMarginPixelSize
+                }
+
                 Text {
-                    height: paintedHeight + dialogButtonsBottomMarginPixelSize
+                    height: paintedHeight
                     text: qsTr("If you delete this, it will be removed from your device")
                     anchors.left:parent.left
                     anchors.right: parent.right
@@ -534,8 +540,7 @@ Window {
                 multiSelectMode = false;
             }
             content: Column {
-                anchors.left:parent.left
-                anchors.right: parent.right
+                anchors.fill: parent
                 clip: true
                 Text {
                     text: qsTr("If you delete these, they will be removed from your device")
@@ -565,8 +570,7 @@ Window {
                 }
             }
             content: Item{
-                anchors.left:parent.left
-                anchors.right: parent.right
+                anchors.fill: parent
                 TextEntry{
                     id: editorCreate
                     width: parent.width
