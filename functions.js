@@ -6,6 +6,51 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
+function selectionCount()
+{
+    switch(multiSelectModel.type) {
+    case MusicListModel.NowPlaying:
+    case MusicListModel.MusicPlaylist:
+        return multiSelectModel.selectionCount(MusicListModel.SelectByIndex);
+    default:
+        return multiSelectModel.selectionCount(MusicListModel.SelectByID);
+    }
+}
+
+function clearSelected()
+{
+    switch(multiSelectModel.type) {
+    case MusicListModel.NowPlaying:
+    case MusicListModel.MusicPlaylist:
+        multiSelectModel.clearSelected(MusicListModel.SelectByIndex);
+        break;
+    default:
+        multiSelectModel.clearSelected(MusicListModel.SelectByID);
+    }
+}
+
+function getSelectedURIs()
+{
+    switch(multiSelectModel.type) {
+    case MusicListModel.NowPlaying:
+    case MusicListModel.MusicPlaylist:
+        return multiSelectModel.getSelectedURIs(MusicListModel.SelectByIndex);
+    default:
+        return multiSelectModel.getSelectedURIs(MusicListModel.SelectByID);
+    }
+}
+
+function getSelectedIDs()
+{
+    switch(multiSelectModel.type) {
+    case MusicListModel.NowPlaying:
+    case MusicListModel.MusicPlaylist:
+        return multiSelectModel.getSelectedIDs(MusicListModel.SelectByIndex);
+    default:
+        return multiSelectModel.getSelectedIDs(MusicListModel.SelectByID);
+    }
+}
+
 function playlistNameValidate(parm,val) {
     if (parm == "") return true;
     for (var i=0; i<parm.length; i++) {
@@ -19,36 +64,49 @@ function addToPlayqueue(item) {
     updateNowNextPlaying();
 }
 
-function addMultipleToPlayqueue(list) {
-    playqueueModel.addItems(list.getSelectedIDs());
+function addMultipleToPlayqueue() {
+    playqueueModel.addItems(getSelectedIDs());
     updateNowNextPlaying();
-    list.clearSelected();
+    clearSelected();
     shareObj.clearItems();
     multiSelectMode = false;
 }
 
-function removeFromPlayqueue(item) {
-    if(playqueueView.currentIndex == playqueueModel.itemIndex(item.mitemid))
-    {
+function removeFromPlayqueue() {
+    if(playqueueModel.playindex == targetIndex)
         audio.stop();
-    }
-    playqueueModel.removeItems(item.mitemid);
+    playqueueModel.removeIndex(targetIndex);
     updateNowNextPlaying();
 }
 
-function removeMultipleFromPlayqueue(list) {
-    var ids = list.getSelectedIDs();
+function removeFromPlaylist(list) {
+    list.removeIndex(targetIndex);
+    list.savePlaylist(list.playlist);
+    clearSelected();
+}
+
+function removeMultipleFromPlayqueue() {
+    var playid = playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.ID);
+    var ids = getSelectedIDs();
     var i;
     for (i in ids) {
-        if(playqueueView.currentIndex == playqueueModel.itemIndex(ids[i]))
+        if(ids[i] == playid)
         {
             audio.stop();
             break;
         }
     }
-    playqueueModel.removeItems(ids);
+    playqueueModel.removeSelected();
     updateNowNextPlaying();
-    list.clearSelected();
+    clearSelected();
+    shareObj.clearItems();
+    multiSelectMode = false;
+}
+
+function removeMultipleFromPlaylist(list) {
+    list.removeSelected();
+    list.savePlaylist(list.playlist);
+    clearSelected();
     shareObj.clearItems();
     multiSelectMode = false;
 }
@@ -62,15 +120,15 @@ function addToPlayqueueAndPlay(item)
     updateNowNextPlaying();
 }
 
-function addMultipleToPlayqueueAndPlay(list)
+function addMultipleToPlayqueueAndPlay()
 {
-    var ids = list.getSelectedIDs();
+    var ids = getSelectedIDs();
     var idx = playqueueModel.count;
     playqueueModel.addItems(ids);
     playqueueModel.playindex = idx;
     playNewSong();
     updateNowNextPlaying();
-    list.clearSelected();
+    clearSelected();
     shareObj.clearItems();
     multiSelectMode = false;
 }
@@ -79,13 +137,13 @@ function changeItemFavorite(item, val) {
     editorModel.setFavorite(item.mitemid,val);
 }
 
-function changeMultipleItemFavorite(list, val) {
-    var ids = list.getSelectedIDs();
+function changeMultipleItemFavorite(val) {
+    var ids = getSelectedIDs();
     var i;
     for (i in ids) {
         editorModel.setFavorite(ids[i], val);
     }
-    list.clearSelected();
+    clearSelected();
     shareObj.clearItems();
     multiSelectMode = false;
 }

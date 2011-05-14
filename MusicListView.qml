@@ -24,6 +24,7 @@ Item {
     property bool selectionMode: false
     property int frameBorderWidth: 0
     property int entryHeight: 50
+    property bool playqueue: false
 
     property int footerHeight: 50
     property bool showPlayIcon: false
@@ -129,7 +130,7 @@ Item {
         clip: true
         boundsBehavior: Flickable.StopAtBounds
         highlightMoveSpeed: 1000
-        highlightRangeMode: ListView.StrictlyEnforceRange
+        highlightRangeMode: (playqueue)?(ListView.StrictlyEnforceRange):(ListView.NoHighlightRange)
         footer: Item{
             width: listview.width
             height: container.footerHeight
@@ -380,7 +381,7 @@ Item {
                 },
                 State {
                     name: "selectionNotSelected"
-                    when: selectionMode && (selectbyindex)?(!listview.model.isSelectedIndex(index)):(!listview.model.isSelected(itemid))
+                    when: selectionMode && (selectbyindex)?(!listview.model.isSelected(index)):(!listview.model.isSelected(itemid))
                     PropertyChanges {
                         target: frame
                         source: "image://themedimage/images/media/photos_thumb_med"
@@ -388,7 +389,7 @@ Item {
                 },
                 State {
                     name: "selectionSelected"
-                    when: selectionMode && (selectbyindex)?(listview.model.isSelectedIndex(index)):(listview.model.isSelected(itemid))
+                    when: selectionMode && (selectbyindex)?(listview.model.isSelected(index)):(listview.model.isSelected(itemid))
                     PropertyChanges {
                         target: frame
                         source: "image://themedimage/images/media/photos_selected_tick"

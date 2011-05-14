@@ -88,6 +88,7 @@ Window {
     property string thumbnailUri:""
     property bool multiSelectMode: false
     property variant multiSelectModel: allTracksModel
+    property int targetIndex: 0
 
     property variant bookModel: [labelPlayqueue,labelAllPlaylist,labelFavorites,
                                  labelAllArtist,labelAllAlbums,labelAllTracks]
@@ -356,7 +357,7 @@ Window {
         playlistEditor.savePlaylist(title);
         if(multiSelectMode)
         {
-            multiSelectModel.clearSelected();
+            Code.clearSelected();
             shareObj.clearItems();
             multiSelectMode = false;
         }
@@ -386,22 +387,22 @@ Window {
             landscape: window.inLandscape
             showadd: true
             onCancelPressed: {
-                multiSelectModel.clearSelected();
+                Code.clearSelected();
                 shareObj.clearItems();
                 multiSelectMode = false;
             }
             onDeletePressed: {
-                if(multiSelectModel.selectionCount() > 0)
+                if(Code.selectionCount() > 0)
                 {
-                    deleteMultipleItemsDialog.deletecount = multiSelectModel.selectionCount();
+                    deleteMultipleItemsDialog.deletecount = Code.selectionCount();
                     deleteMultipleItemsDialog.show();
                 }
             }
             onAddPressed: {
-                if(multiSelectModel.selectionCount() > 0)
+                if(Code.selectionCount() > 0)
                 {
                     playlistPicker.okclicked = false;
-                    playlistPicker.payload = multiSelectModel.getSelectedIDs()
+                    playlistPicker.payload = Code.getSelectedIDs()
                     playlistPicker.show();
                 }
             }
@@ -522,13 +523,13 @@ Window {
 
         ModalDialog {
             id: deleteMultipleItemsDialog
-            property int deletecount: multiSelectModel.selectionCount()
+            property int deletecount: Code.selectionCount()
             title: (deletecount < 2)?qsTr("Permanently delete this song?"):qsTr("Permanently delete these %1 songs?").arg(deletecount)
             acceptButtonText: labelConfirmDelete
             cancelButtonText: labelCancel
             onAccepted: {
-                multiSelectModel.destroyItemsByID(multiSelectModel.getSelectedIDs());
-                multiSelectModel.clearSelected();
+                multiSelectModel.destroyItemsByID(Code.getSelectedIDs());
+                Code.clearSelected();
                 shareObj.clearItems();
                 multiSelectMode = false;
             }
@@ -671,7 +672,8 @@ Window {
                             break;
                         }
                     }
-                    contextMenu.hide();
+                    contextShareMenu.hide();
+                    multiSelectMode = false;
                 }
             }
         }
@@ -692,8 +694,8 @@ Window {
                         // Play
                         if(!multiSelectMode)
                             Code.addToPlayqueueAndPlay(payload);
-                        else if(multiSelectModel.selectionCount() > 0)
-                            Code.addMultipleToPlayqueueAndPlay(multiSelectModel);
+                        else if(Code.selectionCount() > 0)
+                            Code.addMultipleToPlayqueueAndPlay();
                         contextMenu.hide();
                     }
                     else if (model[index] == labelOpen)
@@ -707,8 +709,8 @@ Window {
                         // Favorite/unfavorite
                         if(!multiSelectMode)
                             Code.changeItemFavorite(payload, (model[index] == labelFavorite));
-                        else if(multiSelectModel.selectionCount() > 0)
-                            Code.changeMultipleItemFavorite(multiSelectModel, (model[index] == labelFavorite));
+                        else if(Code.selectionCount() > 0)
+                            Code.changeMultipleItemFavorite(model[index] == labelFavorite);
                         contextMenu.hide();
                     }
                     else if (model[index] == labelAddToPlayQueue)
@@ -716,17 +718,17 @@ Window {
                         // Add to play queue
                         if(!multiSelectMode)
                             Code.addToPlayqueue(payload);
-                        else if(multiSelectModel.selectionCount() > 0)
-                            Code.addMultipleToPlayqueue(multiSelectModel);
+                        else if(Code.selectionCount() > 0)
+                            Code.addMultipleToPlayqueue();
                         contextMenu.hide();
                     }
                     else if (model[index] == labelRemoveFromPlayQueue)
                     {
                         // Remove from play queue
                         if(!multiSelectMode)
-                            Code.removeFromPlayqueue(payload);
-                        else if(multiSelectModel.selectionCount() > 0)
-                            Code.removeMultipleFromPlayqueue(multiSelectModel);
+                            Code.removeFromPlayqueue();
+                        else if(Code.selectionCount() > 0)
+                            Code.removeMultipleFromPlayqueue();
                         contextMenu.hide();
                     }
                     else if (model[index] == labelAddToPlaylist)
@@ -738,10 +740,10 @@ Window {
                             playlistPicker.payload = [payload.mitemid];
                             playlistPicker.show();
                         }
-                        else if(multiSelectModel.selectionCount() > 0)
+                        else if(Code.selectionCount() > 0)
                         {
                             playlistPicker.okclicked = false;
-                            playlistPicker.payload = multiSelectModel.getSelectedIDs()
+                            playlistPicker.payload = Code.getSelectedIDs()
                             playlistPicker.show();
                         }
                         contextMenu.hide();
@@ -750,18 +752,9 @@ Window {
                     {
                         // Remove from a play list
                         if(!multiSelectMode)
-                        {
-                            contextMenu.playlistmodel.removeItems(payload.mitemid);
-                            contextMenu.playlistmodel.savePlaylist(contextMenu.playlistmodel.playlist);
-                        }
-                        else if(multiSelectModel.selectionCount() > 0)
-                        {
-                            contextMenu.playlistmodel.removeItems(multiSelectModel.getSelectedIDs());
-                            contextMenu.playlistmodel.savePlaylist(contextMenu.playlistmodel.playlist);
-                            multiSelectModel.clearSelected();
-                            shareObj.clearItems();
-                            multiSelectMode = false;
-                        }
+                            Code.removeFromPlaylist(contextMenu.playlistmodel);
+                        else if(Code.selectionCount() > 0)
+                            Code.removeMultipleFromPlaylist(contextMenu.playlistmodel);
                         contextMenu.hide();
                     }
                     else if (model[index] == labelClearPlaylist)
@@ -789,9 +782,9 @@ Window {
                             deleteItemDialog.payload = payload;
                             deleteItemDialog.show();
                         }
-                        else if(multiSelectModel.selectionCount() > 0)
+                        else if(Code.selectionCount() > 0)
                         {
-                            deleteMultipleItemsDialog.deletecount = multiSelectModel.selectionCount();
+                            deleteMultipleItemsDialog.deletecount = Code.selectionCount();
                             deleteMultipleItemsDialog.show();
                         }
                         contextMenu.hide();
@@ -810,9 +803,9 @@ Window {
                         {
                             shareObj.addItem(payload.muri) // URI
                         }
-                        else if(multiSelectModel.selectionCount() > 0)
+                        else if(Code.selectionCount() > 0)
                         {
-                            shareObj.addItems(multiSelectModel.getSelectedURIs()) // URIs
+                            shareObj.addItems(Code.getSelectedURIs()) // URIs
                         }
                         contextMenu.shareModel = shareObj.serviceTypes;
                         contextMenu.shareModel = contextMenu.shareModel.concat(labelCancel);
@@ -2164,6 +2157,7 @@ Window {
                     selectionMode: multiSelectMode
                     anchors.margins: 3
                     footerHeight: toolbar.height
+                    selectbyindex: true
                     model: MusicListModel {
                         type: MusicListModel.MusicPlaylist
                         playlist: labelPlaylist
@@ -2176,8 +2170,8 @@ Window {
                     onClicked: {
                         if(multiSelectMode)
                         {
-                            model.setSelected(payload.mitemid, !model.isSelected(payload.mitemid));
-                            if (model.isSelected(payload.mitemid))
+                            model.setSelected(index, !model.isSelected(index));
+                            if (model.isSelected(index))
                                 shareObj.addItem(payload.muri);
                             else
                                 shareObj.delItem(payload.muri);
@@ -2188,6 +2182,7 @@ Window {
                         }
                     }
                     onLongPressAndHold: {
+                        targetIndex = index;
                         musicContextMenu(mouseX, mouseY, payload,
                             [labelPlay, "favorite", labelcShare, labelMultiSelect, labelAddToPlayQueue, labelAddToPlaylist, labelRemFromPlaylist]);
                         multiSelectModel = model;
@@ -2282,12 +2277,13 @@ Window {
         anchors.fill: parent
         model: playqueueModel
         selectbyindex: true
+        playqueue: true
         footerHeight: parent.height - titleBarHeight
         onClicked:{
             if(multiSelectMode)
             {
-                model.setSelectedIndex(index, !model.isSelectedIndex(index));
-                if (model.isSelectedIndex(index))
+                model.setSelected(index, !model.isSelected(index));
+                if (model.isSelected(index))
                     shareObj.addItem(payload.muri);
                 else
                     shareObj.delItem(payload.muri);
@@ -2300,6 +2296,7 @@ Window {
             }
         }
         onLongPressAndHold:{
+            targetIndex = index;
             musicContextMenu(mouseX, mouseY, payload,
                 [labelPlay, "favorite", labelcShare, labelMultiSelect, labelAddToPlaylist, labelRemoveFromPlayQueue]);
             multiSelectModel = model;
