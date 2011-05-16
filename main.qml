@@ -491,32 +491,44 @@ Window {
                 console.log(payload.muri);
                 editorModel.destroyItemByID(payload.mitemid);
             }
-            content: Item {
+            content: Column {
                 id: deleteItemContents
-                anchors.fill: parent
+                anchors.left:parent.left
+                anchors.right: parent.right
                 property alias artist : artistName.text
                 property alias track : trackName.text
                 clip: true
                 Text{
                     id: artistName
+                    font.pixelSize: theme_fontPixelSizeLarge
                     text : qsTr("Artist name")
-                    anchors.top: parent.top
-                    width:  parent.width
-                    horizontalAlignment: Text.AlignHCenter
+                    anchors.leftMargin: theme_dialogLeftMarginPixelSize
+                    anchors.left:parent.left
+                    anchors.right: parent.right
+                    height: paintedHeight
                 }
                 Text{
                     id: trackName
                     text: qsTr("Track name")
-                    anchors.top:artistName.bottom
-                    width:  parent.width
-                    horizontalAlignment: Text.AlignHCenter
+                    anchors.leftMargin: theme_dialogLeftMarginPixelSize
+                    anchors.left:parent.left
+                    anchors.right: parent.right
+                    height: paintedHeight
                 }
+                Item{
+                    anchors.left:parent.left
+                    anchors.right: parent.right
+                    height: theme_dialogContentAreaTopAndBottomMarginPixelSize
+                }
+
                 Text {
+                    height: paintedHeight
                     text: qsTr("If you delete this, it will be removed from your device")
-                    anchors.top:trackName.bottom
-                    width:  parent.width
-                    horizontalAlignment: Text.AlignHCenter
+                    anchors.left:parent.left
+                    anchors.right: parent.right
                     font.pixelSize: theme_fontPixelSizeMedium
+                    verticalAlignment: Text.AlignVCenter
+                    wrapMode: Text.WordWrap
                 }
             }
         }
@@ -533,15 +545,18 @@ Window {
                 shareObj.clearItems();
                 multiSelectMode = false;
             }
-            content: Item {
+            content: Column {
                 anchors.fill: parent
                 clip: true
                 Text {
                     text: qsTr("If you delete these, they will be removed from your device")
-                    anchors.verticalCenter:parent.verticalCenter
-                    width:  parent.width
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    height: paintedHeight
                     horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
                     font.pixelSize: theme_fontPixelSizeMedium
+                    wrapMode: Text.WordWrap
                 }
             }
         }
