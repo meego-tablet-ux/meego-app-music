@@ -72,7 +72,7 @@ Window {
     property string labelMultiSelect:qsTr("Select multiple songs")
 
     property string labelNoMusicText1:qsTr("Where is all the music?")
-    property string labelNoMusicText2:qsTr("Buy, download or copy your music onto your table, then you can enjoy listening to it from here.")
+    property string labelNoMusicText2:qsTr("Buy, download or copy your music onto your tablet, then you can enjoy listening to it from here.")
     property string forbiddenchars: qsTr("\n\'\t\"\\");
     property string forbiddencharsDisplay: qsTr("<return>, <tab>, \', \", \\");
     property string defaultThumbnail: "image://meegotheme/images/media/music_thumb_med"
