@@ -73,8 +73,8 @@ Window {
 
     property string labelNoMusicText1:qsTr("Where is all the music?")
     property string labelNoMusicText2:qsTr("Buy, download or copy your music onto your tablet, then you can enjoy listening to it from here.")
-    property string forbiddenchars: qsTr("\n\'\t\"\\");
-    property string forbiddencharsDisplay: qsTr("<return>, <tab>, \', \", \\");
+    property string forbiddenchars: ("\n\'\t\"\\");
+    property string forbiddencharsDisplay: ("<return>, <tab>, \', \", \\");
     property string defaultThumbnail: "image://themedimage/images/media/music_thumb_med"
 
     property int animationDuration: 500
