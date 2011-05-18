@@ -81,13 +81,14 @@ Window {
 
     property string artistName: ""
     property int tabContentWidth: 300
-    property int albumLength: 0
     property alias shuffle: toolbar.shuffle
     property alias loop: toolbar.loop
 
     property string thumbnailUri:""
     property bool multiSelectMode: false
     property variant multiSelectModel: allTracksModel
+
+    property variant currentAlbum
 
     property variant bookModel: [labelPlayqueue,labelAllPlaylist,labelFavorites,
                                  labelAllArtist,labelAllAlbums,labelAllTracks]
@@ -1614,6 +1615,7 @@ Window {
                         property int mitemtype: itemtype
                         property bool misvirtual: isvirtual
                         property int mlength: length
+                        property int mitemcount: tracknum
 
                         martist: {
                             artist[0] == undefined? labelUnknownArtist:artist[0];
@@ -1648,7 +1650,7 @@ Window {
                                         anchors.top: albumTitleText.bottom
                                         height: albumThumbnail.height/10
                                         width: parent.width
-                                        text: qsTr("%1 songs").arg(tracknum)
+                                        text: qsTr("%1 songs").arg(dinstance.mitemcount)
                                         color: theme_fontColorMediaHighlight
                                         font.pixelSize: theme_fontPixelSizeLarge-3
                                         verticalAlignment:Text.AlignVCenter
@@ -1660,7 +1662,7 @@ Window {
                                         anchors.top: albumTrackcountText.bottom
                                         height: albumThumbnail.height/10
                                         width: parent.width
-                                        text: Code.formatAlbumLength(albumLength);
+                                        text: Code.formatAlbumLength(dinstance.mlength);
                                         color: theme_fontColorMediaHighlight
                                         font.pixelSize: theme_fontPixelSizeLarge-3
                                         verticalAlignment:Text.AlignVCenter
@@ -1960,7 +1962,7 @@ Window {
                                 anchors.top: albumTrackcountText.bottom
                                 height: albumThumbnail.height/10
                                 width: parent.width
-                                text: Code.formatAlbumLength(albumLength)
+                                text: Code.formatAlbumLength(currentAlbum.mlength);
                                 color: theme_fontColorMediaHighlight
                                 font.pixelSize: theme_fontPixelSizeLarge-3
                                 verticalAlignment:Text.AlignVCenter
