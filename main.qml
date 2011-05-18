@@ -109,6 +109,17 @@ Window {
         shareType: MeeGoUXSharingClientQmlObj.ShareTypeAudio
     }
 
+    property variant resourceManager: ResourceManager {
+        name: "meego-app-music"
+        type: ResourceManager.MusicApp
+        onAcquired: {
+            console.log("RESOURCE ACQUIRED");
+        }
+        onLost: {
+            console.log("RESOURCE LOST");
+        }
+    }
+
     property variant allTracksModel: MusicListModel {
         type: MusicListModel.ListofSongs
         sort:MusicListModel.SortByDefault
