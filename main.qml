@@ -76,6 +76,7 @@ Window {
     property string forbiddenchars: ("\n\'\t\"\\");
     property string forbiddencharsDisplay: ("<return>, <tab>, \', \", \\");
     property string defaultThumbnail: "image://themedimage/images/media/music_thumb_med"
+    property bool isLandscape: !(window.inLandscape || window.inInvertedLandscape)
 
     property int animationDuration: 500
 
@@ -244,12 +245,12 @@ Window {
         property string mitemtype
     }
 
-    QmlDBusMusic {
+    MusicDbusObject {
         id: dbusControl
-        onNext: Code.playNextSong();
-        onPrev: Code.playPrevSong();
-        onPlay: Code.play();
+        onPlayNextTrack: Code.playNextSong();
+        onPlayPreviousTrack: Code.playPrevSong();
         onPause: Code.pause();
+        onStop: Code.stop();
 
         property int nextItem1: -1
         property int nextItem2: -1
@@ -262,10 +263,39 @@ Window {
                 ]
             dbusControl.nowNextTracks = newNowNext;
         }
+
+        onPlay: {
+            if(!Code.play()) {
+                toolbar.playNeedsSongs();
+            }
+        }
+
         onStateChanged: {
             Code.updateNowNextPlaying();
         }
 
+        onClose: {
+            dbusControl.setPlayerClosed();
+            Qt.quit();
+        }
+
+        onFastForward: {
+            audio.position += 5000
+        }
+
+        onRewind: {
+            audio.position -= 5000
+        }
+
+        onShow: {
+            mainWindow.show();
+            dbusControl.setPlayerLaunched();
+        }
+
+        Component.onCompleted: {
+            dbusControl.playbackState = MusicDbusObject.PLAYBACK_STATE_UNKNOWN;
+            dbusControl.playbackMode = MusicDbusObject.PLAYBACK_MODE_NORMAL;
+        }
     }
 
     Audio {
@@ -385,7 +415,7 @@ Window {
             anchors.left: parent.left
             audioItem: audio
             playing: false
-            landscape: window.inLandscape
+            landscape: window.isLandscape
         }
 
         MediaMultiBar {
@@ -395,7 +425,7 @@ Window {
             width: parent.width
             anchors.bottom: parent.bottom
             anchors.left: parent.left
-            landscape: window.inLandscape
+            landscape: window.isLandscape
             showadd: true
             onCancelPressed: {
                 Code.clearSelected();
@@ -892,7 +922,7 @@ Window {
                 id: noMusicScreen
                 anchors.centerIn: parent
                 height: parent.height/2
-                width: (window.inLandscape)?(parent.width/2):(parent.width/1.2)
+                width: (window.isLandscape)?(parent.width/2):(parent.width/1.2)
                 visible: ((allTracksModel.total == 0)&&(!startupTimer.running))
                 Text {
                     id: noMusicScreenText1
@@ -970,7 +1000,7 @@ Window {
                 id: noMusicScreen
                 anchors.centerIn: parent
                 height: parent.height/2
-                width: (window.inLandscape)?(parent.width/2):(parent.width/1.2)
+                width: (window.isLandscape)?(parent.width/2):(parent.width/1.2)
                 visible: ((gridView.model.total == 0)&&(allTracksModel.total == 0)&&(!startupTimer.running))
                 Text {
                     id: noMusicScreenText1
@@ -1016,7 +1046,7 @@ Window {
                 id: gridView
                 type: musictype // music app = 0
                 anchors.fill: parent
-                cellWidth: ((width- 15) / (window.inLandscape ? 7: 4))
+                cellWidth: ((width- 15) / (window.isLandscape ? 7: 4))
                 cellHeight: cellWidth
                 visible:showGridView
                 anchors.leftMargin: 15
@@ -1082,7 +1112,7 @@ Window {
                 id: noMusicScreen
                 anchors.centerIn: parent
                 height: parent.height/2
-                width: (window.inLandscape)?(parent.width/2):(parent.width/1.2)
+                width: (window.isLandscape)?(parent.width/2):(parent.width/1.2)
                 visible: ((allTracksModel.total == 0)&&(!startupTimer.running))
                 Text {
                     id: noMusicScreenText1
@@ -1127,7 +1157,7 @@ Window {
                 type: musictype // music app = 0
                 anchors.fill: parent
                 visible: showGridView
-                cellWidth:(width- 15) / (window.inLandscape ? 7: 4)
+                cellWidth:(width- 15) / (window.isLandscape ? 7: 4)
                 cellHeight: cellWidth
                 anchors.leftMargin: 15
                 anchors.topMargin:3
@@ -1191,7 +1221,7 @@ Window {
                 id: noMusicScreen
                 anchors.centerIn: parent
                 height: parent.height/2
-                width: (window.inLandscape)?(parent.width/2):(parent.width/1.2)
+                width: (window.isLandscape)?(parent.width/2):(parent.width/1.2)
                 visible: ((allTracksModel.total == 0)&&(!startupTimer.running))
                 Text {
                     id: noMusicScreenText1
@@ -1238,7 +1268,7 @@ Window {
                 type: musictype // music app = 0
                 anchors.fill: parent
                 visible: showGridView
-                cellWidth:(width- 15) / (window.inLandscape ? 7: 4)
+                cellWidth:(width- 15) / (window.isLandscape ? 7: 4)
                 cellHeight: cellWidth
                 anchors.leftMargin: 15
                 anchors.topMargin:3
@@ -1312,7 +1342,7 @@ Window {
                 id: noMusicScreen
                 anchors.centerIn: parent
                 height: parent.height/2
-                width: (window.inLandscape)?(parent.width/2):(parent.width/1.2)
+                width: (window.isLandscape)?(parent.width/2):(parent.width/1.2)
                 visible: ((allTracksModel.total == 0)&&(!startupTimer.running))
                 Text {
                     id: noMusicScreenText1
@@ -1366,7 +1396,7 @@ Window {
                 selectionMode: multiSelectMode
                 anchors.fill:parent
                 visible: showGridView
-                cellWidth:(width- 15) / (window.inLandscape ? 7: 4)
+                cellWidth:(width- 15) / (window.isLandscape ? 7: 4)
                 cellHeight: cellWidth
                 model: listview.model
                 anchors.leftMargin: 15
@@ -1451,7 +1481,7 @@ Window {
                 id: noMusicScreen
                 anchors.centerIn: parent
                 height: parent.height/2
-                width: (window.inLandscape)?(parent.width/2):(parent.width/1.2)
+                width: (window.isLandscape)?(parent.width/2):(parent.width/1.2)
                 visible: ((allTracksModel.total == 0)&&(!startupTimer.running))
                 Text {
                     id: noMusicScreenText1
@@ -1555,7 +1585,7 @@ Window {
                 BorderImage {
                     id: artistTitleText
                     width: parent.width
-                    source: (window.inLandscape)?"image://themedimage/images/media/subtitle_landscape_bar":"image://theme/media/subtitle_portrait_bar"
+                    source: (window.isLandscape)?"image://themedimage/images/media/subtitle_landscape_bar":"image://theme/media/subtitle_portrait_bar"
                     Text {
                         text: labelArtist
                         font.pixelSize: theme_fontPixelSizeLarge
@@ -1576,7 +1606,7 @@ Window {
                     width: parent.width
                     height: parent.height - artistTitleText.height
                     anchors.top: artistTitleText.bottom
-                    cellWidth:(width- 15) / (window.inLandscape ? 7: 4)
+                    cellWidth:(width- 15) / (window.isLandscape ? 7: 4)
                     cellHeight: cellWidth
                     anchors.leftMargin: 15
                     anchors.topMargin:3
@@ -1757,7 +1787,7 @@ Window {
                         states: [
                             State {
                                 name: "landscapeArtistDetailView"
-                                when: window.inLandscape
+                                when: window.isLandscape
                                 PropertyChanges {
                                     target: dinstance
                                     height: Math.max(albumDetailBackground.height, songsInAlbumList.height)
@@ -1799,7 +1829,7 @@ Window {
                             },
                             State {
                                 name: "portraitArtistDetailView"
-                                when: !window.inLandscape
+                                when: !window.isLandscape
                                 PropertyChanges {
                                     target: dinstance
                                     height: albumDetailBackground.height + songsInAlbumList.height
@@ -1914,7 +1944,7 @@ Window {
                     id: artistTitleText
                     width: parent.width
                     anchors.top: parent.top
-                    source: (window.inLandscape)?"image://themedimage/images/media/subtitle_landscape_bar":"image://theme/media/subtitle_portrait_bar"
+                    source: (window.isLandscape)?"image://themedimage/images/media/subtitle_landscape_bar":"image://theme/media/subtitle_portrait_bar"
                     Text {
                         text: labelArtist
                         font.pixelSize: theme_fontPixelSizeLarge
@@ -2026,7 +2056,7 @@ Window {
             states: [
                 State {
                     name: "landscapeAlbumDetailsView"
-                    when: window.inLandscape
+                    when: window.isLandscape
                     PropertyChanges {
                         target: albumDetailBackground
                         width: albumThumbnail.width + 30
@@ -2065,7 +2095,7 @@ Window {
                 },
                 State {
                     name: "portraitAlbumDetailView"
-                    when: !window.inLandscape
+                    when: !window.isLandscape
                     PropertyChanges {
                         target: albumDetailBackground
                         width: parent.width
@@ -2220,7 +2250,7 @@ Window {
             states: [
                 State {
                     name: "landscapePlaylistDetailView"
-                    when: window.inLandscape
+                    when: window.isLandscape
                     PropertyChanges {
                         target: tPlaylist
                         width:parent.width -15
@@ -2257,7 +2287,7 @@ Window {
                 },
                 State {
                     name: "portraitPlaylistDetailView"
-                    when: !window.inLandscape
+                    when: !window.isLandscape
                     PropertyChanges {
                         target: tPlaylist
                         width:parent.width - playlistThumbnail.width -5

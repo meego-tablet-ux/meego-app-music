@@ -8,14 +8,14 @@
 
 #include "plugin.h"
 #include "qmlsettings.h"
-#include "qmldbusmusic.h"
+#include "MusicDbusObject.h"
 
 #include <QtDeclarative/qdeclarative.h>
 
 void qsettingsqmlPlugin::registerTypes(const char *uri)
 {
     qmlRegisterType<QmlSetting>(uri, 1, 0, "QmlSetting");
-    qmlRegisterType<QmlDBusMusic>(uri, 0, 1, "QmlDBusMusic");
+    qmlRegisterType<MusicDbusObject>(uri, 1, 0, "MusicDbusObject");
 }
 
 Q_EXPORT_PLUGIN2(MusicPlugin, qsettingsqmlPlugin)

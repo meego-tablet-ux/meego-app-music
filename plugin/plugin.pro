@@ -11,12 +11,16 @@ DESTDIR = $$TARGET
 SOURCES += \
     plugin.cpp \
     qmlsettings.cpp \
-    qmldbusmusic.cpp
+    qmldbusmusic.cpp \
+    MusicDbusObject.cpp \
+    music_adaptor.cpp
 
 HEADERS += \
     plugin.h \
     qmlsettings.h \
-    qmldbusmusic.h
+    qmldbusmusic.h \
+    MusicDbusObject.h \
+    music_adaptor_p.h
 
 OTHER_FILES = qmldir
 
