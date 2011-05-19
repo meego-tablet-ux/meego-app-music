@@ -39,6 +39,7 @@ public:
     void setState(QString &state);
     QStringList nowNextTracks() const;
     void setNowNextTracks(QStringList &nowNextTracks);
+    void setCurrentTrackMetadata(QStringList &data);
 
 public Q_SLOTS: // METHODS
     void close();
@@ -60,6 +61,7 @@ public Q_SLOTS: // METHODS
     void setVolume(int level);
     void show();
     void stop();
+    QStringList getCurrentTrackMetadata();
 
 Q_SIGNALS: // SIGNALS
     void error(int errorCode);
@@ -69,6 +71,7 @@ Q_SIGNALS: // SIGNALS
     void trackChanged(int track);
     void stateChanged();
     void nowNextTracksChanged();
+    void currentTrackMetadataChanged(QStringList data);
 
 private:
     MusicDbusObject *dbusObject;

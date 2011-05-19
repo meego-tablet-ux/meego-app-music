@@ -37,13 +37,11 @@ QString MusicAdaptor::state() const
 {
     QString thestate;
     QMetaObject::invokeMethod(parent(), "state", Q_RETURN_ARG(QString, thestate));
-    qDebug() << "MusicAdaptor::state: " << thestate;
     return thestate;
 }
 
 void MusicAdaptor::setState(QString &state)
 {
-    qDebug() << "MusicAdaptor::setState: " << state;
     QMetaObject::invokeMethod(parent(), "setState", Q_ARG(QString, state));
 }
 
@@ -51,14 +49,19 @@ QStringList MusicAdaptor::nowNextTracks() const
 {
     QStringList tracks;
     QMetaObject::invokeMethod(parent(), "nowNextTracks", Q_RETURN_ARG(QStringList, tracks));
-    qDebug() << "MusicAdaptor::nowNextTracks: " << tracks;
     return tracks;
 }
 
 void MusicAdaptor::setNowNextTracks(QStringList &nowNextTracks)
 {
-    qDebug() << "MusicAdaptor::setNowNextTracks: " << nowNextTracks;
     QMetaObject::invokeMethod(parent(), "setNowNextTracks", Q_ARG(QStringList, nowNextTracks));
+}
+
+QStringList MusicAdaptor::getCurrentTrackMetadata()
+{
+    QStringList data;
+    QMetaObject::invokeMethod(parent(), "getCurrentTrackMetadata", Q_RETURN_ARG(QStringList, data));
+    return data;
 }
 
 void MusicAdaptor::close()
@@ -130,7 +133,6 @@ void MusicAdaptor::pause()
 void MusicAdaptor::play()
 {
     // handle method call com.meego.acer.musicplayer.play
-    qDebug() << "MusicAdaptor::play";
     QMetaObject::invokeMethod(parent(), "play");
 }
 

@@ -75,6 +75,7 @@ public:
     Q_INVOKABLE bool muted();
     Q_INVOKABLE void setState(QString &state);
     Q_INVOKABLE void setNowNextTracks(QStringList &nowNextTracks);
+    Q_INVOKABLE void setCurrentTrackMetadata(QString album, QString artist, QString title, QString length);
 
 public Q_SLOTS: // METHODS
     int getCurrentTrack();
@@ -87,6 +88,7 @@ public Q_SLOTS: // METHODS
     void setVolume(int level);
     QString state();
     QStringList nowNextTracks();
+    QStringList getCurrentTrackMetadata();
 
 signals:
     void positionChanged(int position);
@@ -101,7 +103,6 @@ signals:
     void error(int errorCode);
     void playerClosed();
     void playerLaunched();
-
     void close();
     void fastForward();
     void pause();
@@ -111,6 +112,7 @@ signals:
     void rewind();
     void show();
     void stop();
+    void currentTrackMetadataChanged(QStringList data);
 
 private:
     int theCurrentTrack;
@@ -122,6 +124,7 @@ private:
     bool theMuted;
     QString m_state;
     QStringList m_nowNextTracks;
+    QStringList m_currentTrackMetadata;
 
     Q_DISABLE_COPY(MusicDbusObject)
 };

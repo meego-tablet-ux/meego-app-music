@@ -11,18 +11,17 @@ DESTDIR = $$TARGET
 SOURCES += \
     plugin.cpp \
     qmlsettings.cpp \
-    qmldbusmusic.cpp \
     MusicDbusObject.cpp \
     music_adaptor.cpp
 
 HEADERS += \
     plugin.h \
     qmlsettings.h \
-    qmldbusmusic.h \
     MusicDbusObject.h \
     music_adaptor_p.h
 
-OTHER_FILES = qmldir
+OTHER_FILES = qmldir \
+    music-dbus-test
 
 QMAKE_POST_LINK = cp qmldir $$DESTDIR
 

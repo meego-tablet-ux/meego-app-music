@@ -245,6 +245,57 @@ Window {
         property string mitemtype
     }
 
+    VolumeControl {
+        id: volumeControl
+    }
+
+    Connections {
+        id: volumeControlConnection // avoid loop modification
+        target: volumeControl
+        onVolumeChanged: {
+            dbusConnection.target = null
+            dbusControl.volume = value;   // int value (0~100)
+            if(value > 0)
+                dbusControl.muted = false;
+            else
+                dbusControl.muted = true;
+            dbusConnection.target = dbusControl
+        }
+
+        onMuteChanged: {
+            dbusConnection.target = null
+            dbusControl.muted = muted;   // bool value
+            dbusConnection.target = dbusControl
+        }
+    }
+
+    Connections {
+        id: dbusConnection // avoid loop modification
+        target: dbusControl
+        property int lastlevel: 0
+        onMutedChanged: {
+            volumeControlConnection.target = null
+            if(dbusControl.muted)
+            {
+                dbusConnection.lastlevel = volumeControl.volume;
+                volumeControl.volume = 0;
+            }
+            else
+            {
+                volumeControl.volume = dbusConnection.lastlevel;
+            }
+            volumeControlConnection.target = volumeControl
+        }
+
+        onVolumeChanged: {
+            if (level >= 0 && level <= 100) {
+                volumeControlConnection.target = null
+                volumeControl.volume = level;   // int value (0~100)
+                volumeControlConnection.target = volumeControl
+            }
+        }
+    }
+
     MusicDbusObject {
         id: dbusControl
         onPlayNextTrack: Code.playNextSong();
@@ -262,6 +313,11 @@ Window {
                     playqueueModel.getURNFromIndex(nextItem2)
                 ]
             dbusControl.nowNextTracks = newNowNext;
+            var album = playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.Album);
+            var artist = playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.Artist);
+            var title = playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.Title);
+            var length = playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.Length);
+            dbusControl.setCurrentTrackMetadata(album, artist, title, length);
         }
 
         onPlay: {
@@ -295,6 +351,85 @@ Window {
         Component.onCompleted: {
             dbusControl.playbackState = MusicDbusObject.PLAYBACK_STATE_UNKNOWN;
             dbusControl.playbackMode = MusicDbusObject.PLAYBACK_MODE_NORMAL;
+        }
+    }
+
+    Connections {
+        target: playqueueView
+
+        onCountChanged: {  // all track number
+            dbusControl.numberOfTracks = playqueueView.count;
+        }
+
+        onCurrentIndexChanged: {    // current track
+            dbusControl.currentTrack = playqueueView.currentIndex;
+        }
+    }
+
+    Connections {
+        target: toolbar       // Main Tool bar
+
+        function updatePlaybackMode() {
+            if (toolbar.loop) {
+                dbusControl.playbackMode = MusicDbusObject.PLAYBACK_MODE_REPEATED
+            }
+            if (toolbar.shuffle) {
+                dbusControl.playbackMode = MusicDbusObject.PLAYBACK_MODE_SHUFFLE
+            }
+        }
+
+        onLoopChanged: {
+            dbusControl.playbackMode = MusicDbusObject.PLAYBACK_MODE_NORMAL;    // reset the mode
+            updatePlaybackMode();
+        }
+
+        onShuffleChanged: {
+            dbusControl.playbackMode = MusicDbusObject.PLAYBACK_MODE_NORMAL;    // reset the mode
+            updatePlaybackMode();
+        }
+    }
+
+    Connections {
+        target: audio
+
+        onMutedChanged: {
+            dbusControl.muted = audio.muted;
+        }
+
+        onPositionChanged: {
+            dbusControl.position = audio.position;
+        }
+
+        onVolumeChanged: {
+        }
+
+        onError: {
+            dbusControl.error(MusicDbusObject.SHOW_PLAYER_FAILED)
+        }
+
+        onPaused: {
+            dbusControl.playbackState = MusicDbusObject.PLAYBACK_STATE_PAUSE
+        }
+
+        onResumed: {
+            dbusControl.playbackState = MusicDbusObject.PLAYBACK_STATE_PLAY
+        }
+
+        onStarted: {
+            dbusControl.playbackState = MusicDbusObject.PLAYBACK_STATE_PLAY
+        }
+
+        onStopped: {
+            dbusControl.playbackState = MusicDbusObject.PLAYBACK_STATE_STOP
+        }
+
+        onStatusChanged: {
+        }
+
+        onPlayingChanged: {
+        }
+
+        onPausedChanged: {
         }
     }
 

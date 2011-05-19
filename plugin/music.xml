@@ -1,0 +1,51 @@
+<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
+"http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<node>
+<interface name = "com.meego.acer.musicplayer">
+    <method name = "show" />
+    <method name = "close" />
+    <method name = "play" />
+    <method name = "stop" />
+    <method name = "pause" />
+    <method name = "playNextTrack" />
+    <method name = "playPreviousTrack" />
+    <method name = "fastForward" />
+    <method name = "rewind" />
+    <method name = "getPlaybackState">
+        <arg name = "state" type = "i" direction = "out" />
+    </method>
+    <method name = "getPlaybackMode">
+        <arg name = "mode" type = "i" direction = "out" />
+    </method>
+    <method name = "setMuted">
+        <arg name = "muted" type = "b" direction = "in" />
+    </method>
+    <method name = "setVolume">
+        <arg name = "level" type = "i" direction = "in" />
+    </method>
+    <method name = "getVolume">
+        <arg name = "level" type = "i" direction = "out" />
+    </method>
+    <method name = "getPosition">
+        <arg name = "position" type = "i" direction = "out" />
+    </method>
+    <method name = "getNumberOfTracks">
+        <arg name = "tracks" type = "i" direction = "out" />
+    </method>
+    <method name = "getCurrentTrack">
+        <arg name = "track" type = "i" direction = "out" />
+    </method>
+    
+    <signal name = "positionChanged">
+        <arg name = "position" type = "i" direction = "out" />
+    </signal>
+    <signal name = "trackChanged">
+        <arg name = "track" type = "i" direction = "out" />
+    </signal>
+    <signal name = "playerLaunched"/>
+    <signal name = "playerClosed"/>
+    <signal name = "error">
+        <arg name = "errorCode" type = "i" direction = "out" />
+    </signal>    
+</interface>
+</node>

@@ -46,6 +46,22 @@ void MusicDbusObject::setNowNextTracks(QStringList &nowNextTracks)
     emit nowNextTracksChanged();
 }
 
+QStringList MusicDbusObject::getCurrentTrackMetadata()
+{
+    return m_currentTrackMetadata;
+}
+
+void MusicDbusObject::setCurrentTrackMetadata(QString album, QString artist, QString title, QString length)
+{
+    QStringList data;
+    data << album;
+    data << artist;
+    data << title;
+    data << length;
+    m_currentTrackMetadata = data;
+    emit currentTrackMetadataChanged(m_currentTrackMetadata);
+}
+
 int MusicDbusObject::getCurrentTrack() {
     return theCurrentTrack;
 }
