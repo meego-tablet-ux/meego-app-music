@@ -71,8 +71,8 @@ Window {
     property string labelDefaultText:qsTr("Type playlist name here.")
     property string labelMultiSelect:qsTr("Select multiple songs")
 
-    property string labelNoMusicText1:qsTr("Where is all the music?")
-    property string labelNoMusicText2:qsTr("Buy, download or copy your music onto your tablet, then you can enjoy listening to it from here.")
+    property string labelNoMusicText1:qsTr("You have no music on this tablet")
+    property string labelNoMusicText2:qsTr("Download or copy your music onto the tablet. Connect the tablet to your computer with a USB cable, via WiFi or bluetooth.")
     property string forbiddenchars: ("\n\'\t\"\\");
     property string forbiddencharsDisplay: ("<return>, <tab>, \', \", \\");
     property string defaultThumbnail: "image://themedimage/images/media/music_thumb_med"
@@ -1019,28 +1019,10 @@ Window {
                     playqueueModel.clear();
                 }
             }
-            Item {
-                id: noMusicScreen
-                anchors.centerIn: parent
-                height: parent.height/2
-                width: (window.isLandscape)?(parent.width/2):(parent.width/1.2)
+            NoMusicNotification {
                 visible: ((allTracksModel.total == 0)&&(!startupTimer.running))
-                Text {
-                    id: noMusicScreenText1
-                    width: parent.width
-                    text: labelNoMusicText1
-                    font.pixelSize: window.height/17
-                    anchors.top: parent.top
-                    wrapMode: Text.WordWrap
-                }
-                Text {
-                    id: noMusicScreenText2
-                    width: parent.width
-                    text: labelNoMusicText2
-                    font.pixelSize: window.height/21
-                    anchors.top: noMusicScreenText1.bottom
-                    anchors.topMargin: window.height/24
-                    wrapMode: Text.WordWrap
+                onVisibleChanged: {
+                    playqueueView.visible = !visible;
                 }
             }
 
@@ -1097,36 +1079,16 @@ Window {
                     settings.set("PlaylistsView",1);
                 }
             }
-            Item {
+            NoMusicNotification {
                 id: noMusicScreen
-                anchors.centerIn: parent
-                height: parent.height/2
-                width: (window.isLandscape)?(parent.width/2):(parent.width/1.2)
                 visible: ((gridView.model.total == 0)&&(allTracksModel.total == 0)&&(!startupTimer.running))
-                Text {
-                    id: noMusicScreenText1
-                    width: parent.width
-                    text: labelNoMusicText1
-                    font.pixelSize: window.height/17
-                    anchors.top: parent.top
-                    wrapMode: Text.WordWrap
-                }
-                Text {
-                    id: noMusicScreenText2
-                    width: parent.width
-                    text: labelNoMusicText2
-                    font.pixelSize: window.height/21
-                    anchors.top: noMusicScreenText1.bottom
-                    anchors.topMargin: window.height/24
-                    wrapMode: Text.WordWrap
-                }
             }
             MusicListView {
                 anchors.fill: parent
                 model:gridView.model
                 mode : 1
                 footerHeight: toolbar.height
-                visible: !showGridView
+                visible: !showGridView && !noMusicScreen.visible
                 onClicked: {
                      Code.openItemInDetailView(playlistsPage,payload);
                 }
@@ -1149,7 +1111,7 @@ Window {
                 anchors.fill: parent
                 cellWidth: ((width- 15) / (window.isLandscape ? 7: 4))
                 cellHeight: cellWidth
-                visible:showGridView
+                visible:showGridView && !noMusicScreen.visible
                 anchors.leftMargin: 15
                 anchors.topMargin:3
                 defaultThumbnail: "image://themedimage/images/media/music_thumb_med"
@@ -1209,34 +1171,14 @@ Window {
                     settings.set("AllArtistsView",1);
                 }
             }
-            Item {
+            NoMusicNotification {
                 id: noMusicScreen
-                anchors.centerIn: parent
-                height: parent.height/2
-                width: (window.isLandscape)?(parent.width/2):(parent.width/1.2)
                 visible: ((allTracksModel.total == 0)&&(!startupTimer.running))
-                Text {
-                    id: noMusicScreenText1
-                    width: parent.width
-                    text: labelNoMusicText1
-                    font.pixelSize: window.height/17
-                    anchors.top: parent.top
-                    wrapMode: Text.WordWrap
-                }
-                Text {
-                    id: noMusicScreenText2
-                    width: parent.width
-                    text: labelNoMusicText2
-                    font.pixelSize: window.height/21
-                    anchors.top: noMusicScreenText1.bottom
-                    anchors.topMargin: window.height/24
-                    wrapMode: Text.WordWrap
-                }
             }
             MusicListView {
                 id: artistsListView
                 anchors.fill:parent
-                visible: !showGridView
+                visible: !showGridView && !noMusicScreen.visible
                 model:artistsGridView.model
                 mode: 2
                 footerHeight: toolbar.height
@@ -1257,7 +1199,7 @@ Window {
                 id: artistsGridView
                 type: musictype // music app = 0
                 anchors.fill: parent
-                visible: showGridView
+                visible: showGridView && !noMusicScreen.visible
                 cellWidth:(width- 15) / (window.isLandscape ? 7: 4)
                 cellHeight: cellWidth
                 anchors.leftMargin: 15
@@ -1318,34 +1260,14 @@ Window {
                     settings.set("AllAlbumsView",1);
                 }
             }
-            Item {
+            NoMusicNotification {
                 id: noMusicScreen
-                anchors.centerIn: parent
-                height: parent.height/2
-                width: (window.isLandscape)?(parent.width/2):(parent.width/1.2)
                 visible: ((allTracksModel.total == 0)&&(!startupTimer.running))
-                Text {
-                    id: noMusicScreenText1
-                    width: parent.width
-                    text: labelNoMusicText1
-                    font.pixelSize: window.height/17
-                    anchors.top: parent.top
-                    wrapMode: Text.WordWrap
-                }
-                Text {
-                    id: noMusicScreenText2
-                    width: parent.width
-                    text: labelNoMusicText2
-                    font.pixelSize: window.height/21
-                    anchors.top: noMusicScreenText1.bottom
-                    anchors.topMargin: window.height/24
-                    wrapMode: Text.WordWrap
-                }
             }
             MusicListView {
                 id: albumsListView
                 anchors.fill:parent
-                visible: !showGridView
+                visible: !showGridView && !noMusicScreen.visible
                 model:albumsGridView.model
                 mode: 3
                 footerHeight: toolbar.height
@@ -1368,7 +1290,7 @@ Window {
                 id: albumsGridView
                 type: musictype // music app = 0
                 anchors.fill: parent
-                visible: showGridView
+                visible: showGridView && !noMusicScreen.visible
                 cellWidth:(width- 15) / (window.isLandscape ? 7: 4)
                 cellHeight: cellWidth
                 anchors.leftMargin: 15
@@ -1439,35 +1361,15 @@ Window {
                     settings.set("AllTracksView",1);
                 }
             }
-            Item {
+            NoMusicNotification {
                 id: noMusicScreen
-                anchors.centerIn: parent
-                height: parent.height/2
-                width: (window.isLandscape)?(parent.width/2):(parent.width/1.2)
                 visible: ((allTracksModel.total == 0)&&(!startupTimer.running))
-                Text {
-                    id: noMusicScreenText1
-                    width: parent.width
-                    text: labelNoMusicText1
-                    font.pixelSize: window.height/17
-                    anchors.top: parent.top
-                    wrapMode: Text.WordWrap
-                }
-                Text {
-                    id: noMusicScreenText2
-                    width: parent.width
-                    text: labelNoMusicText2
-                    font.pixelSize: window.height/21
-                    anchors.top: noMusicScreenText1.bottom
-                    anchors.topMargin: window.height/24
-                    wrapMode: Text.WordWrap
-                }
             }
             MusicListView {
                 id: listview
                 selectionMode: multiSelectMode
                 anchors.fill:parent
-                visible: !showGridView
+                visible: !showGridView && !noMusicScreen.visible
                 model: allTracksModel
                 footerHeight: toolbar.height
                 onClicked: {
@@ -1496,7 +1398,7 @@ Window {
                 type: musictype // music app = 0
                 selectionMode: multiSelectMode
                 anchors.fill:parent
-                visible: showGridView
+                visible: showGridView && !noMusicScreen.visible
                 cellWidth:(width- 15) / (window.isLandscape ? 7: 4)
                 cellHeight: cellWidth
                 model: listview.model
@@ -1578,29 +1480,9 @@ Window {
                     settings.set("FavoriteView",1);
                 }
             }
-            Item {
+            NoMusicNotification {
                 id: noMusicScreen
-                anchors.centerIn: parent
-                height: parent.height/2
-                width: (window.isLandscape)?(parent.width/2):(parent.width/1.2)
                 visible: ((allTracksModel.total == 0)&&(!startupTimer.running))
-                Text {
-                    id: noMusicScreenText1
-                    width: parent.width
-                    text: labelNoMusicText1
-                    font.pixelSize: window.height/17
-                    anchors.top: parent.top
-                    wrapMode: Text.WordWrap
-                }
-                Text {
-                    id: noMusicScreenText2
-                    width: parent.width
-                    text: labelNoMusicText2
-                    font.pixelSize: window.height/21
-                    anchors.top: noMusicScreenText1.bottom
-                    anchors.topMargin: window.height/24
-                    wrapMode: Text.WordWrap
-                }
             }
             MusicListView {
                 id: listView
