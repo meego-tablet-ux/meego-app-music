@@ -132,6 +132,7 @@ Window {
         type: MusicListModel.NowPlaying
         limit: 0
         sort: MusicListModel.SortByDefault
+        onBeginPlayback: Code.play();
         onPlayIndexChanged: {
             playqueueView.currentIndex = playindex;
         }
@@ -322,7 +323,7 @@ Window {
 
         onPlay: {
             if(!Code.play()) {
-                toolbar.playNeedsSongs();
+                playqueueModel.playAllSongs();
             }
         }
 
