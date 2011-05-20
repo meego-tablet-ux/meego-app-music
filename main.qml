@@ -80,6 +80,8 @@ Window {
     property string labelAddAlbums: qsTr("Add albums")
     property string labelPlaylistsEmptyText:qsTr("You have no playlists")
     property string labelPlaylistsCreate:qsTr("Create a playlist")
+    property string labelFavoritesEmptyText: qsTr("You don't have any favourite music tracks")
+    property string labelFavoritesViewAllTracks: qsTr("View all music tracks")
     property string forbiddenchars: ("\n\'\t\"\\");
     property string forbiddencharsDisplay: ("<return>, <tab>, \', \", \\");
     property string defaultThumbnail: "image://themedimage/images/media/music_thumb_med"
@@ -1554,15 +1556,28 @@ Window {
                     settings.set("FavoriteView",1);
                 }
             }
-            NoMusicNotification {
-                id: noMusicScreen
-                visible: ((allTracksModel.total == 0)&&(!startupTimer.running))
+            Item {
+                anchors.fill: parent
+                NoMusicNotification {
+                    id: noMusicScreen
+                    visible: ((allTracksModel.total == 0)&&(!startupTimer.running))
+                }
+                NoContentTextButton {
+                    id: noFavorites
+                    visible: ((listView.count == 0)&&(!startupTimer.running)) && !noMusicScreen.visible
+                    text: labelFavoritesEmptyText
+                    buttonText: labelFavoritesViewAllTracks
+                    onClicked: {
+                        switchBook(allTracksContent);
+                    }
+                }
             }
             MusicListView {
                 id: listView
                 selectionMode: multiSelectMode
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.top:parent.top
+                visible: !noMusicScreen.visible && !noFavorites.visible
                 width: parent.width
                 height: parent.height
                 model: favoritesPage.model
