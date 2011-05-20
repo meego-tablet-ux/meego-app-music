@@ -367,26 +367,20 @@ Window {
     }
 
     Connections {
+        id: toolbarConnection
         target: toolbar       // Main Tool bar
 
         function updatePlaybackMode() {
-            if (toolbar.loop) {
-                dbusControl.playbackMode = MusicDbusObject.PLAYBACK_MODE_REPEATED
-            }
-            if (toolbar.shuffle) {
-                dbusControl.playbackMode = MusicDbusObject.PLAYBACK_MODE_SHUFFLE
-            }
+            if (!toolbar.loop&&!toolbar.shuffle)
+                dbusControl.playbackMode = MusicDbusObject.PLAYBACK_MODE_NORMAL;
+            else if (toolbar.shuffle)
+                dbusControl.playbackMode = MusicDbusObject.PLAYBACK_MODE_SHUFFLE;
+            else
+                dbusControl.playbackMode = MusicDbusObject.PLAYBACK_MODE_REPEATED;
         }
 
-        onLoopChanged: {
-            dbusControl.playbackMode = MusicDbusObject.PLAYBACK_MODE_NORMAL;    // reset the mode
-            updatePlaybackMode();
-        }
-
-        onShuffleChanged: {
-            dbusControl.playbackMode = MusicDbusObject.PLAYBACK_MODE_NORMAL;    // reset the mode
-            updatePlaybackMode();
-        }
+        onLoopChanged: toolbarConnection.updatePlaybackMode();
+        onShuffleChanged: toolbarConnection.updatePlaybackMode();
     }
 
     Connections {
