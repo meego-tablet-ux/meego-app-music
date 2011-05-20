@@ -1,6 +1,5 @@
 #!/bin/sh
 
-
 function print_usage()
 {
     echo ""
