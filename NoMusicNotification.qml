@@ -8,23 +8,13 @@
 
 import Qt 4.7
 
-Item {
+NoContent {
     id: noMusicScreen
-    anchors.fill: parent
-    //TODO check margins
-    anchors.margins: 20
-    Column {
-        id: col
+    content: Column {
         width: parent.width
-        Loader {
-            width: parent.width
-            sourceComponent: separator
-        }
         Text {
             id: noMusicScreenText1
-            //TODO check margins
-            width: parent.width - 2*10
-            anchors.horizontalCenter: parent.horizontalCenter
+            width: parent.width
             text: labelNoMusicText1
             font.pixelSize: theme_fontPixelSizeLarge*2//window.height/17
             wrapMode: Text.WordWrap
@@ -32,30 +22,10 @@ Item {
         }
         Text {
             id: noMusicScreenText2
-            //TODO check margins
-            width: parent.width - 2*10
-            anchors.horizontalCenter: parent.horizontalCenter
+            width: parent.width
             text: labelNoMusicText2
             font.pixelSize: theme_fontPixelSizeLarge//window.height/21
             wrapMode: Text.WordWrap
-        }
-        Loader {
-            width: parent.width
-            sourceComponent: separator
-        }
-    }
-    Component {
-        id: separator
-        Item {
-            width: parent.width
-            // TODO check margin
-            height: 20
-            Image {
-                anchors.verticalCenter: parent.verticalCenter
-                width: parent.width
-                // TODO this probably is not correct separator
-                source: "image://themedimage/images/dialog-separator"
-            }
         }
     }
 }
