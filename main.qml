@@ -73,6 +73,13 @@ Window {
 
     property string labelNoMusicText1:qsTr("You have no music on this tablet")
     property string labelNoMusicText2:qsTr("Download or copy your music onto the tablet. Connect the tablet to your computer with a USB cable, via WiFi or bluetooth.")
+    property string labelPlayQueueEmptyText:qsTr("Your play queue is empty")
+    property string labelPlayQueueAddMusic:qsTr("Add music to the play queue")
+    property string labelAddTracks: qsTr("Add tracks")
+    property string labelAddPlaylists: qsTr("Add playlists")
+    property string labelAddAlbums: qsTr("Add albums")
+    property string labelPlaylistsEmptyText:qsTr("You have no playlists")
+    property string labelPlaylistsCreate:qsTr("Create a playlist")
     property string forbiddenchars: ("\n\'\t\"\\");
     property string forbiddencharsDisplay: ("<return>, <tab>, \', \", \\");
     property string defaultThumbnail: "image://themedimage/images/media/music_thumb_med"
@@ -131,6 +138,11 @@ Window {
         type: MusicListModel.ListofSongs
         sort:MusicListModel.SortByDefault
         limit: 0
+    }
+    property variant playlistsModel: MusicListModel {
+        type: MusicListModel.ListofPlaylists
+        limit:0
+        sort:MusicListModel.SortByTitle
     }
 
     // global now playing queue
@@ -1019,13 +1031,66 @@ Window {
                     playqueueModel.clear();
                 }
             }
-            NoMusicNotification {
-                visible: ((allTracksModel.total == 0)&&(!startupTimer.running))
-                onVisibleChanged: {
-                    playqueueView.visible = !visible;
+
+            MusicPicker{
+                id: playlistPicker
+                //TODO change to multiSelection when MusicPicker has working support for it.
+                multiSelection: false
+
+                // signal songSelected( string title, string uri, string thumbUri, string album, int type )
+                onSongSelected: {
+                    var itemid = allTracksModel.datafromURI(uri, MediaItem.ID);
+                    playqueueModel.addItems(itemid);
+                }
+
+                //signal albumOrPlaylistSelected( string title, string uri, string thumbUri, int type )
+                onAlbumOrPlaylistSelected: {
+                    var itemid = playlistPicker.model.datafromURI(uri, MediaItem.ID);
+                    playqueueModel.addItems(itemid);
+                }
+                // signal multipleAlbumsOrPlaylistsSelected( variant titles, string uris, string thumbUris, variant types )
+                // onMultipleAlbumsOrPlaylistsSelected: {
+                //     console.log(titles);
+                // }
+                // signal multipleSongsSelected( variant titles, variant uris, variant thumbUris, string album, variant types )
+                // onMultipleSongsSelected: {
+                //     console.log(titles);
+                // }
+            }
+            Item {
+                anchors.fill: parent
+                NoMusicNotification {
+                    id: noMusicScreen
+                    visible: ((allTracksModel.total == 0)&&(!startupTimer.running))
+                    onVisibleChanged: {
+                        playqueueView.visible = (!visible && !(playQueueEmpty.visible))
+                    }
+                }
+                NoContentTextButton {
+                    id: playQueueEmpty
+                    visible: ((playqueueView.count == 0)&&(!startupTimer.running)) && !noMusicScreen.visible
+                    onVisibleChanged: {
+                        playqueueView.visible = (!visible && !noMusicScreen.visible)
+                        contextMenuModel = [labelAddTracks]
+                        if (playlistsModel.total > 0) {
+                            contextMenuModel = contextMenuModel.concat(labelAddPlaylists)
+                        }
+                        if (allTracksModel.total > 0) {
+                            contextMenuModel = contextMenuModel.concat(labelAddAlbums)
+                        }
+                    }
+                    text: labelPlayQueueEmptyText
+                    buttonText: labelPlayQueueAddMusic
+                    showContextMenu: true
+                    onTriggered: {
+                        console.log("Selected: " + contextMenuModel[index]);
+                        playlistPicker.selectSongs = (contextMenuModel[index] == labelAddTracks)
+                        playlistPicker.showPlaylists = (contextMenuModel[index] == labelAddPlaylists)
+                        playlistPicker.showAlbums = (contextMenuModel[index] == labelAddAlbums)
+                        playlistPicker.show();
+                    }
                 }
             }
-
             Connections {
                 target: window
                 onSearch: {
@@ -1083,12 +1148,21 @@ Window {
                 id: noMusicScreen
                 visible: ((gridView.model.total == 0)&&(allTracksModel.total == 0)&&(!startupTimer.running))
             }
+            NoContentTextButton {
+                id: noPlaylists
+                visible: ((gridView.model.total == 0)&&(!startupTimer.running)) && !noMusicScreen.visible
+                text: labelPlaylistsEmptyText
+                buttonText: labelPlaylistsCreate
+                onClicked: {
+                    createPlaylistDialog.show();
+                }
+            }
             MusicListView {
                 anchors.fill: parent
                 model:gridView.model
                 mode : 1
                 footerHeight: toolbar.height
-                visible: !showGridView && !noMusicScreen.visible
+                visible: !showGridView && !noMusicScreen.visible && !noPlaylists.visible
                 onClicked: {
                      Code.openItemInDetailView(playlistsPage,payload);
                 }
@@ -1111,7 +1185,7 @@ Window {
                 anchors.fill: parent
                 cellWidth: ((width- 15) / (window.isLandscape ? 7: 4))
                 cellHeight: cellWidth
-                visible:showGridView && !noMusicScreen.visible
+                visible:showGridView && !noMusicScreen.visible && !noPlaylists.visible
                 anchors.leftMargin: 15
                 anchors.topMargin:3
                 defaultThumbnail: "image://themedimage/images/media/music_thumb_med"
