@@ -108,6 +108,30 @@ void MusicDbusObject::setPlaybackState(int state) {       // helper for property
         thePlaybackState = state;
         emit playbackStateChanged(state);
     }
+
+    QString sstate;
+    switch(state) {
+    case PLAYBACK_STATE_UNKNOWN:
+    case PLAYBACK_STATE_STOP:
+        sstate = "stopped";
+        break;
+    case PLAYBACK_STATE_PLAY:
+    case PLAYBACK_STATE_FASTFORWARD:
+    case PLAYBACK_STATE_REWIND:
+        sstate = "playing";
+        break;
+    case PLAYBACK_STATE_PAUSE:
+        sstate = "paused";
+        break;
+    default:
+        return;
+    }
+
+    if (m_state != sstate)
+    {
+        m_state = sstate;
+        emit stateChanged();
+    }
 }
 
 int MusicDbusObject::getPosition() {

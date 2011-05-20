@@ -383,8 +383,13 @@ Window {
         onShuffleChanged: toolbarConnection.updatePlaybackMode();
     }
 
-    Connections {
-        target: audio
+    Audio {
+        id: audio
+        autoLoad: true
+        onError: {
+            dbusControl.error(MusicDbusObject.SHOW_PLAYER_FAILED)
+            Code.playNextSong();
+        }
 
         onMutedChanged: {
             dbusControl.muted = audio.muted;
@@ -394,58 +399,18 @@ Window {
             dbusControl.position = audio.position;
         }
 
-        onVolumeChanged: {
-        }
-
-        onError: {
-            dbusControl.error(MusicDbusObject.SHOW_PLAYER_FAILED)
-        }
-
-        onPaused: {
-            dbusControl.playbackState = MusicDbusObject.PLAYBACK_STATE_PAUSE
-        }
-
-        onResumed: {
-            dbusControl.playbackState = MusicDbusObject.PLAYBACK_STATE_PLAY
-        }
-
-        onStarted: {
-            dbusControl.playbackState = MusicDbusObject.PLAYBACK_STATE_PLAY
-        }
-
-        onStopped: {
-            dbusControl.playbackState = MusicDbusObject.PLAYBACK_STATE_STOP
-        }
-
-        onStatusChanged: {
-        }
-
-        onPlayingChanged: {
-        }
-
-        onPausedChanged: {
-        }
-    }
-
-    Audio {
-        id: audio
-        autoLoad: true
-        onError: {
-            Code.playNextSong();
-        }
-
-        onPaused: dbusControl.state = "paused";
+        onPaused: dbusControl.playbackState = MusicDbusObject.PLAYBACK_STATE_PAUSE;
         onResumed: {
             dbusControl.updateNowNextTracks();
-            dbusControl.state = "playing";
+            dbusControl.playbackState = MusicDbusObject.PLAYBACK_STATE_PLAY;
         }
         onStarted: {
             dbusControl.updateNowNextTracks();
-            dbusControl.state = "playing";
+            dbusControl.playbackState = MusicDbusObject.PLAYBACK_STATE_PLAY;
         }
         onStopped: {
             dbusControl.updateNowNextTracks();
-            dbusControl.state = "stopped";
+            dbusControl.playbackState = MusicDbusObject.PLAYBACK_STATE_STOP;
         }
 
         onStatusChanged: {
