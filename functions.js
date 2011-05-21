@@ -347,7 +347,7 @@ function openItemInDetailView(fromPage, item)
         // type is album
         thumbnailUri = item.mthumburi;
         labelAlbum = item.mtitle;
-        albumLength = item.mlength;
+        currentAlbum = item;
         window.addPage(albumDetailViewContent);
         break;
     case 5:
