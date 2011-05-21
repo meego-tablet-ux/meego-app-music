@@ -105,7 +105,12 @@ Window {
         else
             window.setBookMenuData(bookModel, bookPayload);
     }
-
+    onBackButtonPressed:
+    {
+        Code.clearSelected();
+        shareObj.clearItems();
+        multiSelectMode = false;
+    }
     ShareObj {
         id: shareObj
         shareType: MeeGoUXSharingClientQmlObj.ShareTypeAudio
