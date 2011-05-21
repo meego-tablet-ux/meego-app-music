@@ -76,7 +76,7 @@ Window {
     property string forbiddenchars: ("\n\'\t\"\\");
     property string forbiddencharsDisplay: ("<return>, <tab>, \', \", \\");
     property string defaultThumbnail: "image://themedimage/images/media/music_thumb_med"
-    property bool isLandscape: !(window.inLandscape || window.inInvertedLandscape)
+    property bool isLandscape: (window.inLandscape || window.inInvertedLandscape)
 
     property int animationDuration: 500
 
