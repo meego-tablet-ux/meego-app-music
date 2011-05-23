@@ -1236,11 +1236,11 @@ Window {
                 id: gridView
                 type: musictype // music app = 0
                 anchors.fill: parent
-                cellWidth: ((width- 15) / (window.isLandscape ? 7: 4))
+                cellWidth: Math.floor(Math.min(window.width, window.height) / 4)
                 cellHeight: cellWidth
                 visible:showGridView && !noMusicScreen.visible && !noPlaylists.visible
-                anchors.leftMargin: 15
-                anchors.topMargin:3
+                anchors.leftMargin: 0
+                anchors.topMargin: 5
                 defaultThumbnail: "image://themedimage/images/media/music_thumb_med"
                 footerHeight: toolbar.height
                 model: MusicListModel {
@@ -1249,6 +1249,8 @@ Window {
                     sort:MusicListModel.SortByTitle
                 }
                 onClicked: {
+                    console.log("scene.width " + scene.width);
+                    console.log("scene.height " + scene.height);
                     Code.openItemInDetailView(playlistsPage,payload);
                 }
                 onDoubleClicked: {
@@ -1327,10 +1329,10 @@ Window {
                 type: musictype // music app = 0
                 anchors.fill: parent
                 visible: showGridView && !noMusicScreen.visible
-                cellWidth:(width- 15) / (window.isLandscape ? 7: 4)
+                cellWidth: Math.floor(Math.min(window.width, window.height) / 4)
                 cellHeight: cellWidth
-                anchors.leftMargin: 15
-                anchors.topMargin:3
+                anchors.leftMargin: 0
+                anchors.topMargin: 5
                 defaultThumbnail: "image://themedimage/images/media/music_thumb_med"
                 footerHeight: toolbar.height
                 model: MusicListModel {
@@ -1418,10 +1420,10 @@ Window {
                 type: musictype // music app = 0
                 anchors.fill: parent
                 visible: showGridView && !noMusicScreen.visible
-                cellWidth:(width- 15) / (window.isLandscape ? 7: 4)
+                cellWidth: Math.floor(Math.min(window.width, window.height) / 4)
                 cellHeight: cellWidth
-                anchors.leftMargin: 15
-                anchors.topMargin:3
+                anchors.leftMargin: 0
+                anchors.topMargin: 5
                 defaultThumbnail: "image://themedimage/images/media/music_thumb_med"
                 footerHeight: toolbar.height
                 model: MusicListModel {
@@ -1524,15 +1526,19 @@ Window {
                 id: gridView
                 type: musictype // music app = 0
                 selectionMode: multiSelectMode
-                anchors.fill:parent
                 visible: showGridView && !noMusicScreen.visible
-                cellWidth:(width- 15) / (window.isLandscape ? 7: 4)
-                cellHeight: cellWidth
-                model: listview.model
-                anchors.leftMargin: 15
-                anchors.topMargin:3
                 footerHeight: toolbar.height
                 defaultThumbnail: "image://themedimage/images/media/music_thumb_med"
+                model: listview.model
+
+                anchors.fill: parent
+                anchors.topMargin: 5
+                anchors.leftMargin: 0
+                anchors.rightMargin: 0
+
+                cellWidth: Math.floor(Math.min(window.width, window.height) / 4)
+                cellHeight: cellWidth
+
                 onClicked: {
                     if(multiSelectMode)
                     {
@@ -1745,10 +1751,10 @@ Window {
                     width: parent.width
                     height: parent.height - artistTitleText.height
                     anchors.top: artistTitleText.bottom
-                    cellWidth:(width- 15) / (window.isLandscape ? 7: 4)
+                    cellWidth: Math.floor(Math.min(window.width, window.height) / 4)
                     cellHeight: cellWidth
-                    anchors.leftMargin: 15
-                    anchors.topMargin:3
+                    anchors.leftMargin: 0
+                    anchors.topMargin: 5
                     visible: false
                     footerHeight: toolbar.height
                     defaultThumbnail: "image://themedimage/images/media/music_thumb_med"
