@@ -29,7 +29,7 @@ NoContent {
         }
     }
     TopItem { id: topItem }
-    content: Item {
+    notification: Item {
         width: parent.width
         height: Math.max(descText.height, button.height)
         Text {

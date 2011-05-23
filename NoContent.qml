@@ -10,10 +10,12 @@ import Qt 4.7
 
 Item {
     id: noContents
-    property alias content: innerContent.children
+    property alias notification: notificationContent.children
+    property alias help: helpContent.children
     anchors.fill: parent
     //TODO check margins
     anchors.margins: 20
+    anchors.bottomMargin: anchors.margins + toolbar.height
     Column {
         id: col
         width: parent.width
@@ -22,7 +24,7 @@ Item {
             sourceComponent: separator
         }
         Item {
-            id: innerContent
+            id: notificationContent
             //TODO check margins
             width: parent.width - 2*10
             height: childrenRect.height
@@ -31,6 +33,13 @@ Item {
         Loader {
             width: parent.width
             sourceComponent: separator
+        }
+        Item {
+            id: helpContent
+            //TODO check margins
+            width: parent.width
+            height: noContents.height - 2*20 - notificationContent.height
+            anchors.horizontalCenter: parent.horizontalCenter
         }
     }
     Component {

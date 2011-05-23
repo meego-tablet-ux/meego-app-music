@@ -10,7 +10,7 @@ import Qt 4.7
 
 NoContent {
     id: noMusicScreen
-    content: Column {
+    notification: Column {
         width: parent.width
         Text {
             id: noMusicScreenText1
@@ -18,7 +18,7 @@ NoContent {
             text: labelNoMusicText1
             font.pixelSize: theme_fontPixelSizeLarge*2//window.height/17
             wrapMode: Text.WordWrap
-            height: paintedHeight + window.height/24
+            height: paintedHeight + 20
         }
         Text {
             id: noMusicScreenText2

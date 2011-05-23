@@ -75,13 +75,31 @@ Window {
     property string labelNoMusicText2:qsTr("Download or copy your music onto the tablet. Connect the tablet to your computer with a USB cable, via WiFi or bluetooth.")
     property string labelPlayQueueEmptyText:qsTr("Your play queue is empty")
     property string labelPlayQueueAddMusic:qsTr("Add music to the play queue")
+    property string labelPlayQueueHelpHeading1: qsTr("What's the play queue?")
+    property string labelPlayQueueHelpText1: qsTr("A place to queue up the music you want to hear. You can queue albums, playlists or individual tracks. ")
+    property string labelPlayQueueHelpHeading2: qsTr("How do I queue music?")
+    property string labelPlayQueueHelpText2: qsTr("To queue music, tap the 'Add music to the play queue' button. You can also tap and hold a song, album or playlist, then select 'Add to play queue'.")
+    property string labelPlayQueueHelpHeading3: qsTr("How do I get music?")
+    property string labelPlayQueueHelpText3: qsTr("Download or copy your music onto the tablet. Connect the tablet to your computer with a USB cable, via Wi-Fi or bluetooth.")
     property string labelAddTracks: qsTr("Add tracks")
     property string labelAddPlaylists: qsTr("Add playlists")
     property string labelAddAlbums: qsTr("Add albums")
     property string labelPlaylistsEmptyText:qsTr("You have no playlists")
     property string labelPlaylistsCreate:qsTr("Create a playlist")
+    property string labelPlaylistsHelpHeading1: qsTr("What's a playlist?")
+    property string labelPlaylistsHelpText1: qsTr("A compilation of music created by you. Create playlists to suit your mood, your activities and to share with friends.")
+    property string labelPlaylistsHelpHeading2: qsTr("How do I add music to a playlist?")
+    property string labelPlaylistsHelpText2: qsTr("To add music to a playlist, tap and hold the track you want to add. Then select 'Add to playlist'.")
+    property string labelPlaylistsHelpHeading3: labelPlayQueueHelpHeading3
+    property string labelPlaylistsHelpText3: labelPlayQueueHelpText3
     property string labelFavoritesEmptyText: qsTr("You don't have any favourite music tracks")
     property string labelFavoritesViewAllTracks: qsTr("View all music tracks")
+    property string labelFavoritesHelpHeading1: qsTr("What are favourites?")
+    property string labelFavoritesHelpText1: qsTr("The place to keep the music tracks you like most.")
+    property string labelFavoritesHelpHeading2: qsTr("How do I create favourites?")
+    property string labelFavoritesHelpText2: qsTr("To add music to your favourites, tap and hold a music track you love. Then select 'Favourite'.")
+    property string labelFavoritesHelpHeading3: labelPlayQueueHelpHeading3
+    property string labelFavoritesHelpText3: labelPlayQueueHelpText3
     property string forbiddenchars: ("\n\'\t\"\\");
     property string forbiddencharsDisplay: ("<return>, <tab>, \', \", \\");
     property string defaultThumbnail: "image://themedimage/images/media/music_thumb_med"
@@ -100,6 +118,8 @@ Window {
     property int targetIndex: 0
 
     property variant currentAlbum
+
+    property int noContentSpacing: 10
 
     property variant bookModel: [labelPlayqueue,labelAllPlaylist,labelFavorites,
                                  labelAllArtist,labelAllAlbums,labelAllTracks]
@@ -1035,7 +1055,7 @@ Window {
             }
 
             MusicPicker{
-                id: playlistPicker
+                id: playqueuePicker
                 //TODO change to multiSelection when MusicPicker has working support for it.
                 multiSelection: false
 
@@ -1047,7 +1067,7 @@ Window {
 
                 //signal albumOrPlaylistSelected( string title, string uri, string thumbUri, int type )
                 onAlbumOrPlaylistSelected: {
-                    var itemid = playlistPicker.model.datafromURI(uri, MediaItem.ID);
+                    var itemid = playqueuePicker.model.datafromURI(uri, MediaItem.ID);
                     playqueueModel.addItems(itemid);
                 }
                 // signal multipleAlbumsOrPlaylistsSelected( variant titles, string uris, string thumbUris, variant types )
@@ -1085,11 +1105,26 @@ Window {
                     buttonText: labelPlayQueueAddMusic
                     showContextMenu: true
                     onTriggered: {
-                        console.log("Selected: " + contextMenuModel[index]);
-                        playlistPicker.selectSongs = (contextMenuModel[index] == labelAddTracks)
-                        playlistPicker.showPlaylists = (contextMenuModel[index] == labelAddPlaylists)
-                        playlistPicker.showAlbums = (contextMenuModel[index] == labelAddAlbums)
-                        playlistPicker.show();
+                        playqueuePicker.selectSongs = (contextMenuModel[index] == labelAddTracks)
+                        playqueuePicker.showPlaylists = (contextMenuModel[index] == labelAddPlaylists)
+                        playqueuePicker.showAlbums = (contextMenuModel[index] == labelAddAlbums)
+                        playqueuePicker.show();
+                    }
+                    help: HelpContent {
+                        id: help
+                        helpHeading1: labelPlayQueueHelpHeading1
+                        helpText1: labelPlayQueueHelpText1
+                        helpHeading2: labelPlayQueueHelpHeading2
+                        helpText2: labelPlayQueueHelpText2
+                        helpHeading3: labelPlayQueueHelpHeading3
+                        helpText3: labelPlayQueueHelpText3
+                    }
+                    Component.onCompleted: {
+                        if (settings.get("PlayQueueOpenedBefore")) {
+                            help.visible = false;
+                        } else {
+                            settings.set("PlayQueueOpenedBefore", 1)
+                        }
                     }
                 }
             }
@@ -1158,6 +1193,22 @@ Window {
                 onClicked: {
                     createPlaylistDialog.show();
                 }
+                help: HelpContent {
+                    id: help
+                    helpHeading1: labelPlaylistsHelpHeading1
+                    helpText1: labelPlaylistsHelpText1
+                    helpHeading2: labelPlaylistsHelpHeading2
+                    helpText2: labelPlaylistsHelpText2
+                    helpHeading3: labelPlaylistsHelpHeading3
+                    helpText3: labelPlaylistsHelpText3
+               }
+               Component.onCompleted: {
+                   if (settings.get("PlaylistsOpenedBefore")) {
+                       help.visible = false;
+                   } else {
+                       settings.set("PlaylistsOpenedBefore", 1)
+                   }
+               }
             }
             MusicListView {
                 anchors.fill: parent
@@ -1570,6 +1621,22 @@ Window {
                     onClicked: {
                         switchBook(allTracksContent);
                     }
+                    help: HelpContent {
+                        id: help
+                        helpHeading1: labelFavoritesHelpHeading1
+                        helpText1: labelFavoritesHelpText1
+                        helpHeading2: labelFavoritesHelpHeading2
+                        helpText2: labelFavoritesHelpText2
+                        helpHeading3: labelFavoritesHelpHeading3
+                        helpText3: labelFavoritesHelpText3
+                        Component.onCompleted: {
+                            if (settings.get("FavoritesOpenedBefore")) {
+                                help.visible = false;
+                            } else {
+                                settings.set("FavoritesOpenedBefore", 1)
+                            }
+                        }
+                   }
                 }
             }
             MusicListView {
