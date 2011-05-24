@@ -14,7 +14,6 @@ Item {
     id: container
     width: parent.width
     height: nowPlayingInfo.height + audioToolbar.height
-    property variant audioItem
     property string trackName
     property string artistName
     property alias playing: audioToolbar.ispause

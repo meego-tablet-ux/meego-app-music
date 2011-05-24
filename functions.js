@@ -74,7 +74,10 @@ function addMultipleToPlayqueue() {
 
 function removeFromPlayqueue() {
     if(playqueueModel.playindex == targetIndex)
+    {
         audio.stop();
+        resourceManager.userwantsplayback = false;
+    }
     playqueueModel.removeIndex(targetIndex);
     updateNowNextPlaying();
 }
@@ -93,6 +96,7 @@ function removeMultipleFromPlayqueue() {
         if(ids[i] == playid)
         {
             audio.stop();
+            resourceManager.userwantsplayback = false;
             break;
         }
     }
@@ -148,10 +152,39 @@ function changeMultipleItemFavorite(val) {
     multiSelectMode = false;
 }
 
+function audioplay()
+{
+    resourceManager.userwantsplayback = true;
+    dbusControl.updateNowNextTracks();
+    dbusControl.playbackState = 1;
+    playqueueModel.playstatus = MusicListModel.Playing;
+    toolbar.playing = true;
+}
+
+function pause()
+{
+    audio.pause();
+    resourceManager.userwantsplayback = false;
+    dbusControl.playbackState = 2;
+    playqueueModel.playstatus = MusicListModel.Paused;
+    toolbar.playing = false;
+}
+
+function stop()
+{
+    audio.stop();
+    resourceManager.userwantsplayback = false;
+    dbusControl.updateNowNextTracks();
+    dbusControl.playbackState = 3;
+    playqueueModel.playstatus = MusicListModel.Stopped;
+    toolbar.playing = false;
+}
+
+
 function play()
 {
     if (audio.paused ) {
-        audio.play();
+        audioplay();
     } else {
         return playNewSong();
     }
@@ -175,7 +208,7 @@ function playNewSong() {
     toolbar.artistName = playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.Artist)[0];
 
     audio.source = playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.URI);
-    audio.playing = true;
+    audioplay();
     editorModel.setViewed(playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.ID));
     return true;
 }
@@ -273,17 +306,6 @@ function updateNowNextPlaying()
     }
     dbusControl.updateNowNextTracks();
 
-}
-
-
-function pause()
-{
-    audio.pause()
-}
-
-function stop()
-{
-    audio.stop();
 }
 
 function formatLength(time)

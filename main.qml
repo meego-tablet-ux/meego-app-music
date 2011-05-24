@@ -145,17 +145,6 @@ Window {
         shareType: MeeGoUXSharingClientQmlObj.ShareTypeAudio
     }
 
-    property variant resourceManager: ResourceManager {
-        name: "meego-app-music"
-        type: ResourceManager.MusicApp
-        onAcquired: {
-            console.log("RESOURCE ACQUIRED");
-        }
-        onLost: {
-            console.log("RESOURCE LOST");
-        }
-    }
-
     property variant allTracksModel: MusicListModel {
         type: MusicListModel.ListofSongs
         sort:MusicListModel.SortByDefault
@@ -249,6 +238,22 @@ Window {
         type: MusicListModel.MusicPlaylist
         limit: 0
         sort: MusicListModel.SortByDefault
+    }
+
+    property variant resourceManager: ResourceManager {
+        name: "player"
+        type: ResourceManager.MusicApp
+        onStartPlaying: {
+            console.log("START PLAYING");
+            audio.play();
+        }
+        onStopPlaying: {
+            console.log("STOP PLAYING");
+            audio.pause();
+        }
+        onUserwantsplaybackChanged: {
+            console.log("USER WANTS PLAYBACK: " + userwantsplayback);
+        }
     }
 
     QmlSetting{
@@ -431,56 +436,16 @@ Window {
             dbusControl.error(MusicDbusObject.SHOW_PLAYER_FAILED)
             Code.playNextSong();
         }
-
         onMutedChanged: {
             dbusControl.muted = audio.muted;
         }
-
         onPositionChanged: {
             dbusControl.position = audio.position;
-        }
-
-        onPaused: dbusControl.playbackState = MusicDbusObject.PLAYBACK_STATE_PAUSE;
-        onResumed: {
-            dbusControl.updateNowNextTracks();
-            dbusControl.playbackState = MusicDbusObject.PLAYBACK_STATE_PLAY;
-        }
-        onStarted: {
-            dbusControl.updateNowNextTracks();
-            dbusControl.playbackState = MusicDbusObject.PLAYBACK_STATE_PLAY;
-        }
-        onStopped: {
-            dbusControl.updateNowNextTracks();
-            dbusControl.playbackState = MusicDbusObject.PLAYBACK_STATE_STOP;
         }
 
         onStatusChanged: {
             if (status == Audio.EndOfMedia) {
                 Code.playNextSong();
-            }
-        }
-        onPlayingChanged: {
-            if (!playing) {
-                playqueueModel.playstatus = MusicListModel.Stopped;
-                toolbar.playing = false;
-            }else {
-                playqueueModel.playstatus = MusicListModel.Playing;
-                toolbar.playing = true;
-            }
-        }
-        onPausedChanged: {
-            if (playing) {
-               if(paused){
-                   playqueueModel.playstatus = MusicListModel.Paused;
-                   toolbar.playing = false;
-               } else {
-                   playqueueModel.playstatus = MusicListModel.Playing;
-                   toolbar.playing = true;
-               }
-            }
-            else{
-                playqueueModel.playstatus = MusicListModel.Stopped;
-                toolbar.playing = false;
             }
         }
     }
@@ -548,7 +513,6 @@ Window {
             id: toolbar
             anchors.bottom: parent.bottom
             anchors.left: parent.left
-            audioItem: audio
             playing: false
             landscape: window.isLandscape
         }
