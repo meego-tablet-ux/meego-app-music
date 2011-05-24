@@ -244,15 +244,10 @@ Window {
         name: "player"
         type: ResourceManager.MusicApp
         onStartPlaying: {
-            console.log("START PLAYING");
             audio.play();
         }
         onStopPlaying: {
-            console.log("STOP PLAYING");
             audio.pause();
-        }
-        onUserwantsplaybackChanged: {
-            console.log("USER WANTS PLAYBACK: " + userwantsplayback);
         }
     }
 
@@ -1213,8 +1208,6 @@ Window {
                     sort:MusicListModel.SortByTitle
                 }
                 onClicked: {
-                    console.log("scene.width " + scene.width);
-                    console.log("scene.height " + scene.height);
                     Code.openItemInDetailView(playlistsPage,payload);
                 }
                 onDoubleClicked: {
