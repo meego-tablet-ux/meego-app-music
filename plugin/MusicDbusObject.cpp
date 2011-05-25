@@ -31,8 +31,11 @@ QString MusicDbusObject::state()
 
 void MusicDbusObject::setState(QString &state)
 {
-    m_state = state;
-    emit stateChanged();
+    if(m_state != state)
+    {
+        m_state = state;
+        emit stateChanged();
+    }
 }
 
 QStringList MusicDbusObject::nowNextTracks()
@@ -42,8 +45,11 @@ QStringList MusicDbusObject::nowNextTracks()
 
 void MusicDbusObject::setNowNextTracks(QStringList &nowNextTracks)
 {
-    m_nowNextTracks = nowNextTracks;
-    emit nowNextTracksChanged();
+    if(m_nowNextTracks != nowNextTracks)
+    {
+        m_nowNextTracks = nowNextTracks;
+        emit nowNextTracksChanged();
+    }
 }
 
 QStringList MusicDbusObject::getCurrentTrackMetadata()
