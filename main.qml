@@ -519,8 +519,15 @@ Window {
             width: parent.width
             anchors.bottom: parent.bottom
             anchors.left: parent.left
+<<<<<<< HEAD
             landscape: window.isLandscape
-            showadd: true
+            showfavourite: (bookMenuSelectedIndex==2)?false:true
+            showunfavourite: true
+            showrmfromqueue: (bookMenuSelectedIndex==0)?true:false
+            showrmfromplaylist: (bookMenuSelectedIndex==1)?true:false
+            showaddtoqueue: (bookMenuSelectedIndex==0)?false:true
+            showaddtoplaylist: (bookMenuSelectedIndex==1)?false:true
+            showdelete: (bookMenuSelectedIndex <= 2)?false:true
             onCancelPressed: {
                 Code.clearSelected();
                 shareObj.clearItems();
@@ -1182,11 +1189,12 @@ Window {
                     Code.addToPlayqueueAndPlay(payload);
                 }
                 onLongPressAndHold: {
+                    if( !multiSelectMode ){
                     musicContextMenu(mouseX, mouseY, payload,
                         [labelOpen, labelPlay, labelAddToPlayQueue, labelRenamePlaylist, labelClearPlaylist, labelDelete]);
                     contextMenu.openpage = playlistsPage;
                     contextMenu.playlistmodel = gridView.model;
-                    contextMenu.show();
+                    contextMenu.show();}
                 }
             }
 
@@ -1214,11 +1222,12 @@ Window {
                     Code.addToPlayqueueAndPlay(dinstance);
                 }
                 onLongPressAndHold: {
+                    if( !multiSelectMode ){
                     musicContextMenu(mouseX, mouseY, payload,
                         [labelOpen, labelPlay, labelAddToPlayQueue, labelRenamePlaylist, labelDelete]);
                     contextMenu.openpage = playlistsPage;
                     contextMenu.playlistmodel = gridView.model;
-                    contextMenu.show();
+                    contextMenu.show();}
                 }
             }
         }
@@ -1275,10 +1284,11 @@ Window {
                     Code.addToPlayqueueAndPlay(payload);
                 }
                 onLongPressAndHold: {
+                    if( !multiSelectMode ){
                     musicContextMenu(mouseX, mouseY, payload,
                         [labelOpen, labelPlay, labelAddToPlayQueue, labelAddToPlaylist, labelDelete]);
                     contextMenu.openpage = artistsPage;
-                    contextMenu.show();
+                    contextMenu.show();}
                 }
             }
             MediaGridView {
@@ -1304,10 +1314,11 @@ Window {
                     Code.addToPlayqueueAndPlay(payload);
                 }
                 onLongPressAndHold: {
+                    if( !multiSelectMode ){
                     musicContextMenu(mouseX, mouseY, payload,
                         [labelOpen, labelPlay, labelAddToPlayQueue, labelAddToPlaylist, labelDelete]);
                     contextMenu.openpage = artistsPage;
-                    contextMenu.show();
+                    contextMenu.show();}
                 }
             }
         }
@@ -1365,10 +1376,11 @@ Window {
                     Code.addToPlayqueueAndPlay(payload);
                 }
                 onLongPressAndHold: {
+                    if( !multiSelectMode ){
                     musicContextMenu(mouseX, mouseY, payload,
                         [labelOpen, labelPlay, labelAddToPlayQueue, labelAddToPlaylist, labelDelete]);
                     contextMenu.openpage = albumsPage;
-                    contextMenu.show();
+                    contextMenu.show();}
                 }
             }
 
@@ -1383,6 +1395,21 @@ Window {
                 anchors.topMargin: 5
                 defaultThumbnail: "image://themedimage/images/media/music_thumb_med"
                 footerHeight: toolbar.height
+
+                spacing: 10
+                showHeader: true
+                delegateHeaderSource: "image://themedimage/widgets/apps/media/music-album-header"
+                delegateHeaderVisible: true
+                delegateFooterSource: "image://themedimage/widgets/apps/media/photo-album-shadow"
+                delegateFooterVisible: true
+                borderImageSource: "image://themedimage/widgets/apps/media/photo-album-border"
+                borderImageTop: 8
+                borderImageBottom: 6
+                borderImageLeft: 8
+                borderImageRight: 8
+                borderImageInnerMargin: 2
+
+
                 model: MusicListModel {
                     type: MusicListModel.ListofAlbums
                     limit:0
@@ -1396,10 +1423,11 @@ Window {
                     Code.addToPlayqueueAndPlay(payload);
                 }
                 onLongPressAndHold: {
+                    if( !multiSelectMode ){
                     musicContextMenu(mouseX, mouseY, payload,
                         [labelOpen, labelPlay, labelAddToPlayQueue, labelAddToPlaylist, labelDelete]);
                     contextMenu.openpage = albumsPage;
-                    contextMenu.show();
+                    contextMenu.show();}
                 }
             }
         }
@@ -1473,10 +1501,11 @@ Window {
                     }
                 }
                 onLongPressAndHold:{
+                    if( !multiSelectMode ){
                     musicContextMenu(mouseX, mouseY, payload,
                         [labelPlay, "favorite", labelcShare, labelMultiSelect, labelAddToPlayQueue, labelAddToPlaylist, labelDelete]);
                     multiSelectModel = model;
-                    contextMenu.show();
+                    contextMenu.show();}
                 }
             }
             MediaGridView {
@@ -1511,10 +1540,11 @@ Window {
                     }
                 }
                 onLongPressAndHold:{
+                    if( !multiSelectMode ){
                     musicContextMenu(mouseX, mouseY, payload,
                         [labelPlay, "favorite", labelcShare, labelMultiSelect, labelAddToPlayQueue, labelAddToPlaylist, labelDelete]);
                     multiSelectModel = model;
-                    contextMenu.show();
+                    contextMenu.show();}
                 }
             }
         }
@@ -1627,10 +1657,11 @@ Window {
                     }
                 }
                 onLongPressAndHold: {
+                    if( !multiSelectMode ){
                     musicContextMenu(mouseX, mouseY, payload,
                         [labelPlay, "favorite", labelcShare, labelMultiSelect, labelAddToPlayQueue, labelAddToPlaylist, labelDelete]);
                     multiSelectModel = model;
-                    contextMenu.show();
+                    contextMenu.show();}
                 }
             }
         }
@@ -1723,10 +1754,11 @@ Window {
                     }
 
                     onLongPressAndHold: {
+                        if( !multiSelectMode ){
                         musicContextMenu(mouseX, mouseY, payload,
                             [labelOpen, labelPlay, labelAddToPlayQueue, labelAddToPlaylist, labelDelete]);
                         contextMenu.openpage = artistDetailViewPage;
-                        contextMenu.show();
+                        contextMenu.show();}
                     }
                 }
 
@@ -1838,10 +1870,11 @@ Window {
                                         Code.openItemInDetailView(artistDetailViewPage,dinstance)
                                     }
                                     onPressAndHold: {
+                                        if( !multiSelectMode ){
                                         musicContextMenu(mouseX, mouseY, dinstance,
                                             [labelOpen, labelPlay, labelAddToPlayQueue, labelAddToPlaylist, labelDelete]);
                                         contextMenu.openpage = artistDetailViewPage;
-                                        contextMenu.show();
+                                        contextMenu.show();}
                                     }
                                 }
                             }
@@ -1880,10 +1913,11 @@ Window {
                                 }
                             }
                             onLongPressAndHold: {
+                                if( !multiSelectMode ){
                                 musicContextMenu(mouseX, mouseY, payload,
                                     [labelPlay, "favorite", labelcShare, labelMultiSelect, labelAddToPlayQueue, labelAddToPlaylist, labelDelete]);
                                 multiSelectModel = model;
-                                contextMenu.show();
+                                contextMenu.show();}
                             }
                         }
 
@@ -2149,10 +2183,11 @@ Window {
                         }
                     }
                     onLongPressAndHold: {
+                        if( !multiSelectMode ){
                         musicContextMenu(mouseX, mouseY, payload,
                             [labelPlay, "favorite", labelcShare, labelMultiSelect, labelAddToPlayQueue, labelAddToPlaylist, labelDelete]);
                         multiSelectModel = model;
-                        contextMenu.show();
+                        contextMenu.show();}
                     }
                 }
             }
@@ -2341,12 +2376,13 @@ Window {
                         }
                     }
                     onLongPressAndHold: {
+                        if( !multiSelectMode ){
                         targetIndex = index;
                         musicContextMenu(mouseX, mouseY, payload,
                             [labelPlay, "favorite", labelcShare, labelMultiSelect, labelAddToPlayQueue, labelAddToPlaylist, labelRemFromPlaylist]);
                         multiSelectModel = model;
                         contextMenu.playlistmodel = playlistList.model;
-                        contextMenu.show();
+                        contextMenu.show();}
                     }
                 }
             }
@@ -2455,11 +2491,12 @@ Window {
             }
         }
         onLongPressAndHold:{
+            if( !multiSelectMode ){
             targetIndex = index;
             musicContextMenu(mouseX, mouseY, payload,
                 [labelPlay, "favorite", labelcShare, labelMultiSelect, labelAddToPlaylist, labelRemoveFromPlayQueue]);
             multiSelectModel = model;
-            contextMenu.show();
+            contextMenu.show();}
         }
     }
 
