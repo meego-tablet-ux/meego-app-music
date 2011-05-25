@@ -58,8 +58,11 @@ void MusicDbusObject::setCurrentTrackMetadata(QString album, QString artist, QSt
     data << artist;
     data << title;
     data << length;
-    m_currentTrackMetadata = data;
-    emit currentTrackMetadataChanged(m_currentTrackMetadata);
+    if(m_currentTrackMetadata != data)
+    {
+        m_currentTrackMetadata = data;
+        emit currentTrackMetadataChanged(m_currentTrackMetadata);
+    }
 }
 
 int MusicDbusObject::getCurrentTrack() {
