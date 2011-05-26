@@ -1534,7 +1534,6 @@ Window {
                             selectedFavoritesAccumulator += (payload.mfavorite?-1:1);
                             }
                         multiSelectModeShowFavoriteAction = (selectedFavoritesAccumulator <= 0) ? true : false;
-                        console.log("SELECTING ("+selectedFavoritesAccumulator+"):"+multiSelectModeShowFavoriteAction);
                     }
                     else
                     {
