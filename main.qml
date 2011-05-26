@@ -490,7 +490,6 @@ Window {
         playlistEditor.clear();
         playlistEditor.playlist = title;
         playlistEditor.addItems(payload);
-        playlistEditor.savePlaylist(title);
         if(multiSelectMode)
         {
             Code.clearSelected();
@@ -789,8 +788,8 @@ Window {
             property string playlistTitle: ""
             onAccepted: {
                 playlistEditor.clear();
+                playlistEditor.playlist = playlistTitle;
                 playlistEditor.addItems(playqueueModel.getAllIDs());
-                playlistEditor.savePlaylist(playlistTitle);
                 playqueuePlaylistDialogTextEntry.text = "";
 
             }
@@ -911,8 +910,7 @@ Window {
                     {
                         // Clear a play list
                         playlistEditor.playlist = payload.mtitle;
-                        playlistEditor.clear();
-                        playlistEditor.savePlaylist(payload.mtitle);
+                        playlistEditor.clearPlaylist();
                         contextMenu.hide();
                     }
                     else if (model[index] == labelRenamePlaylist)
@@ -2275,8 +2273,7 @@ Window {
                 }
                 else if(selectedItem == "clear")
                 {
-                    playlistList.model.clear();
-                    playlistList.model.savePlaylist(labelPlaylist);
+                    playlistList.model.clearPlaylist();
                 }
             }
             Image {
