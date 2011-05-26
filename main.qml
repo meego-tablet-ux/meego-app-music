@@ -125,14 +125,24 @@ Window {
                                  labelAllArtist,labelAllAlbums,labelAllTracks]
     property variant bookPayload: [playQueueContent,playlistsContent,favoritesContent,
                                    artistsContent,albumsContent,allTracksContent]
+    property int selectedPageIndex: 5
+    property int selectedFavoritesAccumulator
+    property bool multiSelectModeShowFavoriteAction
+
     bookMenuModel: bookModel
     bookMenuPayload: bookPayload
 
     onMultiSelectModeChanged: {
         if(multiSelectMode)
+        {
+            selectedPageIndex = bookMenuSelectedIndex;
             window.setBookMenuData([], []);
+        }
         else
+        {
             window.setBookMenuData(bookModel, bookPayload);
+            bookMenuSelectedIndex = selectedPageIndex;
+        }
     }
     onBackButtonPressed:
     {
@@ -452,7 +462,11 @@ Window {
     }
 
     Component.onCompleted: {
+        multiSelectModeShowFavoriteAction = true;
+        selectedFavoritesAccumulator = 0;
         switchBook(allTracksContent);
+        bookMenuSelectedIndex = bookModel.indexOf(labelAllTracks);
+        selectedPageIndex = bookMenuSelectedIndex;
         startupTimer.start();
     }
 
@@ -519,15 +533,14 @@ Window {
             width: parent.width
             anchors.bottom: parent.bottom
             anchors.left: parent.left
-<<<<<<< HEAD
             landscape: window.isLandscape
-            showfavourite: (bookMenuSelectedIndex==2)?false:true
-            showunfavourite: true
-            showrmfromqueue: (bookMenuSelectedIndex==0)?true:false
-            showrmfromplaylist: (bookMenuSelectedIndex==1)?true:false
-            showaddtoqueue: (bookMenuSelectedIndex==0)?false:true
-            showaddtoplaylist: (bookMenuSelectedIndex==1)?false:true
-            showdelete: (bookMenuSelectedIndex <= 2)?false:true
+            showfavourite: (selectedPageIndex==bookModel.indexOf(labelFavorites))?false:(multiSelectModeShowFavoriteAction?true:false)
+            showunfavourite: (selectedPageIndex==bookModel.indexOf(labelFavorites))?true:(multiSelectModeShowFavoriteAction?false:true)
+            showrmfromqueue: (selectedPageIndex==bookModel.indexOf(labelPlayqueue))?true:false
+            showrmfromplaylist: (selectedPageIndex==bookModel.indexOf(labelAllPlaylist))?true:false
+            showaddtoqueue: (selectedPageIndex==bookModel.indexOf(labelPlayqueue))?false:true
+            showaddtoplaylist: (selectedPageIndex==bookModel.indexOf(labelAllPlaylist))?false:true
+            showdelete: (selectedPageIndex <= bookModel.indexOf(labelFavorites))?false:true
             onCancelPressed: {
                 Code.clearSelected();
                 shareObj.clearItems();
@@ -540,14 +553,6 @@ Window {
                     deleteMultipleItemsDialog.show();
                 }
             }
-            onAddPressed: {
-                if(Code.selectionCount() > 0)
-                {
-                    playlistPicker.okclicked = false;
-                    playlistPicker.payload = Code.getSelectedIDs()
-                    playlistPicker.show();
-                }
-            }
             onSharePressed: {
                 if(shareObj.shareCount > 0)
                 {
@@ -556,6 +561,34 @@ Window {
                     topItem.calcTopParent()
                     contextShareMenu.setPosition( map.x, map.y );
                     contextShareMenu.show();
+                }
+            }
+            onFavouritePressed: {
+                if(Code.selectionCount() > 0)
+                    {Code.changeMultipleItemFavorite(true);}
+            }
+            onUnfavouritePressed: {
+                if(Code.selectionCount() > 0)
+                    {Code.changeMultipleItemFavorite(false);}
+            }
+            onRmFromQueuePressed: {
+                if(Code.selectionCount() > 0)
+                    {Code.removeFromPlayqueue();}
+            }
+            onRmFromPlaylistPressed: {
+                if(Code.selectionCount() > 0)
+                    {Code.removeMultipleFromPlaylist(contextMenu.playlistmodel);}
+            }
+            onAddToQueuePressed: {
+                if(Code.selectionCount() > 0)
+                    {Code.addMultipleToPlayqueue();}
+            }
+            onAddToPlaylistPressed: {
+                if(Code.selectionCount() > 0)
+                {
+                    playlistPicker.okclicked = false;
+                    playlistPicker.payload = Code.getSelectedIDs()
+                    playlistPicker.show();
                 }
             }
             states: [
@@ -1491,9 +1524,17 @@ Window {
                     {
                         model.setSelected(payload.mitemid, !model.isSelected(payload.mitemid));
                         if (model.isSelected(payload.mitemid))
+                            {
                             shareObj.addItem(payload.muri);
+                            selectedFavoritesAccumulator += (payload.mfavorite?1:-1);
+                            }
                         else
+                            {
                             shareObj.delItem(payload.muri);
+                            selectedFavoritesAccumulator += (payload.mfavorite?-1:1);
+                            }
+                        multiSelectModeShowFavoriteAction = (selectedFavoritesAccumulator <= 0) ? true : false;
+                        console.log("SELECTING ("+selectedFavoritesAccumulator+"):"+multiSelectModeShowFavoriteAction);
                     }
                     else
                     {
