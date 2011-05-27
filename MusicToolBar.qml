@@ -29,13 +29,13 @@ Item {
         if (shuffle && loop) {
             loop = false;
         }
+        playqueueModel.shuffle = shuffle;
     }
     onLoopChanged: {
         // if in loop state, shuffle should be off
         if (shuffle && loop) {
             shuffle = false;
         }
-        playqueueModel.shuffle = shuffle;
     }
     BorderImage {
         id: nowPlayingInfo
