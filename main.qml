@@ -702,7 +702,6 @@ Window {
             title:labelCreateNewPlaylist
             cancelButtonText:labelCancel
             acceptButtonText:labelCreate
-            z: 1000
             property string playlistTitle: ""
             property bool isvalid: true
             onAccepted: {
