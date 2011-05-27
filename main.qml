@@ -168,6 +168,9 @@ Window {
             if(playstatus == MusicListModel.Playing)
                 playqueueView.currentIndex = playqueueModel.playindex;
         }
+        onShuffleChanged: {
+            playqueueView.currentIndex = playqueueModel.playindex;
+        }
     }
 
     // an editor model, it is used to do things like tag arbitrary items as favorite/viewed
