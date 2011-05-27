@@ -212,22 +212,17 @@ function playNewSong() {
 }
 
 function playNextSong() {
-    if (shuffle) {
-        playqueueModel.playindex = playqueueModel.shuffleIndex(0);
-        playqueueModel.shuffleIncrement();
-    }else {
-        if (playqueueModel.playindex < (playqueueView.count -1))
-        {
-            playqueueModel.playindex++;
-        }
-        else
-        {
-            if (loop){
-                playqueueModel.playindex = 0;
-            }else{
-                stop();
-                return;
-            }
+    if (playqueueModel.playindex < (playqueueView.count -1))
+    {
+        playqueueModel.playindex++;
+    }
+    else
+    {
+        if (loop){
+            playqueueModel.playindex = 0;
+        }else{
+            stop();
+            return;
         }
     }
     audio.source = "";
@@ -236,23 +231,18 @@ function playNextSong() {
 }
 
 function playPrevSong() {
-    if (shuffle) {
-        playqueueModel.playindex = playqueueModel.shuffleIndex(0);
-        playqueueModel.shuffleIncrement();
-    }else {
-        if (playqueueModel.playindex == 0)
-        {
-            if (loop) {
-                playqueueModel.playindex = playqueueView.count - 1;
-            }else {
-                stop();
-                return;
-            }
+    if (playqueueModel.playindex == 0)
+    {
+        if (loop) {
+            playqueueModel.playindex = playqueueView.count - 1;
+        }else {
+            stop();
+            return;
         }
-        else
-        {
-            playqueueModel.playindex--;
-        }
+    }
+    else
+    {
+        playqueueModel.playindex--;
     }
     audio.source = "";
     playNewSong();
@@ -264,9 +254,6 @@ function updateNowNextPlaying()
     if (dbusControl.state == "stopped") {
         dbusControl.nextItem1 = -1;
         dbusControl.nextItem2 = -1;
-    } else if (shuffle) {
-        dbusControl.nextItem1 = playqueueModel.shuffleIndex(1);
-        dbusControl.nextItem2 = playqueueModel.shuffleIndex(2);
     } else  if (playqueueModel.playindex == 0) {
         if (playqueueView.count == 1) {
             dbusControl.nextItem1 = -1;

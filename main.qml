@@ -109,7 +109,6 @@ Window {
 
     property string artistName: ""
     property int tabContentWidth: 300
-    property alias shuffle: toolbar.shuffle
     property alias loop: toolbar.loop
 
     property string thumbnailUri:""

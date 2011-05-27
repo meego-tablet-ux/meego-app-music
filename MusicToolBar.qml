@@ -35,6 +35,7 @@ Item {
         if (shuffle && loop) {
             shuffle = false;
         }
+        playqueueModel.shuffle = shuffle;
     }
     BorderImage {
         id: nowPlayingInfo
