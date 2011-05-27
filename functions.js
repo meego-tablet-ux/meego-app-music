@@ -84,7 +84,6 @@ function removeFromPlayqueue() {
 
 function removeFromPlaylist(list) {
     list.removeIndex(targetIndex);
-    list.savePlaylist(list.playlist);
     clearSelected();
 }
 
@@ -109,7 +108,6 @@ function removeMultipleFromPlayqueue() {
 
 function removeMultipleFromPlaylist(list) {
     list.removeSelected();
-    list.savePlaylist(list.playlist);
     clearSelected();
     shareObj.clearItems();
     multiSelectMode = false;
@@ -390,5 +388,4 @@ function appendItemToPlaylist(item, playlistItem)
     miscModel.clear();
     miscModel.playlist = playlistItem.mtitle;
     miscModel.addItems(item.mitemid);
-    miscModel.savePlaylist(playlistItem.mtitle);
 }
