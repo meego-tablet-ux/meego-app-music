@@ -139,11 +139,6 @@ Window {
         shareObj.clearItems();
         multiSelectMode = false;
     }
-    ShareObj {
-        id: shareObj
-        shareType: MeeGoUXSharingClientQmlObj.ShareTypeAudio
-    }
-
     property variant allTracksModel: MusicListModel {
         type: MusicListModel.ListofSongs
         sort:MusicListModel.SortByDefault
@@ -483,6 +478,8 @@ Window {
         }
         contextMenu.model = ctxList;
         contextMenu.payload = payload;
+        contextMenu.mouseX = map.x;
+        contextMenu.mouseY = map.y;
         topItem.calcTopParent();
         contextMenu.setPosition( map.x, map.y );
     }
@@ -504,6 +501,11 @@ Window {
         id: globalItems
         z: 1000
         anchors.fill: parent
+
+        ShareObj {
+            id: shareObj
+            shareType: MeeGoUXSharingClientQmlObj.ShareTypeAudio
+        }
 
         MusicToolBar {
             id: toolbar
@@ -546,10 +548,7 @@ Window {
                 if(shareObj.shareCount > 0)
                 {
                     var map = mapToItem(topItem.topItem, fingerX, fingerY);
-                    contextShareMenu.model = shareObj.serviceTypes;
-                    topItem.calcTopParent()
-                    contextShareMenu.setPosition( map.x, map.y );
-                    contextShareMenu.show();
+                    shareObj.showContextTypes(map.x, map.y)
                 }
             }
             states: [
@@ -836,6 +835,8 @@ Window {
             property variant shareModel: []
             property variant openpage
             property variant playlistmodel
+            property int mouseX
+            property int mouseY
             content: ActionMenu {
                 id: contextActionMenu
                 property variant payload: undefined
@@ -847,13 +848,11 @@ Window {
                             Code.addToPlayqueueAndPlay(payload);
                         else if(Code.selectionCount() > 0)
                             Code.addMultipleToPlayqueueAndPlay();
-                        contextMenu.hide();
                     }
                     else if (model[index] == labelOpen)
                     {
                         // Open
                         Code.openItemInDetailView(contextMenu.openpage,payload);
-                        contextMenu.hide();
                     }
                     else if ((model[index] == labelFavorite)||(model[index] == labelUnFavorite))
                     {
@@ -862,7 +861,6 @@ Window {
                             Code.changeItemFavorite(payload, (model[index] == labelFavorite));
                         else if(Code.selectionCount() > 0)
                             Code.changeMultipleItemFavorite(model[index] == labelFavorite);
-                        contextMenu.hide();
                     }
                     else if (model[index] == labelAddToPlayQueue)
                     {
@@ -871,7 +869,6 @@ Window {
                             Code.addToPlayqueue(payload);
                         else if(Code.selectionCount() > 0)
                             Code.addMultipleToPlayqueue();
-                        contextMenu.hide();
                     }
                     else if (model[index] == labelRemoveFromPlayQueue)
                     {
@@ -880,7 +877,6 @@ Window {
                             Code.removeFromPlayqueue();
                         else if(Code.selectionCount() > 0)
                             Code.removeMultipleFromPlayqueue();
-                        contextMenu.hide();
                     }
                     else if (model[index] == labelAddToPlaylist)
                     {
@@ -897,7 +893,6 @@ Window {
                             playlistPicker.payload = Code.getSelectedIDs()
                             playlistPicker.show();
                         }
-                        contextMenu.hide();
                     }
                     else if (model[index] == labelRemFromPlaylist)
                     {
@@ -906,14 +901,12 @@ Window {
                             Code.removeFromPlaylist(contextMenu.playlistmodel);
                         else if(Code.selectionCount() > 0)
                             Code.removeMultipleFromPlaylist(contextMenu.playlistmodel);
-                        contextMenu.hide();
                     }
                     else if (model[index] == labelClearPlaylist)
                     {
                         // Clear a play list
                         playlistEditor.playlist = payload.mtitle;
                         playlistEditor.clearPlaylist();
-                        contextMenu.hide();
                     }
                     else if (model[index] == labelRenamePlaylist)
                     {
@@ -922,7 +915,6 @@ Window {
                         renamePlaylistDialog.urn = payload.murn;
                         renamePlaylistDialog.playListModel = contextMenu.playlistmodel;
                         renamePlaylistDialog.show();
-                        contextMenu.hide();
                     }
                     else if (model[index] == labelDelete)
                     {
@@ -937,13 +929,11 @@ Window {
                             deleteMultipleItemsDialog.deletecount = Code.selectionCount();
                             deleteMultipleItemsDialog.show();
                         }
-                        contextMenu.hide();
                     }
                     else if (model[index] == labelMultiSelect)
                     {
                         // Multi Select
                         multiSelectMode = true;
-                        contextMenu.hide();
                     }
                     else if (model[index] == labelcShare)
                     {
@@ -957,27 +947,7 @@ Window {
                         {
                             shareObj.addItems(Code.getSelectedURIs()) // URIs
                         }
-                        contextMenu.shareModel = shareObj.serviceTypes;
-                        contextMenu.shareModel = contextMenu.shareModel.concat(labelCancel);
-                        contextMenu.subMenuModel = contextMenu.shareModel;
-                        contextMenu.subMenuPayload = contextMenu.shareModel;
-                        contextMenu.subMenuVisible = true;
-                    }
-                }
-            }
-            onSubMenuTriggered: {
-                if (shareModel[index] == labelCancel)
-                {
-                    contextMenu.subMenuVisible = false;
-                }
-                else
-                {
-                    var svcTypes = shareObj.serviceTypes;
-                    for (x in svcTypes) {
-                        if (shareModel[index] == svcTypes[x]) {
-                            shareObj.showContext(shareModel[index], contextMenu.x, contextMenu.y);
-                            break;
-                        }
+                        shareObj.showContextTypes(contextMenu.mouseX, contextMenu.mouseY)
                     }
                     contextMenu.hide();
                 }
