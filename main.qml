@@ -505,6 +505,14 @@ Window {
         ShareObj {
             id: shareObj
             shareType: MeeGoUXSharingClientQmlObj.ShareTypeAudio
+            onSharingComplete: {
+                if(multiSelectMode)
+                {
+                    Code.clearSelected();
+                    shareObj.clearItems();
+                    multiSelectMode = false;
+                }
+            }
         }
 
         MusicToolBar {
@@ -805,25 +813,6 @@ Window {
                     onTextChanged: {
                         playqueuePlaylistDialog.playlistTitle = text
                     }
-                }
-            }
-        }
-
-        ContextMenu {
-            id: contextShareMenu
-            property alias model: contextShareActionMenu.model
-            content: ActionMenu {
-                id: contextShareActionMenu
-                onTriggered: {
-                    var svcTypes = shareObj.serviceTypes;
-                    for (x in svcTypes) {
-                        if (model[index] == svcTypes[x]) {
-                            shareObj.showContext(model[index], contextShareMenu.x, contextShareMenu.y);
-                            break;
-                        }
-                    }
-                    contextShareMenu.hide();
-                    multiSelectMode = false;
                 }
             }
         }
