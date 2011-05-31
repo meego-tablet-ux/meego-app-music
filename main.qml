@@ -1149,16 +1149,34 @@ Window {
                 }
             }
 
+            Rectangle {
+                anchors.fill: parent
+                color: "black"
+            }
+
+            BorderImage {
+                anchors.fill: parent
+                anchors.topMargin: 8
+                anchors.leftMargin: 8
+                anchors.rightMargin: 8
+                anchors.bottomMargin: 5
+                source: "image://themedimage/widgets/apps/media/assets/content-background"
+                border.left:   8
+                border.top:    8
+                border.bottom: 8
+                border.right:  8
+            }
+
 
             MediaGridView {
                 id: gridView
                 type: musictype // music app = 0
                 anchors.fill: parent
-                cellWidth: Math.floor(Math.min(window.width, window.height) / 4)
-                cellHeight: cellWidth
+                anchors.topMargin: 10
+                anchors.bottomMargin: 10
+                anchors.leftMargin: (parent.width - Math.floor(parent.width / 326)*326) / 2
+                anchors.rightMargin: anchors.leftMargin
                 visible:showGridView && !noMusicScreen.visible && !noPlaylists.visible
-                anchors.leftMargin: 0
-                anchors.topMargin: 5
                 defaultThumbnail: "image://themedimage/images/media/music_thumb_med"
                 footerHeight: toolbar.height
                 model: MusicListModel {
@@ -1240,15 +1258,33 @@ Window {
                     contextMenu.show();
                 }
             }
+
+            Rectangle {
+                anchors.fill: parent
+                color: "black"
+            }
+
+            BorderImage {
+                anchors.fill: parent
+                anchors.topMargin: 8
+                anchors.leftMargin: 8
+                anchors.rightMargin: 8
+                anchors.bottomMargin: 5
+                source: "image://themedimage/widgets/apps/media/assets/content-background"
+                border.left:   8
+                border.top:    8
+                border.bottom: 8
+                border.right:  8
+            }
             MediaGridView {
                 id: artistsGridView
                 type: musictype // music app = 0
                 anchors.fill: parent
                 visible: showGridView && !noMusicScreen.visible
-                cellWidth: Math.floor(Math.min(window.width, window.height) / 4)
-                cellHeight: cellWidth
-                anchors.leftMargin: 0
-                anchors.topMargin: 5
+                anchors.topMargin: 10
+                anchors.bottomMargin: 10
+                anchors.leftMargin: (parent.width - Math.floor(parent.width / 326)*326) / 2
+                anchors.rightMargin: anchors.leftMargin
                 defaultThumbnail: "image://themedimage/images/media/music_thumb_med"
                 footerHeight: toolbar.height
                 model: MusicListModel {
@@ -1331,15 +1367,33 @@ Window {
                 }
             }
 
+            Rectangle {
+                anchors.fill: parent
+                color: "black"
+            }
+
+            BorderImage {
+                anchors.fill: parent
+                anchors.topMargin: 8
+                anchors.leftMargin: 8
+                anchors.rightMargin: 8
+                anchors.bottomMargin: 5
+                source: "image://themedimage/widgets/apps/media/assets/content-background"
+                border.left:   8
+                border.top:    8
+                border.bottom: 8
+                border.right:  8
+            }
+
             MediaGridView {
                 id: albumsGridView
                 type: musictype // music app = 0
                 anchors.fill: parent
                 visible: showGridView && !noMusicScreen.visible
-                cellWidth: Math.floor(Math.min(window.width, window.height) / 4)
-                cellHeight: cellWidth
-                anchors.leftMargin: 0
-                anchors.topMargin: 5
+                anchors.topMargin: 10
+                anchors.bottomMargin: 10
+                anchors.leftMargin: (parent.width - Math.floor(parent.width / 326)*326) / 2
+                anchors.rightMargin: anchors.leftMargin
                 defaultThumbnail: "image://themedimage/images/media/music_thumb_med"
                 footerHeight: toolbar.height
                 model: MusicListModel {
@@ -1438,6 +1492,24 @@ Window {
                     contextMenu.show();
                 }
             }
+
+            Rectangle {
+                anchors.fill: parent
+                color: "black"
+            }
+
+            BorderImage {
+                anchors.fill: parent
+                anchors.topMargin: 8
+                anchors.leftMargin: 8
+                anchors.rightMargin: 8
+                anchors.bottomMargin: 5
+                source: "image://themedimage/widgets/apps/media/assets/content-background"
+                border.left:   8
+                border.top:    8
+                border.bottom: 8
+                border.right:  8
+            }
             MediaGridView {
                 id: gridView
                 type: musictype // music app = 0
@@ -1448,12 +1520,10 @@ Window {
                 model: listview.model
 
                 anchors.fill: parent
-                anchors.topMargin: 5
-                anchors.leftMargin: 0
-                anchors.rightMargin: 0
-
-                cellWidth: Math.floor(Math.min(window.width, window.height) / 4)
-                cellHeight: cellWidth
+                anchors.topMargin: 10
+                anchors.bottomMargin: 10
+                anchors.leftMargin: (parent.width - Math.floor(parent.width / 326)*326) / 2
+                anchors.rightMargin: anchors.leftMargin
 
                 onClicked: {
                     if(multiSelectMode)
@@ -1659,6 +1729,24 @@ Window {
                     }
                 }
 
+                Rectangle {
+                    anchors.fill: parent
+                    color: "black"
+                }
+
+                BorderImage {
+                    anchors.fill: parent
+                    anchors.topMargin: 8
+                    anchors.leftMargin: 8
+                    anchors.rightMargin: 8
+                    anchors.bottomMargin: 5
+                    source: "image://themedimage/widgets/apps/media/assets/content-background"
+                    border.left:   8
+                    border.top:    8
+                    border.bottom: 8
+                    border.right:  8
+                }
+
                 MediaGridView {
                     id: artistAlbumsGridView
                     type: musictype // music app = 0
@@ -1667,10 +1755,10 @@ Window {
                     width: parent.width
                     height: parent.height - artistTitleText.height
                     anchors.top: artistTitleText.bottom
-                    cellWidth: Math.floor(Math.min(window.width, window.height) / 4)
-                    cellHeight: cellWidth
-                    anchors.leftMargin: 0
-                    anchors.topMargin: 5
+                    anchors.topMargin: 10
+                    anchors.bottomMargin: 10
+                    anchors.leftMargin: (parent.width - Math.floor(parent.width / 326)*326) / 2
+                    anchors.rightMargin: anchors.leftMargin
                     visible: false
                     footerHeight: toolbar.height
                     defaultThumbnail: "image://themedimage/images/media/music_thumb_med"
