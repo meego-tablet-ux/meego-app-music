@@ -1079,7 +1079,7 @@ Window {
             onActivated : {
                 infocus = true;
                 window.disableToolBarSearch = false;
-                actionMenuSelectedIndex = settings.get("PlaylistsView")+1;
+                playlistsPage.actionMenuSelectedIndex = settings.get("PlaylistsView")+1;
                 actionMenuforcedSelectedIndex = settings.get("PlaylistsView")+1;
             }
             onDeactivated : { infocus = false; }
@@ -1223,7 +1223,7 @@ Window {
             onActivated : {
                 infocus = true;
                 window.disableToolBarSearch = false;
-                actionMenuSelectedIndex = settings.get("AllArtistsView");
+                artistsPage.actionMenuSelectedIndex = settings.get("AllArtistsView");
             }
             onDeactivated : { infocus = false; }
             Connections {
@@ -1332,7 +1332,7 @@ Window {
             onActivated : {
                 infocus = true;
                 window.disableToolBarSearch = false;
-                actionMenuSelectedIndex = settings.get("AllAlbumsView");
+                albumsPage.actionMenuSelectedIndex = settings.get("AllAlbumsView");
             }
             onDeactivated : { infocus = false; }
             Connections {
@@ -1444,7 +1444,7 @@ Window {
             onActivated : {
                 infocus = true;
                 window.disableToolBarSearch = false;
-                actionMenuSelectedIndex = settings.get("AllTracksView");
+                allTracksPage.actionMenuSelectedIndex = settings.get("AllTracksView");
             }
             onDeactivated : { infocus = false; }
             Connections {
