@@ -118,8 +118,6 @@ Window {
 
     property variant currentAlbum
 
-    property int noContentSpacing: 10
-
     property variant bookModel: [labelPlayqueue,labelAllPlaylist,labelFavorites,
                                  labelAllArtist,labelAllAlbums,labelAllTracks]
     property variant bookPayload: [playQueueContent,playlistsContent,favoritesContent,
@@ -1006,26 +1004,28 @@ Window {
                         playqueueView.visible = (!visible && !(playQueueEmpty.visible))
                     }
                 }
-                NoContentTextButton {
+                NoContent {
                     id: playQueueEmpty
+                    bottomMargin: toolbar.height
                     visible: ((playqueueView.count == 0)&&(!startupTimer.running)) && !noMusicScreen.visible
                     onVisibleChanged: {
                         playqueueView.visible = (!visible && !noMusicScreen.visible)
-                        contextMenuModel = [labelAddTracks]
+                        button1ContextMenuModel = [labelAddTracks]
                         if (playlistsModel.total > 0) {
-                            contextMenuModel = contextMenuModel.concat(labelAddPlaylists)
+                            button1ContextMenuModel = button1ContextMenuModel.concat(labelAddPlaylists)
                         }
                         if (allTracksModel.total > 0) {
-                            contextMenuModel = contextMenuModel.concat(labelAddAlbums)
+                            button1ContextMenuModel = button1ContextMenuModel.concat(labelAddAlbums)
                         }
                     }
-                    text: labelPlayQueueEmptyText
-                    buttonText: labelPlayQueueAddMusic
-                    showContextMenu: true
-                    onTriggered: {
-                        playqueuePicker.selectSongs = (contextMenuModel[index] == labelAddTracks)
-                        playqueuePicker.showPlaylists = (contextMenuModel[index] == labelAddPlaylists)
-                        playqueuePicker.showAlbums = (contextMenuModel[index] == labelAddAlbums)
+                    title: labelPlayQueueEmptyText
+                    button1Text: labelPlayQueueAddMusic
+                    showButton1ContextMenu: true
+                    onButton1MenuTriggered: {
+                        console.log("playqueuePicker")
+                        playqueuePicker.selectSongs = (button1ContextMenuModel[index] == labelAddTracks)
+                        playqueuePicker.showPlaylists = (button1ContextMenuModel[index] == labelAddPlaylists)
+                        playqueuePicker.showAlbums = (button1ContextMenuModel[index] == labelAddAlbums)
                         playqueuePicker.show();
                     }
                     help: HelpContent {
@@ -1103,12 +1103,13 @@ Window {
                 id: noMusicScreen
                 visible: ((gridView.model.total == 0)&&(allTracksModel.total == 0)&&(!startupTimer.running))
             }
-            NoContentTextButton {
+            NoContent {
                 id: noPlaylists
+                bottomMargin: toolbar.height
                 visible: ((gridView.model.total == 0)&&(!startupTimer.running)) && !noMusicScreen.visible
-                text: labelPlaylistsEmptyText
-                buttonText: labelPlaylistsCreate
-                onClicked: {
+                title: labelPlaylistsEmptyText
+                button1Text: labelPlaylistsCreate
+                onButton1Clicked: {
                     createPlaylistDialog.show();
                 }
                 help: HelpContent {
@@ -1606,12 +1607,13 @@ Window {
                     id: noMusicScreen
                     visible: ((allTracksModel.total == 0)&&(!startupTimer.running))
                 }
-                NoContentTextButton {
+                NoContent {
                     id: noFavorites
+                    bottomMargin: toolbar.height
                     visible: ((listView.count == 0)&&(!startupTimer.running)) && !noMusicScreen.visible
-                    text: labelFavoritesEmptyText
-                    buttonText: labelFavoritesViewAllTracks
-                    onClicked: {
+                    title: labelFavoritesEmptyText
+                    button1Text: labelFavoritesViewAllTracks
+                    onButton1Clicked: {
                         switchBook(allTracksContent);
                     }
                     help: HelpContent {

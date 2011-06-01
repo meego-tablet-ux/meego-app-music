@@ -7,25 +7,10 @@
  */
 
 import Qt 4.7
+import MeeGo.Media 0.1
 
 NoContent {
     id: noMusicScreen
-    notification: Column {
-        width: parent.width
-        Text {
-            id: noMusicScreenText1
-            width: parent.width
-            text: labelNoMusicText1
-            font.pixelSize: theme_fontPixelSizeLarge*2//window.height/17
-            wrapMode: Text.WordWrap
-            height: paintedHeight + 20
-        }
-        Text {
-            id: noMusicScreenText2
-            width: parent.width
-            text: labelNoMusicText2
-            font.pixelSize: theme_fontPixelSizeLarge//window.height/21
-            wrapMode: Text.WordWrap
-        }
-    }
+    title: labelNoMusicText1
+    description: labelNoMusicText2
 }
