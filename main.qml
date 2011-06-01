@@ -272,6 +272,10 @@ Window {
                 editorModel.requestItem(MediaItem.MusicAlbumItem, cdata);
             } else if (cmd == "playPlaylist") {
                 editorModel.requestItem(MediaItem.MusicPlaylistItem, cdata);
+            } else if(cmd == "show") {
+                if(cdata == "playqueue") {
+                    switchBook(playQueueContent);
+                }
             }
         }
     }
