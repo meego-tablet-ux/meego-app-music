@@ -1119,6 +1119,7 @@ Window {
                 infocus = true;
                 window.disableToolBarSearch = false;
                 actionMenuSelectedIndex = settings.get("PlaylistsView")+1;
+                actionMenuforcedSelectedIndex = settings.get("PlaylistsView")+1;
             }
             onDeactivated : { infocus = false; }
             Connections {
