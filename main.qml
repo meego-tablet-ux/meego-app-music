@@ -1073,12 +1073,14 @@ Window {
             id: playlistsPage
             anchors.fill: parent
             pageTitle: labelAllPlaylist
+            actionMenuHighlightSelection: true
             property bool showGridView: settings.get("PlaylistsView") == 0
             property bool infocus: true
             onActivated : {
                 infocus = true;
                 window.disableToolBarSearch = false;
                 actionMenuSelectedIndex = settings.get("PlaylistsView")+1;
+                actionMenuforcedSelectedIndex = settings.get("PlaylistsView")+1;
             }
             onDeactivated : { infocus = false; }
             Connections {
@@ -1104,6 +1106,7 @@ Window {
                     showGridView = false;
                     settings.set("PlaylistsView",1);
                 }
+                actionMenuforcedSelectedIndex = settings.get("PlaylistsView")+1
             }
             NoMusicNotification {
                 id: noMusicScreen
@@ -1214,6 +1217,7 @@ Window {
             id: artistsPage
             anchors.fill: parent
             pageTitle: labelAllArtist
+            actionMenuHighlightSelection: true
             property bool showGridView: settings.get("AllArtistsView") == 0
             property bool infocus: true
             onActivated : {
@@ -1322,6 +1326,7 @@ Window {
             id: albumsPage
             anchors.fill: parent
             pageTitle: labelAllAlbums
+            actionMenuHighlightSelection: true
             property bool showGridView: settings.get("AllAlbumsView") == 0
             property bool infocus: true
             onActivated : {
@@ -1433,6 +1438,7 @@ Window {
             id: allTracksPage
             anchors.fill: parent
             pageTitle: labelAllTracks
+            actionMenuHighlightSelection: true
             property bool showGridView: settings.get("AllTracksView") == 0
             property bool infocus: true
             onActivated : {
@@ -1566,6 +1572,7 @@ Window {
             id: favoritesPage
             anchors.fill: parent
             pageTitle: labelFavorites
+            actionMenuHighlightSelection: true
             property bool infocus: true
             onActivated : {
                 infocus = true;
@@ -1683,6 +1690,7 @@ Window {
             id: artistDetailViewPage
             anchors.fill: parent
             pageTitle: labelArtist
+            actionMenuHighlightSelection: true
             property bool infocus: true
             onActivated : {
                 infocus = true;
@@ -2072,6 +2080,7 @@ Window {
             id: albumDetailViewPage
             anchors.fill: parent
             pageTitle: labelAlbum
+            actionMenuHighlightSelection: true
             property bool infocus: true
             onActivated : {
                 infocus = true;
