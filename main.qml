@@ -1128,6 +1128,11 @@ Window {
                    }
                }
             }
+            Rectangle {
+                anchors.fill: parent
+                color: "black"
+            }
+
             MusicListView {
                 anchors.fill: parent
                 model:gridView.model
@@ -1147,11 +1152,6 @@ Window {
                     contextMenu.playlistmodel = gridView.model;
                     contextMenu.show();
                 }
-            }
-
-            Rectangle {
-                anchors.fill: parent
-                color: "black"
             }
 
             BorderImage {
@@ -1238,6 +1238,11 @@ Window {
                 id: noMusicScreen
                 visible: ((allTracksModel.total == 0)&&(!startupTimer.running))
             }
+            Rectangle {
+                anchors.fill: parent
+                color: "black"
+            }
+
             MusicListView {
                 id: artistsListView
                 anchors.fill:parent
@@ -1257,11 +1262,6 @@ Window {
                     contextMenu.openpage = artistsPage;
                     contextMenu.show();
                 }
-            }
-
-            Rectangle {
-                anchors.fill: parent
-                color: "black"
             }
 
             BorderImage {
@@ -1345,6 +1345,11 @@ Window {
                 id: noMusicScreen
                 visible: ((allTracksModel.total == 0)&&(!startupTimer.running))
             }
+            Rectangle {
+                anchors.fill: parent
+                color: "black"
+            }
+
             MusicListView {
                 id: albumsListView
                 anchors.fill:parent
@@ -1365,11 +1370,6 @@ Window {
                     contextMenu.openpage = albumsPage;
                     contextMenu.show();
                 }
-            }
-
-            Rectangle {
-                anchors.fill: parent
-                color: "black"
             }
 
             BorderImage {
@@ -1464,6 +1464,12 @@ Window {
                 id: noMusicScreen
                 visible: ((allTracksModel.total == 0)&&(!startupTimer.running))
             }
+
+            Rectangle {
+                anchors.fill: parent
+                color: "black"
+            }
+
             MusicListView {
                 id: listview
                 selectionMode: multiSelectMode
@@ -1491,11 +1497,6 @@ Window {
                     multiSelectModel = model;
                     contextMenu.show();
                 }
-            }
-
-            Rectangle {
-                anchors.fill: parent
-                color: "black"
             }
 
             BorderImage {

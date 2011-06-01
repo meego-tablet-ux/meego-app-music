@@ -146,7 +146,10 @@ Item {
                     return "image://themedimage/images/media/music_row_highlight_landscape";
                 }else if ((index%2) == 0) {
                     return "image://themedimage/images/media/music_row_landscape";
+                }else {
+                    return "image://themedimage/images/media/music_row_whtie_landscape";
                 }
+
                 return "";
             }
 
