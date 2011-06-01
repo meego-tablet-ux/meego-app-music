@@ -497,7 +497,6 @@ Window {
 
     overlayItem: Item {
         id: globalItems
-        z: 1000
         anchors.fill: parent
 
         ShareObj {
