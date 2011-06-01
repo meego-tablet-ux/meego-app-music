@@ -14,6 +14,7 @@ Item {
     width: 640
     height: 480
     property alias model: listview.model
+    property alias currentItem: listview.currentItem
     property alias currentIndex: listview.currentIndex
     property alias count: listview.count
     property string labelUnknownArtist: qsTr("unknown artist")

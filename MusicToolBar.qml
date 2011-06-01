@@ -22,6 +22,10 @@ Item {
     property bool landscape: false
     property real nowPlayingHeight: 36
 
+    property variant syncItem
+    property alias audioSliderPosition : audioToolbar.sliderPosition
+    property alias audioElapsedTimeText: audioToolbar.elapsedTimeText
+
     signal playNeedsSongs()
 
     onShuffleChanged: {
@@ -158,6 +162,31 @@ Item {
                 progressBarConnection.target = audio
             }
         }
+
+        onSliderPositionChanged: {
+            syncItem.sendCommandData();
+        }
+        Connections {
+            id: syncItemConnection
+            target: syncItem
+            onPlayNeedsSongs: {
+                if(Code.play())
+                    ispause = true;
+                else
+                    container.playNeedsSongs();
+            }
+            onPlayPrevSongs: {
+                Code.playPrevSong();
+            }
+            onPlayNextSongs: {
+                Code.playNextSong();
+            }
+            onPauseSongs: {
+                Code.pause();
+                ispause = false;
+            }
+        }
+
         Connections {
             id: progressBarConnection
             target: audio
