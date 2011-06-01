@@ -125,6 +125,9 @@ Window {
     bookMenuModel: bookModel
     bookMenuPayload: bookPayload
 
+    bookMenuHighlightSelection: true
+    actionMenuHighlightSelection: true
+
     onMultiSelectModeChanged: {
         if(multiSelectMode)
             window.setBookMenuData([], []);
@@ -1075,6 +1078,7 @@ Window {
             onActivated : {
                 infocus = true;
                 window.disableToolBarSearch = false;
+                actionMenuSelectedIndex = settings.get("PlaylistsView")+1;
             }
             onDeactivated : { infocus = false; }
             Connections {
@@ -1215,6 +1219,7 @@ Window {
             onActivated : {
                 infocus = true;
                 window.disableToolBarSearch = false;
+                actionMenuSelectedIndex = settings.get("AllArtistsView");
             }
             onDeactivated : { infocus = false; }
             Connections {
@@ -1322,6 +1327,7 @@ Window {
             onActivated : {
                 infocus = true;
                 window.disableToolBarSearch = false;
+                actionMenuSelectedIndex = settings.get("AllAlbumsView");
             }
             onDeactivated : { infocus = false; }
             Connections {
@@ -1432,6 +1438,7 @@ Window {
             onActivated : {
                 infocus = true;
                 window.disableToolBarSearch = false;
+                actionMenuSelectedIndex = settings.get("AllTracksView");
             }
             onDeactivated : { infocus = false; }
             Connections {
