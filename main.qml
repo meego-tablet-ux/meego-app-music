@@ -1641,9 +1641,8 @@ Window {
             }
             onDeactivated : { infocus = false; }
             property variant model: MusicListModel {
-                type: MusicListModel.ListofSongs
+                type: MusicListModel.ListofFavorites
                 limit: 0
-                filter:MusicListModel.FilterFavorite // favorite
                 sort:(settings.get("FavoriteView") == 1? MusicListModel.SortByAddedTime:MusicListModel.SortByTitle)
             }
             Connections {
@@ -1651,7 +1650,7 @@ Window {
                 onSearch: {
                    listView.model.search = needle;
                     if (!needle ) {
-                        listView.model.filter=MusicListModel.FilterFavorite
+                        listView.model.filter=MusicListModel.FilterAll
                     }
                 }
             }
