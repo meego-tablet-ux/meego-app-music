@@ -1590,7 +1590,7 @@ Window {
                 anchors.leftMargin: 8
                 anchors.rightMargin: 8
                 anchors.bottomMargin: 5
-                source: "image://themedimage/widgets/apps/media/assets/content-background"
+                source: "image://themedimage/widgets/apps/media/content-background"
                 border.left:   8
                 border.top:    8
                 border.bottom: 8
