@@ -126,6 +126,8 @@ Window {
     property int selectedFavoritesAccumulator
     property bool multiSelectModeShowFavoriteAction
 
+    property int contentMargins: 15
+
     bookMenuModel: bookModel
     bookMenuPayload: bookPayload
 
@@ -1040,6 +1042,23 @@ Window {
                 //     console.log(titles);
                 // }
             }
+            Rectangle {
+                anchors.fill: parent
+                color: "black"
+            }
+
+            BorderImage {
+                anchors.fill: parent
+                anchors.topMargin: 8
+                anchors.leftMargin: 8
+                anchors.rightMargin: 8
+                anchors.bottomMargin: 5
+                source: "image://themedimage/widgets/apps/media/content-background"
+                border.left:   8
+                border.top:    8
+                border.bottom: 8
+                border.right:  8
+            }
             Item {
                 anchors.fill: parent
                 NoMusicNotification {
@@ -1120,7 +1139,7 @@ Window {
                 infocus = true;
                 window.disableToolBarSearch = false;
                 playlistsPage.actionMenuSelectedIndex = settings.get("PlaylistsView")+1;
-                actionMenuforcedSelectedIndex = settings.get("PlaylistsView")+1;
+                //actionMenuforcedSelectedIndex = settings.get("PlaylistsView")+1;
             }
             onDeactivated : { infocus = false; }
             Connections {
@@ -1146,7 +1165,24 @@ Window {
                     showGridView = false;
                     settings.set("PlaylistsView",1);
                 }
-                actionMenuforcedSelectedIndex = settings.get("PlaylistsView")+1
+                //actionMenuforcedSelectedIndex = settings.get("PlaylistsView")+1
+            }
+            Rectangle {
+                anchors.fill: parent
+                color: "black"
+            }
+
+            BorderImage {
+                anchors.fill: parent
+                anchors.topMargin: 8
+                anchors.leftMargin: 8
+                anchors.rightMargin: 8
+                anchors.bottomMargin: 5
+                source: "image://themedimage/widgets/apps/media/content-background"
+                border.left:   8
+                border.top:    8
+                border.bottom: 8
+                border.right:  8
             }
             NoMusicNotification {
                 id: noMusicScreen
@@ -1178,15 +1214,12 @@ Window {
                    }
                }
             }
-            Rectangle {
-                anchors.fill: parent
-                color: "black"
-            }
 
             MusicListView {
                 anchors.fill: parent
+                anchors.margins: contentMargins
                 model:gridView.model
-                mode : 1
+                mode: 1
                 footerHeight: toolbar.height
                 visible: !showGridView && !noMusicScreen.visible && !noPlaylists.visible
                 onClicked: {
@@ -1204,20 +1237,6 @@ Window {
                     contextMenu.show();}
                 }
             }
-
-            BorderImage {
-                anchors.fill: parent
-                anchors.topMargin: 8
-                anchors.leftMargin: 8
-                anchors.rightMargin: 8
-                anchors.bottomMargin: 5
-                source: "image://themedimage/widgets/apps/media/assets/content-background"
-                border.left:   8
-                border.top:    8
-                border.bottom: 8
-                border.right:  8
-            }
-
 
             MediaGridView {
                 id: gridView
@@ -1296,10 +1315,23 @@ Window {
                 anchors.fill: parent
                 color: "black"
             }
+            BorderImage {
+                anchors.fill: parent
+                anchors.topMargin: 8
+                anchors.leftMargin: 8
+                anchors.rightMargin: 8
+                anchors.bottomMargin: 5
+                source: "image://themedimage/widgets/apps/media/content-background"
+                border.left:   8
+                border.top:    8
+                border.bottom: 8
+                border.right:  8
+            }
 
             MusicListView {
                 id: artistsListView
                 anchors.fill:parent
+                anchors.margins: contentMargins
                 visible: !showGridView && !noMusicScreen.visible
                 model:artistsGridView.model
                 mode: 2
@@ -1319,18 +1351,6 @@ Window {
                 }
             }
 
-            BorderImage {
-                anchors.fill: parent
-                anchors.topMargin: 8
-                anchors.leftMargin: 8
-                anchors.rightMargin: 8
-                anchors.bottomMargin: 5
-                source: "image://themedimage/widgets/apps/media/assets/content-background"
-                border.left:   8
-                border.top:    8
-                border.bottom: 8
-                border.right:  8
-            }
             MediaGridView {
                 id: artistsGridView
                 type: musictype // music app = 0
@@ -1399,18 +1419,31 @@ Window {
                     settings.set("AllAlbumsView",1);
                 }
             }
-            NoMusicNotification {
-                id: noMusicScreen
-                visible: ((allTracksModel.total == 0)&&(!startupTimer.running))
-            }
             Rectangle {
                 anchors.fill: parent
                 color: "black"
             }
+            BorderImage {
+                anchors.fill: parent
+                anchors.topMargin: 8
+                anchors.leftMargin: 8
+                anchors.rightMargin: 8
+                anchors.bottomMargin: 5
+                source: "image://themedimage/widgets/apps/media/content-background"
+                border.left:   8
+                border.top:    8
+                border.bottom: 8
+                border.right:  8
+            }
 
+            NoMusicNotification {
+                id: noMusicScreen
+                visible: ((allTracksModel.total == 0)&&(!startupTimer.running))
+            }
             MusicListView {
                 id: albumsListView
                 anchors.fill:parent
+                anchors.margins: contentMargins
                 visible: !showGridView && !noMusicScreen.visible
                 model:albumsGridView.model
                 mode: 3
@@ -1429,19 +1462,6 @@ Window {
                     contextMenu.openpage = albumsPage;
                     contextMenu.show();}
                 }
-            }
-
-            BorderImage {
-                anchors.fill: parent
-                anchors.topMargin: 8
-                anchors.leftMargin: 8
-                anchors.rightMargin: 8
-                anchors.bottomMargin: 5
-                source: "image://themedimage/widgets/apps/media/assets/content-background"
-                border.left:   8
-                border.top:    8
-                border.bottom: 8
-                border.right:  8
             }
 
             MediaGridView {
@@ -1537,20 +1557,34 @@ Window {
                     settings.set("AllTracksView",1);
                 }
             }
-            NoMusicNotification {
-                id: noMusicScreen
-                visible: ((allTracksModel.total == 0)&&(!startupTimer.running))
-            }
-
             Rectangle {
                 anchors.fill: parent
                 color: "black"
+            }
+
+            BorderImage {
+                anchors.fill: parent
+                anchors.topMargin: 8
+                anchors.leftMargin: 8
+                anchors.rightMargin: 8
+                anchors.bottomMargin: 5
+                source: "image://themedimage/widgets/apps/media/content-background"
+                border.left:   8
+                border.top:    8
+                border.bottom: 8
+                border.right:  8
+            }
+
+            NoMusicNotification {
+                id: noMusicScreen
+                visible: ((allTracksModel.total == 0)&&(!startupTimer.running))
             }
 
             MusicListView {
                 id: listview
                 selectionMode: multiSelectMode
                 anchors.fill:parent
+                anchors.margins: contentMargins
                 visible: !showGridView && !noMusicScreen.visible
                 model: allTracksModel
                 footerHeight: toolbar.height
@@ -1584,18 +1618,6 @@ Window {
                 }
             }
 
-            BorderImage {
-                anchors.fill: parent
-                anchors.topMargin: 8
-                anchors.leftMargin: 8
-                anchors.rightMargin: 8
-                anchors.bottomMargin: 5
-                source: "image://themedimage/widgets/apps/media/content-background"
-                border.left:   8
-                border.top:    8
-                border.bottom: 8
-                border.right:  8
-            }
             MediaGridView {
                 id: gridView
                 type: musictype // music app = 0
@@ -1686,6 +1708,24 @@ Window {
                     settings.set("FavoriteView",1);
                 }
             }
+            Rectangle {
+                anchors.fill: parent
+                color: "black"
+            }
+
+            BorderImage {
+                anchors.fill: parent
+                anchors.topMargin: 8
+                anchors.leftMargin: 8
+                anchors.rightMargin: 8
+                anchors.bottomMargin: 5
+                source: "image://themedimage/widgets/apps/media/content-background"
+                border.left:   8
+                border.top:    8
+                border.bottom: 8
+                border.right:  8
+            }
+
             Item {
                 anchors.fill: parent
                 NoMusicNotification {
@@ -1722,11 +1762,9 @@ Window {
             MusicListView {
                 id: listView
                 selectionMode: multiSelectMode
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.top:parent.top
+                anchors.fill: parent
+                anchors.margins: contentMargins
                 visible: !noMusicScreen.visible && !noFavorites.visible
-                width: parent.width
-                height: parent.height
                 model: favoritesPage.model
                 footerHeight: toolbar.height
                 onClicked :{
@@ -1803,22 +1841,6 @@ Window {
                 anchors.fill: parent
                 fillMode: Image.Tile
                 source: "image://themedimage/images/bg_application_p"
-                BorderImage {
-                    id: artistTitleText
-                    width: parent.width
-                    source: (window.isLandscape)?"image://themedimage/images/media/subtitle_landscape_bar":"image://theme/media/subtitle_portrait_bar"
-                    Text {
-                        text: labelArtist
-                        font.pixelSize: theme_fontPixelSizeLarge
-                        anchors.fill: parent
-                        color:theme_fontColorNormal
-                        verticalAlignment:Text.AlignVCenter
-                        horizontalAlignment:Text.AlignLeft
-                        elide: Text.ElideRight
-                        anchors.leftMargin: 50
-                    }
-                }
-
                 Rectangle {
                     anchors.fill: parent
                     color: "black"
@@ -1830,7 +1852,7 @@ Window {
                     anchors.leftMargin: 8
                     anchors.rightMargin: 8
                     anchors.bottomMargin: 5
-                    source: "image://themedimage/widgets/apps/media/assets/content-background"
+                    source: "image://themedimage/widgets/apps/media/content-background"
                     border.left:   8
                     border.top:    8
                     border.bottom: 8
@@ -1842,13 +1864,8 @@ Window {
                     type: musictype // music app = 0
                     clip: true
                     model: artistDetailViewPage.model
-                    width: parent.width
-                    height: parent.height - artistTitleText.height
-                    anchors.top: artistTitleText.bottom
-                    anchors.topMargin: 10
-                    anchors.bottomMargin: 10
-                    anchors.leftMargin: (parent.width - Math.floor(parent.width / 326)*326) / 2
-                    anchors.rightMargin: anchors.leftMargin
+                    anchors.fill: parent
+                    anchors.margins: contentMargins
                     visible: false
                     footerHeight: toolbar.height
                     defaultThumbnail: "image://themedimage/images/media/music_thumb_med"
@@ -1871,9 +1888,8 @@ Window {
 
                 ListView {
                     id: artistAlbumsListView
-                    width: parent.width
-                    height: parent.height - artistTitleText.height
-                    anchors.top: artistTitleText.bottom
+                    anchors.fill: parent
+                    anchors.margins: contentMargins
                     clip: true
                     model: artistDetailViewPage.model
                     boundsBehavior: Flickable.StopAtBounds
@@ -2576,6 +2592,7 @@ Window {
         selectionMode: multiSelectMode
         parent: parkingLot
         anchors.fill: parent
+        anchors.margins: contentMargins
         model: playqueueModel
         selectbyindex: true
         playqueue: true
