@@ -2195,9 +2195,27 @@ Window {
                     Code.play();
                 }
             }
+            Rectangle {
+                anchors.fill: parent
+                color: "black"
+            }
+
+            BorderImage {
+                anchors.fill: parent
+                anchors.topMargin: 8
+                anchors.leftMargin: 8
+                anchors.rightMargin: 8
+                anchors.bottomMargin: 5
+                source: "image://themedimage/widgets/apps/media/content-background"
+                border.left:   8
+                border.top:    8
+                border.bottom: 8
+                border.right:  8
+            }
             Image {
                 id: box
                 anchors.fill: parent
+                anchors.margins: contentMargins
                 fillMode: Image.Tile
                 source: "image://themedimage/images/bg_application_p"
                 BorderImage {
