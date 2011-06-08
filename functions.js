@@ -203,7 +203,11 @@ function playNewSong() {
         playqueueModel.playindex = 0;
 
     toolbar.trackName = playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.Title);
-    toolbar.artistName = playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.Artist)[0];
+    if(playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.Artist)[0]) {
+        toolbar.artistName = playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.Artist)[0];
+    } else {
+        toolbar.artistName = qsTr("Unknown")
+    }
 
     audio.source = playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.URI);
     audioplay();
