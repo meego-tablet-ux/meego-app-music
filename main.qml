@@ -2219,25 +2219,8 @@ Window {
                 fillMode: Image.Tile
                 source: "image://themedimage/images/bg_application_p"
                 BorderImage {
-                    id: artistTitleText
-                    width: parent.width
-                    anchors.top: parent.top
-                    source: (window.isLandscape)?"image://themedimage/images/media/subtitle_landscape_bar":"image://theme/media/subtitle_portrait_bar"
-                    Text {
-                        text: labelArtist
-                        font.pixelSize: theme_fontPixelSizeLarge
-                        anchors.fill: parent
-                        color:theme_fontColorNormal
-                        verticalAlignment:Text.AlignVCenter
-                        horizontalAlignment:Text.AlignLeft
-                        elide: Text.ElideRight
-                        anchors.leftMargin: 50
-                    }
-                }
-
-                BorderImage {
                     id: albumDetailBackground
-                    anchors.top: artistTitleText.bottom
+                    anchors.top: parent.top
                     source: "image://themedimage/widgets/apps/media/gradient-albumview"
                     Item {
                         id: albumDetailText
@@ -2339,7 +2322,7 @@ Window {
                     PropertyChanges {
                         target: albumDetailBackground
                         width: albumThumbnail.width + 30
-                        height: parent.height - artistTitleText.height
+                        height: parent.height
                     }
                     PropertyChanges {
                         target: albumDetailText
@@ -2349,12 +2332,12 @@ Window {
                     PropertyChanges {
                         target: albumSongList
                         width: parent.width - albumDetailBackground.width
-                        height: parent.height - artistTitleText.height
+                        height: parent.height
                     }
                     AnchorChanges {
                         target: albumDetailBackground
                         anchors.left:parent.left
-                        anchors.top:artistTitleText.bottom
+                        anchors.top: parent.top
                     }
                     AnchorChanges {
                         target:albumSongList
@@ -2388,13 +2371,13 @@ Window {
                     PropertyChanges {
                         target: albumSongList
                         width: parent.width - 5
-                        height: parent.height - albumDetailBackground.height - artistTitleText.height
+                        height: parent.height - albumDetailBackground.height
                     }
 
                     AnchorChanges {
                         target: albumDetailBackground
                         anchors.left:parent.left
-                        anchors.top:artistTitleText.bottom
+                        anchors.top: parent.top
                     }
                     AnchorChanges {
                         target: albumDetailText
