@@ -1845,6 +1845,7 @@ Window {
                 }
 
                 BorderImage {
+                    visible: artistAlbumsGridView.visible
                     anchors.fill: parent
                     anchors.topMargin: 8
                     anchors.leftMargin: 8
@@ -1883,6 +1884,20 @@ Window {
                     }
                 }
 
+
+                BorderImage {
+                    id: artistAlbumsListViewBorder
+                    visible: artistAlbumsListView.visible
+                    anchors.fill: parent
+                    anchors.topMargin: 8
+                    anchors.rightMargin: 8
+                    anchors.bottomMargin: 5
+                    source: "image://themedimage/widgets/apps/media/content-background"
+                    border.left:   8
+                    border.top:    8
+                    border.bottom: 8
+                    border.right:  8
+                }
 
                 ListView {
                     id: artistAlbumsListView
@@ -1999,12 +2014,16 @@ Window {
                                 }
                             }
                         }
+
                         MusicListView{
                             id: songsInAlbumList
                             selectionMode: multiSelectMode
                             height: 500
                             interactive: false
                             footerHeight: toolbar.height
+                            showThumbnail: false
+                            showHeader: false
+                            anchors.leftMargin: 7
                             Component.onCompleted: {
                                 height = model.count * entryHeight + titleBarHeight;
                             }
@@ -2050,6 +2069,10 @@ Window {
                                     height: Math.max(albumDetailBackground.height, songsInAlbumList.height)
                                 }
                                 PropertyChanges {
+                                    target: artistAlbumsListViewBorder
+                                    anchors.leftMargin: albumThumbnail.width + 30 + contentMargins
+                                }
+                                PropertyChanges {
                                     target: albumDetailBackground
                                     width: albumThumbnail.width + 30
                                     height: Math.max(songsInAlbumList.height, albumThumbnail.height + albumThumbnail.height/3)
@@ -2090,6 +2113,10 @@ Window {
                                 PropertyChanges {
                                     target: dinstance
                                     height: albumDetailBackground.height + songsInAlbumList.height
+                                }
+                                PropertyChanges {
+                                    target: artistAlbumsListViewBorder
+                                    anchors.leftMargin: 8
                                 }
                                 PropertyChanges {
                                     target: albumDetailBackground
@@ -2199,9 +2226,9 @@ Window {
             }
 
             BorderImage {
+                id: albumDetailBorder
                 anchors.fill: parent
                 anchors.topMargin: 8
-                anchors.leftMargin: 8
                 anchors.rightMargin: 8
                 anchors.bottomMargin: 5
                 source: "image://themedimage/widgets/apps/media/content-background"
@@ -2290,6 +2317,8 @@ Window {
                     selectionMode: multiSelectMode
                     model: albumDetailViewPage.model
                     footerHeight: toolbar.height
+                    showThumbnail: false
+                    showHeader: false
                     onClicked: {
                         if(multiSelectMode)
                         {
@@ -2332,6 +2361,10 @@ Window {
                         width: parent.width - albumDetailBackground.width
                         height: parent.height
                     }
+                    PropertyChanges {
+                        target: albumDetailBorder
+                        anchors.leftMargin: albumThumbnail.width + 30 + contentMargins
+                    }
                     AnchorChanges {
                         target: albumDetailBackground
                         anchors.left:parent.left
@@ -2360,6 +2393,10 @@ Window {
                         target: albumDetailBackground
                         width: parent.width
                         height: albumThumbnail.height
+                    }
+                    PropertyChanges {
+                        target: albumDetailBorder
+                        anchors.leftMargin: 8
                     }
                     PropertyChanges {
                         target: albumDetailText
