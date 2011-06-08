@@ -28,8 +28,10 @@ Item {
     property bool playqueue: false
 
     property int footerHeight: 50
-    property bool showPlayIcon: false
-    property color textColor: theme_fontColorNormal
+    property bool showThumbnail: true
+    property bool showHeader: true
+    property color titleColor: theme_fontColorNormal
+    property color textColor: theme_fontColorMedium
     property int mode: 0
     property bool showNowPlayingIcon: true
     property alias titleBarHeight: titleBar.height
@@ -41,10 +43,12 @@ Item {
 
     Image {
         id: titleBar
+        visible: showHeader
         source: "image://themedimage/images/media/subtitle_landscape_bar"
         anchors.top:parent.top
         anchors.left:parent.left
         width: parent.width
+        height: showHeader ? sourceSize.height : 0
         Text {
             id: nameLabel
             text:{
@@ -68,25 +72,11 @@ Item {
         }
 
         Text {
-            id: artistLabel
-            text: qsTr("Artist")
-            color:theme_fontColorHighlight
-            font.pixelSize: theme_fontPixelSizeLarge
-            anchors.left: nameLabel.right
-            width: parent.width*0.2
-            height: parent.height
-            horizontalAlignment:Text.Left
-            verticalAlignment: Text.AlignVCenter
-            visible: mode == 0
-            elide: Text.ElideRight
-        }
-
-        Text {
             id: durationLabel
             text: qsTr("Time")
             color:theme_fontColorHighlight
             font.pixelSize: theme_fontPixelSizeLarge
-            anchors.left: artistLabel.right
+            anchors.left: nameLabel.right
             width: parent.width*0.1
             height: parent.height
             horizontalAlignment:Text.Left
@@ -102,6 +92,20 @@ Item {
             font.pixelSize: theme_fontPixelSizeLarge
             anchors.left: durationLabel.right
             width: parent.width*0.3
+            height: parent.height
+            horizontalAlignment:Text.Left
+            verticalAlignment: Text.AlignVCenter
+            visible: mode == 0
+            elide: Text.ElideRight
+        }
+
+        Text {
+            id: artistLabel
+            text: qsTr("Artist")
+            color:theme_fontColorHighlight
+            font.pixelSize: theme_fontPixelSizeLarge
+            anchors.left: albumLabel.right
+            width: parent.width*0.2
             height: parent.height
             horizontalAlignment:Text.Left
             verticalAlignment: Text.AlignVCenter
@@ -248,7 +252,7 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.left: parent.left
                 fillMode: Image.PreserveAspectCrop
-                source:mthumburi
+                source: showThumbnail ? mthumburi : "image://themedimage/icons/actionbar/media-play-disabled"
 
                 Rectangle {
                     id: fog
@@ -289,17 +293,15 @@ Item {
                 elide: Text.ElideRight
                 text: title
                 font.bold: true
-                color:textColor
+                color:titleColor
                 font.pixelSize: theme_fontPixelSizeLarge
             }
 
             Text {
-                id:trackArtist
-                text: {
-                    artist[0] == undefined? labelUnknownArtist:artist[0];
-                }
+                id:trackLength
+                text: Code.formatTime(length)
                 height: parent.height
-                width: parent.width * 0.2
+                width: parent.width*0.1
                 anchors.left: titleText.right
                 verticalAlignment: Text.AlignVCenter
                 horizontalAlignment:Text.AlignLeft
@@ -310,19 +312,6 @@ Item {
             }
 
             Text {
-                id:trackLength
-                text: Code.formatTime(length)
-                height: parent.height
-                width: parent.width*0.1
-                anchors.left: trackArtist.right
-                verticalAlignment: Text.AlignVCenter
-                horizontalAlignment:Text.AlignLeft
-                elide: Text.ElideRight
-                color:textColor
-                visible: mode == 0
-                font.pixelSize: theme_fontPixelSizeLarge
-            }
-            Text {
                 id:trackAlbum
                 text: {
                     album == ""?labelUnknownAlbum: album;
@@ -330,6 +319,22 @@ Item {
                 height: parent.height
                 width: parent.width*0.3
                 anchors.left: trackLength.right
+                verticalAlignment: Text.AlignVCenter
+                horizontalAlignment:Text.AlignLeft
+                elide: Text.ElideRight
+                color:textColor
+                visible: mode == 0
+                font.pixelSize: theme_fontPixelSizeLarge
+            }
+
+            Text {
+                id:trackArtist
+                text: {
+                    artist[0] == undefined? labelUnknownArtist:artist[0];
+                }
+                height: parent.height
+                width: parent.width * 0.2
+                anchors.left: trackAlbum.right
                 verticalAlignment: Text.AlignVCenter
                 horizontalAlignment:Text.AlignLeft
                 elide: Text.ElideRight
