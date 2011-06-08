@@ -60,7 +60,7 @@ Item {
             }
             Text {
                 id: playinfo
-                text:qsTr("%1, %2").arg(trackName).arg(artistName)
+                text:artistName != "" ? qsTr("%1, %2").arg(trackName).arg(artistName) : qsTr("%1").arg(trackName)
                 smooth: true
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.left: title.right
