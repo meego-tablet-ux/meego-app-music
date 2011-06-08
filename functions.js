@@ -206,7 +206,7 @@ function playNewSong() {
     if(playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.Artist)[0]) {
         toolbar.artistName = playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.Artist)[0];
     } else {
-        toolbar.artistName = qsTr("Unknown")
+        toolbar.artistName = ""
     }
 
     audio.source = playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.URI);
