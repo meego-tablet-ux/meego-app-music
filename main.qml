@@ -1139,7 +1139,6 @@ Window {
                 infocus = true;
                 window.disableToolBarSearch = false;
                 playlistsPage.actionMenuSelectedIndex = settings.get("PlaylistsView")+1;
-                //actionMenuforcedSelectedIndex = settings.get("PlaylistsView")+1;
             }
             onDeactivated : { infocus = false; }
             Connections {
@@ -1165,7 +1164,6 @@ Window {
                     showGridView = false;
                     settings.set("PlaylistsView",1);
                 }
-                //actionMenuforcedSelectedIndex = settings.get("PlaylistsView")+1
             }
             Rectangle {
                 anchors.fill: parent
