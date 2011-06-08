@@ -27,8 +27,10 @@ Item {
     property bool playqueue: false
 
     property int footerHeight: 50
-    property bool showPlayIcon: false
-    property color textColor: theme_fontColorNormal
+    property bool showThumbnail: true
+    property bool showHeader: true
+    property color titleColor: theme_fontColorNormal
+    property color textColor: theme_fontColorMedium
     property int mode: 0
     property bool showNowPlayingIcon: true
     property alias titleBarHeight: titleBar.height
@@ -40,10 +42,12 @@ Item {
 
     Image {
         id: titleBar
+        visible: showHeader
         source: "image://themedimage/images/media/subtitle_landscape_bar"
         anchors.top:parent.top
         anchors.left:parent.left
         width: parent.width
+        height: showHeader ? sourceSize.height : 0
         Text {
             id: nameLabel
             text:{
@@ -247,7 +251,7 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.left: parent.left
                 fillMode: Image.PreserveAspectCrop
-                source:mthumburi
+                source: showThumbnail ? mthumburi : "image://themedimage/icons/actionbar/media-play-disabled"
 
                 Rectangle {
                     id: fog
@@ -288,7 +292,7 @@ Item {
                 elide: Text.ElideRight
                 text: title
                 font.bold: true
-                color:textColor
+                color:titleColor
                 font.pixelSize: theme_fontPixelSizeLarge
             }
 
