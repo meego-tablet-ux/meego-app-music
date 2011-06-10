@@ -203,7 +203,6 @@ function playNewSong() {
         playqueueModel.playindex = 0;
 
     toolbar.trackName = playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.Title);
-    var artistlist;
     try {
         toolbar.artistName = playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.Artist)[0];
     }
