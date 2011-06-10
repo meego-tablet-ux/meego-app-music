@@ -203,10 +203,12 @@ function playNewSong() {
         playqueueModel.playindex = 0;
 
     toolbar.trackName = playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.Title);
-    if(playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.Artist)[0]) {
+    var artistlist;
+    try {
         toolbar.artistName = playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.Artist)[0];
-    } else {
-        toolbar.artistName = ""
+    }
+    catch(err) {
+        toolbar.artistName = "";
     }
 
     audio.source = playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.URI);
