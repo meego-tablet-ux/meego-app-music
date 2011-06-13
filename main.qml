@@ -1356,7 +1356,7 @@ Window {
                 visible: showGridView && !noMusicScreen.visible
                 anchors.topMargin: 10
                 anchors.bottomMargin: 10
-                anchors.leftMargin: (parent.width - Math.floor(parent.width / 326)*326) / 2
+                anchors.leftMargin: 15
                 anchors.rightMargin: anchors.leftMargin
                 defaultThumbnail: "image://themedimage/images/media/music_thumb_med"
                 footerHeight: toolbar.height
@@ -1469,7 +1469,7 @@ Window {
                 visible: showGridView && !noMusicScreen.visible
                 anchors.topMargin: 10
                 anchors.bottomMargin: 10
-                anchors.leftMargin: (parent.width - Math.floor(parent.width / 326)*326) / 2
+                anchors.leftMargin: 15
                 anchors.rightMargin: anchors.leftMargin
                 defaultThumbnail: "image://themedimage/images/media/music_thumb_med"
                 footerHeight: toolbar.height
@@ -1628,7 +1628,7 @@ Window {
                 anchors.fill: parent
                 anchors.topMargin: 10
                 anchors.bottomMargin: 10
-                anchors.leftMargin: (parent.width - Math.floor(parent.width / 326)*326) / 2
+                anchors.leftMargin: 15
                 anchors.rightMargin: anchors.leftMargin
 
                 onClicked: {
