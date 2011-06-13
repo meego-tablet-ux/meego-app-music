@@ -35,7 +35,9 @@ Window {
     property string labelPlay: qsTr("Play")
     property string labelOpen: qsTr("Open")
     property string labelOpenAlbum: qsTr("Open album")
+    //This is a verb. Marks the operation whereby items are added to the favorites list
     property string labelFavorite: qsTr("Favorite")
+    //This is a verb. Marks the operation whereby items are removed from the favorites list
     property string labelUnFavorite: qsTr("Unfavorite")
     property string labelAddToPlayQueue: qsTr("Add to play queue")
     property string labelAddToPlaylist: qsTr("Add to playlist")
@@ -712,6 +714,7 @@ Window {
 
                 Text {
                     height: paintedHeight
+                    //Confirmation message for deleting music tracks. "This" and "it" refer to list items, which represent music tracks on-screen.
                     text: qsTr("If you delete this, it will be removed from your device")
                     anchors.left:parent.left
                     anchors.right: parent.right
@@ -738,6 +741,7 @@ Window {
                 anchors.fill: parent
                 clip: true
                 Text {
+                    //Confirmation message for deleting music tracks. "These" and "they" refer to list items, which represent music tracks on-screen.
                     text: qsTr("If you delete these, they will be removed from your device")
                     anchors.left: parent.left
                     anchors.right: parent.right
