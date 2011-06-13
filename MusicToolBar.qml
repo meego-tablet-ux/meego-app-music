@@ -16,13 +16,24 @@ Item {
     height: nowPlayingInfo.height + audioToolbar.height
     property string trackName
     property string artistName
+    property string albumThumbnailURI
+    property string defaultThumbnail: "image://themedimage/images/media/music_thumb_med"
     property alias playing: audioToolbar.ispause
     property bool loop: false
     property bool shuffle: false
     property bool landscape: false
     property real nowPlayingHeight: 36
+    property bool makeVisible: false
 
     signal playNeedsSongs()
+
+    onPlayingChanged: {
+        if( playing ){
+            makeVisible = true;
+        }else{
+            hidingTimer.running = true;
+        }
+    }
 
     onShuffleChanged: {
         // if in shuffle state, loop makes no sense
@@ -37,14 +48,26 @@ Item {
             shuffle = false;
         }
     }
+
+    Image {
+        id: albumThumbnailArea
+        opacity: 1
+        anchors.top: nowPlayingInfo.top
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        width: landscape ? (nowPlayingHeight+55) : 0
+        source: (container.albumThumbnailURI == "")?defaultThumbnail:container.albumThumbnailURI
+        fillMode: Image.Stretch
+        }
+
     BorderImage {
         id: nowPlayingInfo
-        width: parent.width
+        anchors.left: albumThumbnailArea.right
+        anchors.right: parent.right
         source: "image://themedimage/widgets/common/statusbar/statusbar-background"
         height: 0
 
         anchors.bottom: audioToolbar.top
-        anchors.left: parent.left
 
         Item {
             id: nowPlayingText
@@ -60,7 +83,7 @@ Item {
             }
             Text {
                 id: playinfo
-                text:artistName != "" ? qsTr("%1, %2").arg(trackName).arg(artistName) : qsTr("%1").arg(trackName)
+                text:qsTr("%1").arg(trackName)
                 smooth: true
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.left: title.right
@@ -79,18 +102,28 @@ Item {
     states: [
         State {
             name: "showNowPlayingBar"
-            when: playing
+            when: makeVisible
             PropertyChanges {
                 target: nowPlayingInfo
                 height: nowPlayingHeight
                 opacity:1
             }
+            PropertyChanges {
+                target: audioToolbar
+                height: 55
+                opacity: 1
+            }
         },
         State {
             name: "hideNowPlayingBar"
-            when: !playing
+            when: !makeVisible
             PropertyChanges {
                 target: nowPlayingInfo
+                height: 0
+                opacity: 0
+            }
+            PropertyChanges {
+                target: audioToolbar
                 height: 0
                 opacity: 0
             }
@@ -105,10 +138,19 @@ Item {
                     target:nowPlayingInfo
                     property: "height"
                     duration: 250
-
                 }
                 PropertyAnimation {
                     target: nowPlayingInfo
+                    property: "opacity"
+                    duration: 250
+                }
+                PropertyAnimation {
+                    target: audioToolbar
+                    property: "height"
+                    duration: 250
+                }
+                PropertyAnimation {
+                    target: audioToolbar
                     property: "opacity"
                     duration: 250
                 }
@@ -119,9 +161,9 @@ Item {
     MediaToolbar {
         id: audioToolbar
         anchors.bottom: parent.bottom
-        anchors.left: parent.left
         height: 55
-        width: parent.width
+        anchors.left: albumThumbnailArea.right
+        anchors.right: parent.right
         landscape: container.landscape
         showprev: true
         showplay: true
@@ -141,6 +183,7 @@ Item {
         onPausePressed: {
             Code.pause();
             ispause = false;
+            hidingTimer.running = true;
         }
         onNextPressed: Code.playNextSong();
         Connections {
@@ -157,6 +200,13 @@ Item {
                 audio.position = audio.duration * audioToolbar.sliderPosition;
                 progressBarConnection.target = audio
             }
+        }
+        Timer{
+            id: hidingTimer
+            running: false
+            repeat: false
+            interval: 120000//TODO: add value to theme as "musicToolbarHidingTimeout"
+            onTriggered: {if( !playing ){makeVisible=false;}}
         }
         Connections {
             id: progressBarConnection
