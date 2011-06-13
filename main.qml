@@ -118,16 +118,6 @@ Window {
 
     property variant currentAlbum
 
-
-    property alias progressBarPosition: toolbar.audioSliderPosition
-    property alias progressBarElapsedTimeText: toolbar.audioElapsedTimeText
-    property alias currentFocus: playqueueView
-    property variant audioPosition
-    property variant audioDuration
-    property int totalOrg: 0
-    property bool freeAddMusic: false
-
-
     property variant bookModel: [labelPlayqueue,labelAllPlaylist,labelFavorites,
                                  labelAllArtist,labelAllAlbums,labelAllTracks]
     property variant bookPayload: [playQueueContent,playlistsContent,favoritesContent,
@@ -189,25 +179,6 @@ Window {
         onShuffleChanged: {
             playqueueView.currentIndex = playqueueModel.playindex;
         }
-
-        onTotalChanged: {
-            if(freeAddMusic) {
-                musicInterFace.initWidget();
-                if(window.playqueueModel.total > 0)
-                    freeAddMusic = false;
-            }
-            else if(window.playqueueModel.total < totalOrg) {
-                if(window.playqueueModel.total < 1) {
-                    musicInterFace.sendNoMuiscData();
-                    freeAddMusic = true;
-                }
-                else {
-                    musicInterFace.initWidget();
-                }
-            }
-            totalOrg = window.playqueueModel.total
-        }
-
     }
 
     // an editor model, it is used to do things like tag arbitrary items as favorite/viewed
@@ -279,14 +250,6 @@ Window {
         sort: MusicListModel.SortByDefault
     }
 
-
-    MusicInterface {
-        id: musicInterFace
-        main: window
-        audioItem: audio
-    }
-
-
     property variant resourceManager: ResourceManager {
         name: "player"
         type: ResourceManager.MusicApp
@@ -296,6 +259,9 @@ Window {
         onStopPlaying: {
             audio.pause();
         }
+    }
+
+    MusicAwdInterface {
     }
 
     QmlSetting{
@@ -489,29 +455,6 @@ Window {
             dbusControl.position = audio.position;
         }
 
-        onPaused: {
-            musicInterFace.awdState = false;
-            musicInterFace.sendCommandData();
-        }
-        onResumed: {
-            musicInterFace.awdState = true;
-            musicInterFace.sendCommandData();
-        }
-        onStarted: {
-            if (window.audioPosition > 0) {
-                audio.position = window.audioPosition;
-                window.progressBarPosition = audio.position/audio.duration;
-                musicInterFace.sendCommandData();
-                window.audioPosition = 0
-            }
-            musicInterFace.awdState = true;
-            musicInterFace.sendCommandData();
-        }
-        onStopped: {
-            musicInterFace.awdState = false;
-            musicInterFace.sendCommandData();
-        }
-
         onStatusChanged: {
             if (status == Audio.EndOfMedia) {
                 Code.playNextSong();
@@ -601,7 +544,6 @@ Window {
             anchors.left: parent.left
             playing: false
             landscape: window.isLandscape
-            syncItem: musicInterFace
         }
 
         MediaMultiBar {
@@ -2694,12 +2636,6 @@ Window {
         selectbyindex: true
         playqueue: true
         footerHeight: parent.height - titleBarHeight
-
-        property variant urnName: playqueueView.currentItem.murn
-        property variant trackName: playqueueView.currentItem.mtitle
-        property variant albumName: playqueueView.currentItem.malbum
-        property variant imageSource: playqueueView.currentItem.mthumburi
-
         onClicked:{
             if(multiSelectMode)
             {
