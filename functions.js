@@ -471,3 +471,9 @@ function dropFromActivePlayingList( itemid ){
         toolbar.makeVisible = false;
     }
 }
+
+function songCheck(cdata)
+{
+    // if the song ands in .desktop, it's not a song
+    return (cdata.indexOf(".desktop", cdata.length - 8) == -1);
+}
