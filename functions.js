@@ -61,53 +61,66 @@ function playlistNameValidate(parm,val) {
 
 function addToPlayqueue(item) {
     playqueueModel.addItems(item.mitemid);
-    updateNowNextPlaying();
+    if( activePlayingListModel == playqueueModel ){
+        updateNowNextPlaying();
+    }
 }
 
 function addMultipleToPlayqueue() {
     playqueueModel.addItems(getSelectedIDs());
-    updateNowNextPlaying();
+    if( activePlayingListModel == playqueueModel ){
+        updateNowNextPlaying();
+    }
     clearSelected();
     shareObj.clearItems();
     multiSelectMode = false;
 }
 
 function removeFromPlayqueue() {
-    if(playqueueModel.playindex == targetIndex)
-    {
-        audio.stop();
-        resourceManager.userwantsplayback = false;
+    if( activePlayingListModel == playqueueModel && activePlayingListModel.playindex == targetIndex ){
+        //pause();
+        //resourceManager.userwantsplayback = false;
     }
-    playqueueModel.removeIndex(targetIndex);
-    updateNowNextPlaying();
+    if( activePlayingListModel == playqueueModel )
+        {dropFromActivePlayingList(activePlayingListModel.datafromIndex(targetIndex, MediaItem.ID));}//remove and take care of moving to the next item
+    else
+        {playqueueModel.removeIndex(targetIndex);}//just remove
 }
 
 function removeFromPlaylist(list) {
-    list.removeIndex(targetIndex);
+    //Handle removing a song from the playlist that we are playing
+    if( activePlayingListModel == nowPlayingModel &&
+        nowPlayingLabel == "Playlist" &&
+        nowPlayingName == list.playlist )
+    {
+        console.log("do removeFromPlaylist: "+list.playlist);
+        dropFromActivePlayingList(activePlayingListModel.datafromIndex(targetIndex, MediaItem.ID));
+    }
+    list.removeIndex(targetIndex);//the playlist is separate from "now playing", remove also from the actual list
     clearSelected();
 }
 
 function removeMultipleFromPlayqueue() {
-    var playid = playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.ID);
-    var ids = getSelectedIDs();
-    var i;
-    for (i in ids) {
-        if(ids[i] == playid)
-        {
-            audio.stop();
-            resourceManager.userwantsplayback = false;
-            break;
-        }
-    }
-    playqueueModel.removeSelected();
-    updateNowNextPlaying();
+    if( activePlayingListModel == playqueueModel )
+        {dropFromActivePlayingList(-1);}//remove and take care of moving to the right item
+    else
+        {playqueueModel.removeSelected();}
     clearSelected();
     shareObj.clearItems();
     multiSelectMode = false;
 }
 
 function removeMultipleFromPlaylist(list) {
-    list.removeSelected();
+    console.log("removeMultipleFromPlaylist: "+list.album);
+    //Handle removing a song from the playlist that we are playing
+    if( activePlayingListModel == nowPlayingModel &&
+        nowPlayingLabel == "Playlist" &&
+        nowPlayingName == list.playlist )
+    {
+        console.log("do removeMultipleFromPlaylist: "+list.playlist);
+        dropFromActivePlayingList(-1);
+    }
+    list.removeSelected();//playlist separate from "now playing"
     clearSelected();
     shareObj.clearItems();
     multiSelectMode = false;
@@ -115,19 +128,23 @@ function removeMultipleFromPlaylist(list) {
 
 function addToPlayqueueAndPlay(item)
 {
-    var idx = playqueueModel.count;
+    activePlayingListModel = playqueueModel;
+    activePlayingListView  = playqueueView;
+    var idx = activePlayingListModel.count;
     addToPlayqueue(item);
-    playqueueModel.playindex = idx;
+    activePlayingListModel.playindex = idx;
     playNewSong();
     updateNowNextPlaying();
 }
 
 function addMultipleToPlayqueueAndPlay()
 {
+    activePlayingListModel = playqueueModel;
+    activePlayingListView  = playqueueView;
     var ids = getSelectedIDs();
-    var idx = playqueueModel.count;
-    playqueueModel.addItems(ids);
-    playqueueModel.playindex = idx;
+    var idx = activePlayingListModel.count;
+    activePlayingListModel.addItems(ids);
+    activePlayingListModel.playindex = idx;
     playNewSong();
     updateNowNextPlaying();
     clearSelected();
@@ -155,7 +172,7 @@ function audioplay()
     resourceManager.userwantsplayback = true;
     dbusControl.updateNowNextTracks();
     dbusControl.playbackState = 1;
-    playqueueModel.playstatus = MusicListModel.Playing;
+    activePlayingListModel.playstatus = MusicListModel.Playing;
     toolbar.playing = true;
 }
 
@@ -164,7 +181,7 @@ function pause()
     audio.pause();
     resourceManager.userwantsplayback = false;
     dbusControl.playbackState = 2;
-    playqueueModel.playstatus = MusicListModel.Paused;
+    activePlayingListModel.playstatus = MusicListModel.Paused;
     toolbar.playing = false;
 }
 
@@ -174,7 +191,7 @@ function stop()
     resourceManager.userwantsplayback = false;
     dbusControl.updateNowNextTracks();
     dbusControl.playbackState = 3;
-    playqueueModel.playstatus = MusicListModel.Stopped;
+    activePlayingListModel.playstatus = MusicListModel.Stopped;
     toolbar.playing = false;
 }
 
@@ -193,38 +210,43 @@ function playNewSong() {
     audio.stop();
 
     // if there are no songs or the index is out of range, do nothing
-    if((playqueueView.count <= 0)||
-       (playqueueModel.playindex >= playqueueView.count))
+    if((activePlayingListView.count <= 0)||
+       (activePlayingListModel.playindex >= activePlayingListView.count))
     {
         return false;
     }
 
-    if (playqueueModel.playindex == -1)
-        playqueueModel.playindex = 0;
+    if (activePlayingListModel.playindex == -1)
+        activePlayingListModel.playindex = 0;
 
-    toolbar.trackName = playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.Title);
+    audio.source = activePlayingListModel.datafromIndex(activePlayingListModel.playindex, MediaItem.URI);
+    audioplay();
+    editorModel.setViewed(activePlayingListModel.datafromIndex(activePlayingListModel.playindex, MediaItem.ID));
+
+    toolbar.trackName = activePlayingListModel.datafromIndex(activePlayingListModel.playindex, MediaItem.Title);
     try {
-        toolbar.artistName = playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.Artist)[0];
+        toolbar.artistName = activePlayingListModel.datafromIndex(activePlayingListModel.playindex, MediaItem.Artist)[0];
     }
     catch(err) {
-        toolbar.artistName = "";
+	toolbar.artistName = "";
     }
-
-    audio.source = playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.URI);
-    audioplay();
-    editorModel.setViewed(playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.ID));
+    if( activePlayingListModel.datafromIndex(activePlayingListModel.playindex, MediaItem.ThumbURI)) {
+        toolbar.albumThumbnailURI = activePlayingListModel.datafromIndex(activePlayingListModel.playindex, MediaItem.ThumbURI);
+    } else {
+        toolbar.albumThumbnailURI = ""
+    }
     return true;
 }
 
 function playNextSong() {
-    if (playqueueModel.playindex < (playqueueView.count -1))
+    if (activePlayingListModel.playindex < (activePlayingListView.count -1))
     {
-        playqueueModel.playindex++;
+        activePlayingListModel.playindex++;
     }
     else
     {
         if (loop){
-            playqueueModel.playindex = 0;
+            activePlayingListModel.playindex = 0;
         }else{
             stop();
             return;
@@ -236,10 +258,10 @@ function playNextSong() {
 }
 
 function playPrevSong() {
-    if (playqueueModel.playindex == 0)
+    if (activePlayingListModel.playindex == 0)
     {
         if (loop) {
-            playqueueModel.playindex = playqueueView.count - 1;
+            activePlayingListModel.playindex = activePlayingListView.count - 1;
         }else {
             stop();
             return;
@@ -247,7 +269,7 @@ function playPrevSong() {
     }
     else
     {
-        playqueueModel.playindex--;
+        activePlayingListModel.playindex--;
     }
     audio.source = "";
     playNewSong();
@@ -259,11 +281,11 @@ function updateNowNextPlaying()
     if (dbusControl.state == "stopped") {
         dbusControl.nextItem1 = -1;
         dbusControl.nextItem2 = -1;
-    } else  if (playqueueModel.playindex == 0) {
-        if (playqueueView.count == 1) {
+    } else  if (activePlayingListModel.playindex == 0) {
+        if (activePlayingListView.count == 1) {
             dbusControl.nextItem1 = -1;
             dbusControl.nextItem2 = -1;
-        } else if (playqueueView.count == 2) {
+        } else if (activePlayingListView.count == 2) {
             dbusControl.nextItem1 = 1;
             dbusControl.nextItem2 = -1;
         } else {
@@ -271,20 +293,20 @@ function updateNowNextPlaying()
             dbusControl.nextItem2 = 2;
         }
     } else {
-        if (playqueueModel.playindex+1 < playqueueView.count) {
-            dbusControl.nextItem1 = playqueueModel.playindex+1;
+        if (activePlayingListModel.playindex+1 < activePlayingListView.count) {
+            dbusControl.nextItem1 = activePlayingListModel.playindex+1;
 
-            if (dbusControl.nextItem1+1 < playqueueView.count) {
+            if (dbusControl.nextItem1+1 < activePlayingListView.count) {
                 dbusControl.nextItem2 = dbusControl.nextItem1+1;
-            } else if (loop && playqueueView.count > 2) {
+            } else if (loop && activePlayingListView.count > 2) {
                 dbusControl.nextItem2 = 0
             } else {
                 dbusControl.nextItem2 = -1;
             }
 
-        } else if (loop && playqueueView.count > 1) {
+        } else if (loop && activePlayingListView.count > 1) {
             dbusControl.nextItem1 = 0;
-            if (playqueueView.count > 2) {
+            if (activePlayingListView.count > 2) {
                 dbusControl.nextItem2 = 1;
             } else {
                 dbusControl.nextItem2 = -1
@@ -295,7 +317,6 @@ function updateNowNextPlaying()
         }
     }
     dbusControl.updateNowNextTracks();
-
 }
 
 function formatLength(time)
@@ -313,22 +334,26 @@ function formatAlbumLength(length)
     if( hours == 0 && mins == 0 )
     {//only show seconds
         var secs = parseInt( length%3600 );
+        // music album length in seconds
         time = (secs==1) ? qsTr("1 second") : qsTr("%1 seconds").arg(secs);
     }
     else
     {
         if( hours == 0 )
         {//only show minutes
+            // music album length in minutes
             time = (mins==1) ? qsTr("1 minute") : qsTr("%1 minutes").arg(mins);
         }
         else
         {
             if( mins == 0 )
             {//only show hours
+                // music album length in hours
                 time = ((hours == 1) ? qsTr("1 hour") : qsTr("%1 hours").arg(hours));
             }
             else
             {//show hours and minutes
+                // music album length in hours and minutes
                 time = ((hours == 1) ? qsTr("1 hour") : qsTr("%1 hours").arg(hours)) + ((mins == 1) ? qsTr(" 1 minute") : qsTr(" %1 minutes").arg(mins));
             }
         }
@@ -380,4 +405,75 @@ function appendItemToPlaylist(item, playlistItem)
     miscModel.clear();
     miscModel.playlist = playlistItem.mtitle;
     miscModel.addItems(item.mitemid);
+}
+
+//Functions to support playing from the current context
+function playAndAddContextToNowPlaying(item)
+{
+    activePlayingListModel = nowPlayingModel;
+    activePlayingListView = nowPlayingView;
+    nowPlayingModel.clear();
+    var ids = currentListModel.getAllIDs();
+    var i;
+    for (i in ids) {
+        activePlayingListModel.addItems(ids[i]);
+    }
+    var idx = nowPlayingModel.itemIndex(item.mitemid);
+
+    nowPlayingModel.playindex = idx;
+    updateNowNextPlaying();
+    playNewSong();
+}
+
+//Items are to be removed from the active playing model
+//This is appropriate when a) we are removing items from the queue, playlists, favorites, or
+//b) when we are actually removing files.
+function dropFromActivePlayingList( itemid ){
+    console.log("---- dropFromActivePlayingList");
+    var playid = activePlayingListModel.datafromIndex( activePlayingListModel.playindex, MediaItem.ID );
+    if( itemid == -1 )//No item given, implies multiselection
+    {
+        //First adjust playindex to account for lost items before the current playindex
+        var ids = getSelectedIDs();
+        var ai;//index in active
+        var i;
+        for (ai=0;ai < activePlayingListModel.playindex;++ai)
+            {
+            for (i in ids) {
+                if(ids[i] == activePlayingListModel.datafromIndex(ai, MediaItem.ID)){
+                    activePlayingListModel.playindex--;
+                    break;
+                }
+            }
+        }
+        console.log("---- Playindex adjusted to: "+activePlayingListModel.playindex);
+        //Remove selected items from the active playing list
+        activePlayingListModel.removeSelected();
+    }
+    else//single item
+    {
+        //First adjust playindex to account for lost items before the current playindex
+        if( activePlayingListModel.itemIndex( itemid ) < activePlayingListModel.playindex ){
+            activePlayingListModel.playindex--;
+        }
+        activePlayingListModel.removeIndex(targetIndex);
+    }
+    // if there are no songs or the index is out of range, do nothing
+    if (activePlayingListModel.playindex == -1 ||
+        activePlayingListModel.playindex >= activePlayingListView.count)
+        {activePlayingListModel.playindex = 0;}
+    if( activePlayingListView.count > 0 ){
+        playNewSong();
+    }
+    else
+    {
+        pause();
+        toolbar.makeVisible = false;
+    }
+}
+
+function songCheck(cdata)
+{
+    // if the song ands in .desktop, it's not a song
+    return (cdata.indexOf(".desktop", cdata.length - 8) == -1);
 }
