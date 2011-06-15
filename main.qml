@@ -930,13 +930,21 @@ Window {
                         // Open
                         Code.openItemInDetailView(contextMenu.openpage,payload);
                     }
-                    else if ((model[index] == labelFavorite)||(model[index] == labelUnFavorite))
+                    else if (model[index] == labelFavorite)
                     {
-                        // Favorite/unfavorite
+                        // Favorite
                         if(!multiSelectMode)
-                            Code.changeItemFavorite(payload, (model[index] == labelFavorite));
+                            Code.changeItemFavorite(payload, true);
                         else if(Code.selectionCount() > 0)
-                            Code.changeMultipleItemFavorite(model[index] == labelFavorite);
+                            Code.changeMultipleItemFavorite(true);
+                    }
+                    else if (model[index] == labelUnFavorite)
+                    {
+                        // unfavorite
+                        if(!multiSelectMode)
+                            Code.changeItemFavorite(payload, false);
+                        else if(Code.selectionCount() > 0)
+                            Code.changeMultipleItemFavorite(false);
                     }
                     else if (model[index] == labelAddToPlayQueue)
                     {
@@ -1010,6 +1018,7 @@ Window {
                     {
                         // Multi Select
                         multiSelectMode = true;
+                        selectedFavoritesAccumulator = 0;
                     }
                     else if (model[index] == labelcShare)
                     {
@@ -1260,7 +1269,7 @@ Window {
                 anchors.margins: contentMargins
                 model:gridView.model
                 mode: 1
-                footerHeight: toolbar.height
+                footerHeight: toolbar.height + multibar.height
                 visible: !showGridView && !noMusicScreen.visible && !noPlaylists.visible
                 onClicked: {
                      Code.openItemInDetailView(playlistsPage,payload);
@@ -1288,7 +1297,7 @@ Window {
                 anchors.rightMargin: anchors.leftMargin
                 visible:showGridView && !noMusicScreen.visible && !noPlaylists.visible
                 defaultThumbnail: "image://themedimage/images/media/music_thumb_med"
-                footerHeight: toolbar.height
+                footerHeight: toolbar.height + multibar.height
                 model: MusicListModel {
                     type: MusicListModel.ListofPlaylists
                     limit:0
@@ -1375,7 +1384,7 @@ Window {
                 visible: !showGridView && !noMusicScreen.visible
                 model:artistsGridView.model
                 mode: 2
-                footerHeight: toolbar.height
+                footerHeight: toolbar.height + multibar.height
                 onClicked: {
                     Code.openItemInDetailView(artistsPage,payload)
                 }
@@ -1401,7 +1410,7 @@ Window {
                 anchors.leftMargin: 15
                 anchors.rightMargin: anchors.leftMargin
                 defaultThumbnail: "image://themedimage/images/media/music_thumb_med"
-                footerHeight: toolbar.height
+                footerHeight: toolbar.height + multibar.height
                 model: MusicListModel {
                     type: MusicListModel.ListofArtists
                     limit:0
@@ -1487,7 +1496,7 @@ Window {
                 visible: !showGridView && !noMusicScreen.visible
                 model:albumsGridView.model
                 mode: 3
-                footerHeight: toolbar.height
+                footerHeight: toolbar.height + multibar.height
                 onClicked: {
                     labelArtist = payload.martist;
                     Code.openItemInDetailView(albumsPage,payload)
@@ -1514,7 +1523,7 @@ Window {
                 anchors.leftMargin: 15
                 anchors.rightMargin: anchors.leftMargin
                 defaultThumbnail: "image://themedimage/images/media/music_thumb_med"
-                footerHeight: toolbar.height
+                footerHeight: toolbar.height + multibar.height
 
                 spacing: 10
                 showHeader: true
@@ -1627,8 +1636,9 @@ Window {
                 anchors.margins: contentMargins
                 visible: !showGridView && !noMusicScreen.visible
                 model: allTracksModel
-                footerHeight: toolbar.height
+                footerHeight: toolbar.height + multibar.height
                 onClicked: {
+                    console.log("-- multiselect clicked");
                     if(multiSelectMode)
                     {
                         model.setSelected(payload.mitemid, !model.isSelected(payload.mitemid));
@@ -1666,7 +1676,7 @@ Window {
                 type: musictype // music app = 0
                 selectionMode: multiSelectMode
                 visible: showGridView && !noMusicScreen.visible
-                footerHeight: toolbar.height
+                footerHeight: toolbar.height + multibar.height
                 defaultThumbnail: "image://themedimage/images/media/music_thumb_med"
                 model: listview.model
 
@@ -1681,9 +1691,16 @@ Window {
                     {
                         model.setSelected(payload.mitemid, !model.isSelected(payload.mitemid));
                         if (model.isSelected(payload.mitemid))
+                        {
                             shareObj.addItem(payload.muri);
+                            selectedFavoritesAccumulator += (payload.mfavorite?1:-1);
+                        }
                         else
+                        {
                             shareObj.delItem(payload.muri);
+                            selectedFavoritesAccumulator += (payload.mfavorite?-1:1);
+                        }
+                        multiSelectModeShowFavoriteAction = (selectedFavoritesAccumulator <= 0) ? true : false;
                     }
                     else
                     {
@@ -1814,15 +1831,22 @@ Window {
                 anchors.margins: contentMargins
                 visible: !noMusicScreen.visible && !noFavorites.visible
                 model: favoritesPage.model
-                footerHeight: toolbar.height
+                footerHeight: toolbar.height + multibar.height
                 onClicked :{
                     if(multiSelectMode)
                     {
                         model.setSelected(payload.mitemid, !model.isSelected(payload.mitemid));
                         if (model.isSelected(payload.mitemid))
+                        {
                             shareObj.addItem(payload.muri);
+                            selectedFavoritesAccumulator += (payload.mfavorite?1:-1);
+                        }
                         else
+                        {
                             shareObj.delItem(payload.muri);
+                            selectedFavoritesAccumulator += (payload.mfavorite?-1:1);
+                        }
+                        multiSelectModeShowFavoriteAction = (selectedFavoritesAccumulator <= 0) ? true : false;
                     }
                     else
                     {
@@ -1921,7 +1945,7 @@ Window {
                     anchors.fill: parent
                     anchors.margins: contentMargins
                     visible: false
-                    footerHeight: toolbar.height
+                    footerHeight: toolbar.height + multibar.height
                     defaultThumbnail: "image://themedimage/images/media/music_thumb_med"
                     onClicked: {
                         if(payload.misvirtual) {
@@ -2076,7 +2100,7 @@ Window {
                             selectionMode: multiSelectMode
                             height: 500
                             interactive: false
-                            footerHeight: toolbar.height
+                            footerHeight: toolbar.height + multibar.height
                             showThumbnail: false
                             showHeader: false
                             anchors.leftMargin: 7
@@ -2098,9 +2122,16 @@ Window {
                                 {
                                     model.setSelected(payload.mitemid, !model.isSelected(payload.mitemid));
                                     if (model.isSelected(payload.mitemid))
+                                    {
                                         shareObj.addItem(payload.muri);
+                                        selectedFavoritesAccumulator += (payload.mfavorite?1:-1);
+                                    }
                                     else
+                                    {
                                         shareObj.delItem(payload.muri);
+                                        selectedFavoritesAccumulator += (payload.mfavorite?-1:1);
+                                    }
+                                    multiSelectModeShowFavoriteAction = (selectedFavoritesAccumulator <= 0) ? true : false;
                                 }
                                 else
                                 {
@@ -2378,7 +2409,7 @@ Window {
                     id: albumSongList
                     selectionMode: multiSelectMode
                     model: albumDetailViewPage.model
-                    footerHeight: toolbar.height
+                    footerHeight: toolbar.height + multibar.height
                     showThumbnail: false
                     showHeader: false
                     onClicked: {
@@ -2386,9 +2417,16 @@ Window {
                         {
                             model.setSelected(payload.mitemid, !model.isSelected(payload.mitemid));
                             if (model.isSelected(payload.mitemid))
+                            {
                                 shareObj.addItem(payload.muri);
+                                selectedFavoritesAccumulator += (payload.mfavorite?1:-1);
+                            }
                             else
+                            {
                                 shareObj.delItem(payload.muri);
+                                selectedFavoritesAccumulator += (payload.mfavorite?-1:1);
+                            }
+                            multiSelectModeShowFavoriteAction = (selectedFavoritesAccumulator <= 0) ? true : false;
                         }
                         else
                         {
@@ -2575,7 +2613,7 @@ Window {
                     id: playlistList
                     selectionMode: multiSelectMode
                     anchors.margins: 3
-                    footerHeight: toolbar.height
+                    footerHeight: toolbar.height + multibar.height
                     selectbyindex: true
                     model: MusicListModel {
                         type: MusicListModel.MusicPlaylist
@@ -2589,11 +2627,18 @@ Window {
                     onClicked: {
                         if(multiSelectMode)
                         {
-                            model.setSelected(index, !model.isSelected(index));
-                            if (model.isSelected(index))
+                            model.setSelected(payload.mitemid, !model.isSelected(payload.mitemid));
+                            if (model.isSelected(payload.mitemid))
+                            {
                                 shareObj.addItem(payload.muri);
+                                selectedFavoritesAccumulator += (payload.mfavorite?1:-1);
+                            }
                             else
+                            {
                                 shareObj.delItem(payload.muri);
+                                selectedFavoritesAccumulator += (payload.mfavorite?-1:1);
+                            }
+                            multiSelectModeShowFavoriteAction = (selectedFavoritesAccumulator <= 0) ? true : false;
                         }
                         else
                         {
@@ -2706,11 +2751,18 @@ Window {
         onClicked:{
             if(multiSelectMode)
             {
-                model.setSelected(index, !model.isSelected(index));
-                if (model.isSelected(index))
+                model.setSelected(payload.mitemid, !model.isSelected(payload.mitemid));
+                if (model.isSelected(payload.mitemid))
+                {
                     shareObj.addItem(payload.muri);
+                    selectedFavoritesAccumulator += (payload.mfavorite?1:-1);
+                }
                 else
+                {
                     shareObj.delItem(payload.muri);
+                    selectedFavoritesAccumulator += (payload.mfavorite?-1:1);
+                }
+                multiSelectModeShowFavoriteAction = (selectedFavoritesAccumulator <= 0) ? true : false;
             }
             else
             {
