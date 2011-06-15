@@ -83,7 +83,7 @@ Item {
             }
             Text {
                 id: playinfo
-                //This is the track name of the currently played song
+                //: %1 is track name, %2 is artist name
                 text:artistName != "" ? qsTr("%1, %2").arg(trackName).arg(artistName) : qsTr("%1").arg(trackName)
                 smooth: true
                 anchors.verticalCenter: parent.verticalCenter

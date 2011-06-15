@@ -35,9 +35,9 @@ Window {
     property string labelPlay: qsTr("Play")
     property string labelOpen: qsTr("Open")
     property string labelOpenAlbum: qsTr("Open album")
-    //This is a verb. Marks the operation whereby items are added to the favorites list
+    //: This is a verb. Marks the operation whereby items are added to the favorites list
     property string labelFavorite: qsTr("Favorite")
-    //This is a verb. Marks the operation whereby items are removed from the favorites list
+    //: This is a verb. Marks the operation whereby items are removed from the favorites list
     property string labelUnFavorite: qsTr("Unfavorite")
     property string labelAddToPlayQueue: qsTr("Add to play queue")
     property string labelAddToPlaylist: qsTr("Add to playlist")
@@ -749,7 +749,7 @@ Window {
 
                 Text {
                     height: paintedHeight
-                    //Confirmation message for deleting music tracks. "This" and "it" refer to list items, which represent music tracks on-screen.
+                    //: Confirmation message for deleting music tracks. "This" and "it" refer to list items, which represent music tracks on-screen.
                     text: qsTr("If you delete this, it will be removed from your device")
                     anchors.left:parent.left
                     anchors.right: parent.right
@@ -763,7 +763,7 @@ Window {
         ModalDialog {
             id: deleteMultipleItemsDialog
             property int deletecount: Code.selectionCount()
-            // text asking the user if the song(s) is to deleted, warning them that it's permanent
+            //: text asking the user if the song(s) is to deleted, warning them that it's permanent
             title: (deletecount < 2)?qsTr("Permanently delete this song?"):qsTr("Permanently delete these %1 songs?").arg(deletecount)
             acceptButtonText: labelConfirmDelete
             cancelButtonText: labelCancel
@@ -779,7 +779,7 @@ Window {
                 anchors.fill: parent
                 clip: true
                 Text {
-                    //Confirmation message for deleting music tracks. "These" and "they" refer to list items, which represent music tracks on-screen.
+                    //: Confirmation message for deleting music tracks. "These" and "they" refer to list items, which represent music tracks on-screen.
                     text: qsTr("If you delete these, they will be removed from your device")
                     anchors.left: parent.left
                     anchors.right: parent.right
@@ -2013,7 +2013,7 @@ Window {
                                         anchors.top: albumTitleText.bottom
                                         height: albumThumbnail.height/10
                                         width: parent.width
-                                        // number of tracks in an album
+                                        //: number of tracks in an album
                                         text: qsTr("%1 songs").arg(dinstance.mitemcount)
                                         color: theme_fontColorMediaHighlight
                                         font.pixelSize: theme_fontPixelSizeLarge-3
@@ -2334,7 +2334,7 @@ Window {
                                 anchors.top: albumTitleText.bottom
                                 height: albumThumbnail.height/10
                                 width: parent.width
-                                // number of songs in an album
+                                //: number of songs in an album
                                 text: qsTr("%1 songs").arg(model.count)
                                 color: theme_fontColorMediaHighlight
                                 font.pixelSize: theme_fontPixelSizeLarge-3
