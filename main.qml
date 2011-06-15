@@ -764,7 +764,7 @@ Window {
             id: deleteMultipleItemsDialog
             property int deletecount: Code.selectionCount()
             //: text asking the user if the song(s) is to deleted, warning them that it's permanent
-            title: (deletecount < 2)?qsTr("Permanently delete this song?"):qsTr("Permanently delete these %1 songs?").arg(deletecount)
+            title: qsTr("Permanently delete these %n song(s)?", "", deletecount)
             acceptButtonText: labelConfirmDelete
             cancelButtonText: labelCancel
             onAccepted: {
@@ -2014,7 +2014,7 @@ Window {
                                         height: albumThumbnail.height/10
                                         width: parent.width
                                         //: number of tracks in an album
-                                        text: qsTr("%1 songs").arg(dinstance.mitemcount)
+                                        text: qsTr("%n song(s)", "", dinstance.mitemcount)
                                         color: theme_fontColorMediaHighlight
                                         font.pixelSize: theme_fontPixelSizeLarge-3
                                         verticalAlignment:Text.AlignVCenter
@@ -2335,7 +2335,7 @@ Window {
                                 height: albumThumbnail.height/10
                                 width: parent.width
                                 //: number of songs in an album
-                                text: qsTr("%1 songs").arg(model.count)
+                                text: qsTr("%n song(s)", "", model.count)
                                 color: theme_fontColorMediaHighlight
                                 font.pixelSize: theme_fontPixelSizeLarge-3
                                 verticalAlignment:Text.AlignVCenter
