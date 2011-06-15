@@ -35,9 +35,9 @@ Window {
     property string labelPlay: qsTr("Play")
     property string labelOpen: qsTr("Open")
     property string labelOpenAlbum: qsTr("Open album")
-    //This is a verb. Marks the operation whereby items are added to the favorites list
-    property string labelFavorite: qsTr("Favorite")
-    //This is a verb. Marks the operation whereby items are removed from the favorites list
+    //: This is a verb. Marks the operation whereby items are added to the favorites list
+    property string labelFavorite: qsTr("Favorite", "Verb")
+    //: This is a verb. Marks the operation whereby items are removed from the favorites list
     property string labelUnFavorite: qsTr("Unfavorite")
     property string labelAddToPlayQueue: qsTr("Add to play queue")
     property string labelAddToPlaylist: qsTr("Add to playlist")
@@ -54,13 +54,6 @@ Window {
     property string labelSavePlaylist: qsTr("Save as playlist")
     property string labelClearPlayqueue: qsTr("Clear play queue")
     property string labelClearPlaylist: qsTr("Clear playlist")
-
-    // number of songs for an artist
-    property string labelItemCount: qsTr("%1 items")
-    // number of albums
-    property string labelAlbumCount: qsTr("%1 album")
-    // number of songs
-    property string labelTrackCount: qsTr("%1 tracks")
 
     property string labelGrid: qsTr("Grid")
     property string labelList: qsTr("List")
@@ -83,7 +76,8 @@ Window {
     property string labelPlayQueueHelpHeading1: qsTr("What's the play queue?")
     property string labelPlayQueueHelpText1: qsTr("A place to queue up the music you want to hear. You can queue albums, playlists or individual tracks. ")
     property string labelPlayQueueHelpHeading2: qsTr("How do I queue music?")
-    property string labelPlayQueueHelpText2: qsTr("To queue music, tap the 'Add music to the play queue' button. You can also tap and hold a song, album or playlist, then select 'Add to play queue'.")
+    //: %1 is "Add music to the play queue", %2 is "Add to play queue" button labels
+    property string labelPlayQueueHelpText2: qsTr("To queue music, tap the '%1' button. You can also tap and hold a song, album or playlist, then select '%2'.").arg(qsTr("Add music to the play queue")).arg(qsTr("Add to play queue"))
     property string labelPlayQueueHelpHeading3: qsTr("How do I get music?")
     property string labelPlayQueueHelpText3: qsTr("Download or copy your music onto the tablet. Connect the tablet to your computer with a USB cable, via Wi-Fi or bluetooth.")
     property string labelAddTracks: qsTr("Add tracks")
@@ -94,15 +88,17 @@ Window {
     property string labelPlaylistsHelpHeading1: qsTr("What's a playlist?")
     property string labelPlaylistsHelpText1: qsTr("A compilation of music created by you. Create playlists to suit your mood, your activities and to share with friends.")
     property string labelPlaylistsHelpHeading2: qsTr("How do I add music to a playlist?")
-    property string labelPlaylistsHelpText2: qsTr("To add music to a playlist, tap and hold the track you want to add. Then select 'Add to playlist'.")
+    //: %1 is "Add to playlist" button label
+    property string labelPlaylistsHelpText2: qsTr("To add music to a playlist, tap and hold the track you want to add. Then select '%1'.").arg(qsTr("Add to playlist"))
     property string labelPlaylistsHelpHeading3: labelPlayQueueHelpHeading3
     property string labelPlaylistsHelpText3: labelPlayQueueHelpText3
-    property string labelFavoritesEmptyText: qsTr("You don't have any favourite music tracks")
+    property string labelFavoritesEmptyText: qsTr("You don't have any favorite music tracks")
     property string labelFavoritesViewAllTracks: qsTr("View all music tracks")
-    property string labelFavoritesHelpHeading1: qsTr("What are favourites?")
+    property string labelFavoritesHelpHeading1: qsTr("What are favorites?")
     property string labelFavoritesHelpText1: qsTr("The place to keep the music tracks you like most.")
-    property string labelFavoritesHelpHeading2: qsTr("How do I create favourites?")
-    property string labelFavoritesHelpText2: qsTr("To add music to your favourites, tap and hold a music track you love. Then select 'Favourite'.")
+    property string labelFavoritesHelpHeading2: qsTr("How do I create favorites?")
+    //: %1 is "Favorite" button label
+    property string labelFavoritesHelpText2: qsTr("To add music to your favorites, tap and hold a music track you love. Then select '%1'.").arg(qsTr("Favorite", "Verb"))
     property string labelFavoritesHelpHeading3: labelPlayQueueHelpHeading3
     property string labelFavoritesHelpText3: labelPlayQueueHelpText3
     property string forbiddenchars: ("\n\'\t\"\\");
@@ -749,7 +745,7 @@ Window {
 
                 Text {
                     height: paintedHeight
-                    //Confirmation message for deleting music tracks. "This" and "it" refer to list items, which represent music tracks on-screen.
+                    //: Confirmation message for deleting music tracks. "This" and "it" refer to list items, which represent music tracks on-screen.
                     text: qsTr("If you delete this, it will be removed from your device")
                     anchors.left:parent.left
                     anchors.right: parent.right
@@ -763,8 +759,8 @@ Window {
         ModalDialog {
             id: deleteMultipleItemsDialog
             property int deletecount: Code.selectionCount()
-            // text asking the user if the song(s) is to deleted, warning them that it's permanent
-            title: (deletecount < 2)?qsTr("Permanently delete this song?"):qsTr("Permanently delete these %1 songs?").arg(deletecount)
+            //: text asking the user if the song(s) is to deleted, warning them that it's permanent
+            title: qsTr("Permanently delete these %n song(s)?", "", deletecount)
             acceptButtonText: labelConfirmDelete
             cancelButtonText: labelCancel
             onAccepted: {
@@ -779,7 +775,7 @@ Window {
                 anchors.fill: parent
                 clip: true
                 Text {
-                    //Confirmation message for deleting music tracks. "These" and "they" refer to list items, which represent music tracks on-screen.
+                    //: Confirmation message for deleting music tracks. "These" and "they" refer to list items, which represent music tracks on-screen.
                     text: qsTr("If you delete these, they will be removed from your device")
                     anchors.left: parent.left
                     anchors.right: parent.right
@@ -2037,8 +2033,8 @@ Window {
                                         anchors.top: albumTitleText.bottom
                                         height: albumThumbnail.height/10
                                         width: parent.width
-                                        // number of tracks in an album
-                                        text: qsTr("%1 songs").arg(dinstance.mitemcount)
+                                        //: number of tracks in an album
+                                        text: qsTr("%n song(s)", "", dinstance.mitemcount)
                                         color: theme_fontColorMediaHighlight
                                         font.pixelSize: theme_fontPixelSizeLarge-3
                                         verticalAlignment:Text.AlignVCenter
@@ -2365,8 +2361,8 @@ Window {
                                 anchors.top: albumTitleText.bottom
                                 height: albumThumbnail.height/10
                                 width: parent.width
-                                // number of songs in an album
-                                text: qsTr("%1 songs").arg(model.count)
+                                //: number of songs in an album
+                                text: qsTr("%n song(s)", "", model.count)
                                 color: theme_fontColorMediaHighlight
                                 font.pixelSize: theme_fontPixelSizeLarge-3
                                 verticalAlignment:Text.AlignVCenter
