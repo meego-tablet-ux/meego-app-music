@@ -92,13 +92,13 @@ Window {
     property string labelPlaylistsHelpText2: qsTr("To add music to a playlist, tap and hold the track you want to add. Then select '%1'.").arg(qsTr("Add to playlist"))
     property string labelPlaylistsHelpHeading3: labelPlayQueueHelpHeading3
     property string labelPlaylistsHelpText3: labelPlayQueueHelpText3
-    property string labelFavoritesEmptyText: qsTr("You don't have any favourite music tracks")
+    property string labelFavoritesEmptyText: qsTr("You don't have any favorite music tracks")
     property string labelFavoritesViewAllTracks: qsTr("View all music tracks")
-    property string labelFavoritesHelpHeading1: qsTr("What are favourites?")
+    property string labelFavoritesHelpHeading1: qsTr("What are favorites?")
     property string labelFavoritesHelpText1: qsTr("The place to keep the music tracks you like most.")
-    property string labelFavoritesHelpHeading2: qsTr("How do I create favourites?")
+    property string labelFavoritesHelpHeading2: qsTr("How do I create favorites?")
     //: %1 is "Favorite" button label
-    property string labelFavoritesHelpText2: qsTr("To add music to your favourites, tap and hold a music track you love. Then select '%1'.").arg(qsTr("Favorite", "Verb"))
+    property string labelFavoritesHelpText2: qsTr("To add music to your favorites, tap and hold a music track you love. Then select '%1'.").arg(qsTr("Favorite", "Verb"))
     property string labelFavoritesHelpHeading3: labelPlayQueueHelpHeading3
     property string labelFavoritesHelpText3: labelPlayQueueHelpText3
     property string forbiddenchars: ("\n\'\t\"\\");
