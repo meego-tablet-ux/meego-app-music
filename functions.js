@@ -384,3 +384,9 @@ function appendItemToPlaylist(item, playlistItem)
     miscModel.playlist = playlistItem.mtitle;
     miscModel.addItems(item.mitemid);
 }
+
+function songCheck(cdata)
+{
+    // if the song ands in .desktop, it's not a song
+    return (cdata.indexOf(".desktop", cdata.length - 8) == -1);
+}

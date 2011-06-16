@@ -283,7 +283,8 @@ Window {
             } else if (cmd == "stop") {
                 Code.stop();
             } else if (cmd == "playSong") {
-                editorModel.requestItem(MediaItem.SongItem, cdata);
+                if(Code.songCheck(cdata))
+                    editorModel.requestItem(MediaItem.SongItem, cdata);
             } else if (cmd == "playArtist") {
                 editorModel.requestItem(MediaItem.MusicArtistItem, cdata);
             } else if (cmd == "playAlbum") {
