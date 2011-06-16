@@ -115,7 +115,6 @@ Window {
     property string thumbnailUri:""
     property bool multiSelectMode: false
     property variant multiSelectModel: allTracksModel
-    property variant currentListModel: allTracksModel
     property int targetIndex: 0
 
     property variant currentAlbum
@@ -129,8 +128,6 @@ Window {
     property bool multiSelectModeShowFavoriteAction
 
     property int contentMargins: 15
-    property string nowPlayingLabel//in "Play Queue", "Playlist", "Album", "Artist", "All Tracks", "Favorites"
-    property string nowPlayingName//name of the playlist, album or artist
 
     bookMenuModel: bookModel
     bookMenuPayload: bookPayload
@@ -167,10 +164,6 @@ Window {
         sort:MusicListModel.SortByTitle
     }
 
-    //Toggle between "play queue" and "now playing", so that functions in Code can be reused.
-    property variant activePlayingListModel: playqueueModel
-    property variant activePlayingListView: playqueueView
-
     // global now playing queue
     property variant playqueueModel: MusicListModel {
         type: MusicListModel.NowPlaying
@@ -187,31 +180,6 @@ Window {
         onShuffleChanged: {
             playqueueView.currentIndex = playqueueModel.playindex;
         }
-    }
-
-    // global now playing queue, for just playing the current context
-    // Behaves like the playqueue, except items do not remain when a new
-    // context (an album, for example) is added.
-    property variant nowPlayingModel: MusicListModel {
-        type: MusicListModel.NowPlaying
-        limit: 0
-        sort: MusicListModel.SortByDefault
-        onBeginPlayback: Code.playNowPlaying();
-        onPlayStatusChanged: {
-            //if(playstatus == MusicListModel.Playing)
-            //    playqueueView.currentIndex = playqueueModel.playindex;
-        }
-        onShuffleChanged: {
-            //playqueueView.currentIndex = playqueueModel.playindex;
-        }
-    }
-
-    //Just a dummy view, to allow using the now playing list the same way as the play queue
-    MusicListView {
-        id: nowPlayingView
-        model: nowPlayingModel
-        playqueue: true
-        visible: false
     }
 
     // an editor model, it is used to do things like tag arbitrary items as favorite/viewed
@@ -397,21 +365,21 @@ Window {
 
         function updateNowNextTracks() {
             var newNowNext = [
-                    activePlayingListModel.datafromIndex(activePlayingListModel.playindex, MediaItem.URN),
-                    activePlayingListModel.getURNFromIndex(nextItem1),
-                    activePlayingListModel.getURNFromIndex(nextItem2)
+                    playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.URN),
+                    playqueueModel.getURNFromIndex(nextItem1),
+                    playqueueModel.getURNFromIndex(nextItem2)
                 ]
             dbusControl.nowNextTracks = newNowNext;
-            var album = activePlayingListModel.datafromIndex(activePlayingListModel.playindex, MediaItem.Album);
-            var artist = activePlayingListModel.datafromIndex(activePlayingListModel.playindex, MediaItem.Artist);
-            var title = activePlayingListModel.datafromIndex(activePlayingListModel.playindex, MediaItem.Title);
-            var length = activePlayingListModel.datafromIndex(activePlayingListModel.playindex, MediaItem.Length);
+            var album = playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.Album);
+            var artist = playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.Artist);
+            var title = playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.Title);
+            var length = playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.Length);
             dbusControl.setCurrentTrackMetadata(album, artist, title, length);
         }
 
         onPlay: {
             if(!Code.play()) {
-                activePlayingListModel.playAllSongs();
+                playqueueModel.playAllSongs();
             }
         }
 
@@ -544,8 +512,6 @@ Window {
         playlistEditor.clear();
         playlistEditor.playlist = title;
         playlistEditor.addItems(payload);
-        if( activePlayingListModel == nowPlayingModel )
-            {activePlayingListModel.addItems(payload);}
         if(multiSelectMode)
         {
             Code.clearSelected();
@@ -584,7 +550,7 @@ Window {
             height: 55
             opacity: 0
             width: parent.width
-            anchors.bottom: toolbar.top
+            anchors.bottom: parent.bottom
             anchors.left: parent.left
             landscape: window.isLandscape
             showfavourite: (selectedPageIndex==bookModel.indexOf(labelFavorites))?false:(multiSelectModeShowFavoriteAction?true:false)
@@ -622,14 +588,12 @@ Window {
                     {Code.changeMultipleItemFavorite(false);}
             }
             onRmFromQueuePressed: {
-                if(Code.selectionCount() > 0){
-                    Code.removeMultipleFromPlayqueue();
-                }
+                if(Code.selectionCount() > 0)
+                    {Code.removeFromPlayqueue();}
             }
             onRmFromPlaylistPressed: {
-                if(Code.selectionCount() > 0){
-                    Code.removeMultipleFromPlaylist(contextMenu.playlistmodel);
-                }
+                if(Code.selectionCount() > 0)
+                    {Code.removeMultipleFromPlaylist(contextMenu.playlistmodel);}
             }
             onAddToQueuePressed: {
                 if(Code.selectionCount() > 0)
@@ -651,6 +615,10 @@ Window {
                         target: multibar
                         opacity:1
                     }
+                    PropertyChanges {
+                        target: toolbar
+                        opacity:0
+                    }
                 },
                 State {
                     name: "hideActionBar"
@@ -658,6 +626,10 @@ Window {
                     PropertyChanges {
                         target: multibar
                         opacity: 0
+                    }
+                    PropertyChanges {
+                        target: toolbar
+                        opacity:1
                     }
                 }
             ]
@@ -708,10 +680,7 @@ Window {
             }
             onAccepted: {
                 console.log(payload.muri);
-                Code.dropFromActivePlayingList(payload.mitemid);
-                Code.updateNowNextPlaying();
                 editorModel.destroyItemByID(payload.mitemid);
-                Code.playNewSong();
             }
             content: Column {
                 id: deleteItemContents
@@ -745,7 +714,6 @@ Window {
 
                 Text {
                     height: paintedHeight
-                    //: Confirmation message for deleting music tracks. "This" and "it" refer to list items, which represent music tracks on-screen.
                     text: qsTr("If you delete this, it will be removed from your device")
                     anchors.left:parent.left
                     anchors.right: parent.right
@@ -764,9 +732,7 @@ Window {
             acceptButtonText: labelConfirmDelete
             cancelButtonText: labelCancel
             onAccepted: {
-                Code.dropFromActivePlayingList(-1);
                 multiSelectModel.destroyItemsByID(Code.getSelectedIDs());
-                Code.updateNowNextPlaying();
                 Code.clearSelected();
                 shareObj.clearItems();
                 multiSelectMode = false;
@@ -775,7 +741,6 @@ Window {
                 anchors.fill: parent
                 clip: true
                 Text {
-                    //: Confirmation message for deleting music tracks. "These" and "they" refer to list items, which represent music tracks on-screen.
                     text: qsTr("If you delete these, they will be removed from your device")
                     anchors.left: parent.left
                     anchors.right: parent.right
@@ -954,9 +919,9 @@ Window {
                     {
                         // Remove from play queue
                         if(!multiSelectMode)
-                            {Code.removeFromPlayqueue();}
+                            Code.removeFromPlayqueue();
                         else if(Code.selectionCount() > 0)
-                            {Code.removeMultipleFromPlayqueue();}
+                            Code.removeMultipleFromPlayqueue();
                     }
                     else if (model[index] == labelAddToPlaylist)
                     {
@@ -1403,7 +1368,7 @@ Window {
                 visible: showGridView && !noMusicScreen.visible
                 anchors.topMargin: 10
                 anchors.bottomMargin: 10
-                anchors.leftMargin: 15
+                anchors.leftMargin: (parent.width - Math.floor(parent.width / 326)*326) / 2
                 anchors.rightMargin: anchors.leftMargin
                 defaultThumbnail: "image://themedimage/images/media/music_thumb_med"
                 footerHeight: toolbar.height + multibar.height
@@ -1516,7 +1481,7 @@ Window {
                 visible: showGridView && !noMusicScreen.visible
                 anchors.topMargin: 10
                 anchors.bottomMargin: 10
-                anchors.leftMargin: 15
+                anchors.leftMargin: (parent.width - Math.floor(parent.width / 326)*326) / 2
                 anchors.rightMargin: anchors.leftMargin
                 defaultThumbnail: "image://themedimage/images/media/music_thumb_med"
                 footerHeight: toolbar.height + multibar.height
@@ -1652,10 +1617,7 @@ Window {
                     }
                     else
                     {
-                        currentListModel = model;
-                        nowPlayingLabel="All Tracks"
-                        nowPlayingName ="All Tracks"
-                        Code.playAndAddContextToNowPlaying(payload);
+                        Code.addToPlayqueueAndPlay(payload);
                     }
                 }
                 onLongPressAndHold:{
@@ -1679,7 +1641,7 @@ Window {
                 anchors.fill: parent
                 anchors.topMargin: 10
                 anchors.bottomMargin: 10
-                anchors.leftMargin: 15
+                anchors.leftMargin: (parent.width - Math.floor(parent.width / 326)*326) / 2
                 anchors.rightMargin: anchors.leftMargin
 
                 onClicked: {
@@ -1700,12 +1662,7 @@ Window {
                     }
                     else
                     {
-                        currentListModel = model;
-                        activePlayingListModel = nowPlayingModel;
-                        activePlayingListView = nowPlayingView;
-                        nowPlayingLabel="All Tracks"
-                        nowPlayingName ="All Tracks"
-                        Code.playAndAddContextToNowPlaying(payload);
+                        Code.addToPlayqueueAndPlay(payload);
                     }
                 }
                 onLongPressAndHold:{
@@ -1846,12 +1803,7 @@ Window {
                     }
                     else
                     {
-                        currentListModel = model;
-                        activePlayingListModel = nowPlayingModel;
-                        activePlayingListView = nowPlayingView;
-                        nowPlayingLabel = "Favorites"
-                        nowPlayingName  = "Favorites"
-                        Code.playAndAddContextToNowPlaying(payload);
+                        Code.addToPlayqueueAndPlay(payload);
                     }
                 }
                 onLongPressAndHold: {
@@ -2131,12 +2083,7 @@ Window {
                                 }
                                 else
                                 {
-                                    currentListModel = model;
-                                    activePlayingListModel = nowPlayingModel;
-                                    activePlayingListView = nowPlayingView;
-                                    nowPlayingLabel = "Artist"
-                                    nowPlayingName  = payload.martist;
-                                    Code.playAndAddContextToNowPlaying(payload);
+                                    Code.addToPlayqueueAndPlay(payload);
                                 }
                             }
                             onLongPressAndHold: {
@@ -2426,12 +2373,7 @@ Window {
                         }
                         else
                         {
-                            currentListModel = model;
-                            activePlayingListModel = nowPlayingModel;
-                            activePlayingListView = nowPlayingView;
-                            nowPlayingLabel="Album"
-                            nowPlayingName =model.album
-                            Code.playAndAddContextToNowPlaying(payload);
+                            Code.addToPlayqueueAndPlay(payload);
                         }
                     }
                     onLongPressAndHold: {
@@ -2638,10 +2580,7 @@ Window {
                         }
                         else
                         {
-                            currentListModel = model;
-                            nowPlayingLabel = "Playlist"
-                            nowPlayingName = model.playlist;
-                            Code.playAndAddContextToNowPlaying(payload);
+                            Code.addToPlayqueueAndPlay(payload);
                         }
                     }
                     onLongPressAndHold: {
@@ -2762,13 +2701,8 @@ Window {
             }
             else
             {
-                currentListModel = model;
-                activePlayingListModel = playqueueModel;
-                activePlayingListView = playqueueView;
-                nowPlayingLabel = "Play queue"
-                nowPlayingName = "Play queue"
-                activePlayingListModel.playindex = index;
-                activePlayingListView.currentIndex = index;
+                playqueueModel.playindex = index;
+                playqueueView.currentIndex = index;
                 Code.playNewSong();
             }
         }
