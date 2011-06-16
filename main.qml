@@ -55,13 +55,6 @@ Window {
     property string labelClearPlayqueue: qsTr("Clear play queue")
     property string labelClearPlaylist: qsTr("Clear playlist")
 
-    // number of songs for an artist
-    property string labelItemCount: qsTr("%1 items")
-    // number of albums
-    property string labelAlbumCount: qsTr("%1 album")
-    // number of songs
-    property string labelTrackCount: qsTr("%1 tracks")
-
     property string labelGrid: qsTr("Grid")
     property string labelList: qsTr("List")
 
