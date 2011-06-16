@@ -35,7 +35,9 @@ Window {
     property string labelPlay: qsTr("Play")
     property string labelOpen: qsTr("Open")
     property string labelOpenAlbum: qsTr("Open album")
-    property string labelFavorite: qsTr("Favorite")
+    //: This is a verb. Marks the operation whereby items are added to the favorites list
+    property string labelFavorite: qsTr("Favorite", "Verb")
+    //: This is a verb. Marks the operation whereby items are removed from the favorites list
     property string labelUnFavorite: qsTr("Unfavorite")
     property string labelAddToPlayQueue: qsTr("Add to play queue")
     property string labelAddToPlaylist: qsTr("Add to playlist")
@@ -52,10 +54,6 @@ Window {
     property string labelSavePlaylist: qsTr("Save as playlist")
     property string labelClearPlayqueue: qsTr("Clear play queue")
     property string labelClearPlaylist: qsTr("Clear playlist")
-
-    property string labelItemCount: qsTr("%1 items")
-    property string labelAlbumCount: qsTr("%1 album")
-    property string labelTrackCount: qsTr("%1 tracks")
 
     property string labelGrid: qsTr("Grid")
     property string labelList: qsTr("List")
@@ -78,7 +76,8 @@ Window {
     property string labelPlayQueueHelpHeading1: qsTr("What's the play queue?")
     property string labelPlayQueueHelpText1: qsTr("A place to queue up the music you want to hear. You can queue albums, playlists or individual tracks. ")
     property string labelPlayQueueHelpHeading2: qsTr("How do I queue music?")
-    property string labelPlayQueueHelpText2: qsTr("To queue music, tap the 'Add music to the play queue' button. You can also tap and hold a song, album or playlist, then select 'Add to play queue'.")
+    //: %1 is "Add music to the play queue", %2 is "Add to play queue" button labels
+    property string labelPlayQueueHelpText2: qsTr("To queue music, tap the '%1' button. You can also tap and hold a song, album or playlist, then select '%2'.").arg(qsTr("Add music to the play queue")).arg(qsTr("Add to play queue"))
     property string labelPlayQueueHelpHeading3: qsTr("How do I get music?")
     property string labelPlayQueueHelpText3: qsTr("Download or copy your music onto the tablet. Connect the tablet to your computer with a USB cable, via Wi-Fi or bluetooth.")
     property string labelAddTracks: qsTr("Add tracks")
@@ -89,15 +88,17 @@ Window {
     property string labelPlaylistsHelpHeading1: qsTr("What's a playlist?")
     property string labelPlaylistsHelpText1: qsTr("A compilation of music created by you. Create playlists to suit your mood, your activities and to share with friends.")
     property string labelPlaylistsHelpHeading2: qsTr("How do I add music to a playlist?")
-    property string labelPlaylistsHelpText2: qsTr("To add music to a playlist, tap and hold the track you want to add. Then select 'Add to playlist'.")
+    //: %1 is "Add to playlist" button label
+    property string labelPlaylistsHelpText2: qsTr("To add music to a playlist, tap and hold the track you want to add. Then select '%1'.").arg(qsTr("Add to playlist"))
     property string labelPlaylistsHelpHeading3: labelPlayQueueHelpHeading3
     property string labelPlaylistsHelpText3: labelPlayQueueHelpText3
-    property string labelFavoritesEmptyText: qsTr("You don't have any favourite music tracks")
+    property string labelFavoritesEmptyText: qsTr("You don't have any favorite music tracks")
     property string labelFavoritesViewAllTracks: qsTr("View all music tracks")
-    property string labelFavoritesHelpHeading1: qsTr("What are favourites?")
+    property string labelFavoritesHelpHeading1: qsTr("What are favorites?")
     property string labelFavoritesHelpText1: qsTr("The place to keep the music tracks you like most.")
-    property string labelFavoritesHelpHeading2: qsTr("How do I create favourites?")
-    property string labelFavoritesHelpText2: qsTr("To add music to your favourites, tap and hold a music track you love. Then select 'Favourite'.")
+    property string labelFavoritesHelpHeading2: qsTr("How do I create favorites?")
+    //: %1 is "Favorite" button label
+    property string labelFavoritesHelpText2: qsTr("To add music to your favorites, tap and hold a music track you love. Then select '%1'.").arg(qsTr("Favorite", "Verb"))
     property string labelFavoritesHelpHeading3: labelPlayQueueHelpHeading3
     property string labelFavoritesHelpText3: labelPlayQueueHelpText3
     property string forbiddenchars: ("\n\'\t\"\\");
@@ -283,7 +284,8 @@ Window {
             } else if (cmd == "stop") {
                 Code.stop();
             } else if (cmd == "playSong") {
-                editorModel.requestItem(MediaItem.SongItem, cdata);
+                if(Code.songCheck(cdata))
+                    editorModel.requestItem(MediaItem.SongItem, cdata);
             } else if (cmd == "playArtist") {
                 editorModel.requestItem(MediaItem.MusicArtistItem, cdata);
             } else if (cmd == "playAlbum") {
@@ -728,7 +730,8 @@ Window {
         ModalDialog {
             id: deleteMultipleItemsDialog
             property int deletecount: Code.selectionCount()
-            title: (deletecount < 2)?qsTr("Permanently delete this song?"):qsTr("Permanently delete these %1 songs?").arg(deletecount)
+            //: text asking the user if the song(s) is to deleted, warning them that it's permanent
+            title: qsTr("Permanently delete these %n song(s)?", "", deletecount)
             acceptButtonText: labelConfirmDelete
             cancelButtonText: labelCancel
             onAccepted: {
@@ -891,13 +894,21 @@ Window {
                         // Open
                         Code.openItemInDetailView(contextMenu.openpage,payload);
                     }
-                    else if ((model[index] == labelFavorite)||(model[index] == labelUnFavorite))
+                    else if (model[index] == labelFavorite)
                     {
-                        // Favorite/unfavorite
+                        // Favorite
                         if(!multiSelectMode)
-                            Code.changeItemFavorite(payload, (model[index] == labelFavorite));
+                            Code.changeItemFavorite(payload, true);
                         else if(Code.selectionCount() > 0)
-                            Code.changeMultipleItemFavorite(model[index] == labelFavorite);
+                            Code.changeMultipleItemFavorite(true);
+                    }
+                    else if (model[index] == labelUnFavorite)
+                    {
+                        // unfavorite
+                        if(!multiSelectMode)
+                            Code.changeItemFavorite(payload, false);
+                        else if(Code.selectionCount() > 0)
+                            Code.changeMultipleItemFavorite(false);
                     }
                     else if (model[index] == labelAddToPlayQueue)
                     {
@@ -971,6 +982,7 @@ Window {
                     {
                         // Multi Select
                         multiSelectMode = true;
+                        selectedFavoritesAccumulator = 0;
                     }
                     else if (model[index] == labelcShare)
                     {
@@ -1221,7 +1233,7 @@ Window {
                 anchors.margins: contentMargins
                 model:gridView.model
                 mode: 1
-                footerHeight: toolbar.height
+                footerHeight: toolbar.height + multibar.height
                 visible: !showGridView && !noMusicScreen.visible && !noPlaylists.visible
                 onClicked: {
                      Code.openItemInDetailView(playlistsPage,payload);
@@ -1249,7 +1261,7 @@ Window {
                 anchors.rightMargin: anchors.leftMargin
                 visible:showGridView && !noMusicScreen.visible && !noPlaylists.visible
                 defaultThumbnail: "image://themedimage/images/media/music_thumb_med"
-                footerHeight: toolbar.height
+                footerHeight: toolbar.height + multibar.height
                 model: MusicListModel {
                     type: MusicListModel.ListofPlaylists
                     limit:0
@@ -1336,7 +1348,7 @@ Window {
                 visible: !showGridView && !noMusicScreen.visible
                 model:artistsGridView.model
                 mode: 2
-                footerHeight: toolbar.height
+                footerHeight: toolbar.height + multibar.height
                 onClicked: {
                     Code.openItemInDetailView(artistsPage,payload)
                 }
@@ -1362,7 +1374,7 @@ Window {
                 anchors.leftMargin: (parent.width - Math.floor(parent.width / 326)*326) / 2
                 anchors.rightMargin: anchors.leftMargin
                 defaultThumbnail: "image://themedimage/images/media/music_thumb_med"
-                footerHeight: toolbar.height
+                footerHeight: toolbar.height + multibar.height
                 model: MusicListModel {
                     type: MusicListModel.ListofArtists
                     limit:0
@@ -1448,7 +1460,7 @@ Window {
                 visible: !showGridView && !noMusicScreen.visible
                 model:albumsGridView.model
                 mode: 3
-                footerHeight: toolbar.height
+                footerHeight: toolbar.height + multibar.height
                 onClicked: {
                     labelArtist = payload.martist;
                     Code.openItemInDetailView(albumsPage,payload)
@@ -1475,7 +1487,7 @@ Window {
                 anchors.leftMargin: (parent.width - Math.floor(parent.width / 326)*326) / 2
                 anchors.rightMargin: anchors.leftMargin
                 defaultThumbnail: "image://themedimage/images/media/music_thumb_med"
-                footerHeight: toolbar.height
+                footerHeight: toolbar.height + multibar.height
 
                 spacing: 10
                 showHeader: true
@@ -1588,8 +1600,9 @@ Window {
                 anchors.margins: contentMargins
                 visible: !showGridView && !noMusicScreen.visible
                 model: allTracksModel
-                footerHeight: toolbar.height
+                footerHeight: toolbar.height + multibar.height
                 onClicked: {
+                    console.log("-- multiselect clicked");
                     if(multiSelectMode)
                     {
                         model.setSelected(payload.mitemid, !model.isSelected(payload.mitemid));
@@ -1624,7 +1637,7 @@ Window {
                 type: musictype // music app = 0
                 selectionMode: multiSelectMode
                 visible: showGridView && !noMusicScreen.visible
-                footerHeight: toolbar.height
+                footerHeight: toolbar.height + multibar.height
                 defaultThumbnail: "image://themedimage/images/media/music_thumb_med"
                 model: listview.model
 
@@ -1639,9 +1652,16 @@ Window {
                     {
                         model.setSelected(payload.mitemid, !model.isSelected(payload.mitemid));
                         if (model.isSelected(payload.mitemid))
+                        {
                             shareObj.addItem(payload.muri);
+                            selectedFavoritesAccumulator += (payload.mfavorite?1:-1);
+                        }
                         else
+                        {
                             shareObj.delItem(payload.muri);
+                            selectedFavoritesAccumulator += (payload.mfavorite?-1:1);
+                        }
+                        multiSelectModeShowFavoriteAction = (selectedFavoritesAccumulator <= 0) ? true : false;
                     }
                     else
                     {
@@ -1767,15 +1787,22 @@ Window {
                 anchors.margins: contentMargins
                 visible: !noMusicScreen.visible && !noFavorites.visible
                 model: favoritesPage.model
-                footerHeight: toolbar.height
+                footerHeight: toolbar.height + multibar.height
                 onClicked :{
                     if(multiSelectMode)
                     {
                         model.setSelected(payload.mitemid, !model.isSelected(payload.mitemid));
                         if (model.isSelected(payload.mitemid))
+                        {
                             shareObj.addItem(payload.muri);
+                            selectedFavoritesAccumulator += (payload.mfavorite?1:-1);
+                        }
                         else
+                        {
                             shareObj.delItem(payload.muri);
+                            selectedFavoritesAccumulator += (payload.mfavorite?-1:1);
+                        }
+                        multiSelectModeShowFavoriteAction = (selectedFavoritesAccumulator <= 0) ? true : false;
                     }
                     else
                     {
@@ -1869,7 +1896,7 @@ Window {
                     anchors.fill: parent
                     anchors.margins: contentMargins
                     visible: false
-                    footerHeight: toolbar.height
+                    footerHeight: toolbar.height + multibar.height
                     defaultThumbnail: "image://themedimage/images/media/music_thumb_med"
                     onClicked: {
                         if(payload.misvirtual) {
@@ -1961,7 +1988,8 @@ Window {
                                         anchors.top: albumTitleText.bottom
                                         height: albumThumbnail.height/10
                                         width: parent.width
-                                        text: qsTr("%1 songs").arg(dinstance.mitemcount)
+                                        //: number of tracks in an album
+                                        text: qsTr("%n song(s)", "", dinstance.mitemcount)
                                         color: theme_fontColorMediaHighlight
                                         font.pixelSize: theme_fontPixelSizeLarge-3
                                         verticalAlignment:Text.AlignVCenter
@@ -2023,7 +2051,7 @@ Window {
                             selectionMode: multiSelectMode
                             height: 500
                             interactive: false
-                            footerHeight: toolbar.height
+                            footerHeight: toolbar.height + multibar.height
                             showThumbnail: false
                             showHeader: false
                             anchors.leftMargin: 7
@@ -2045,9 +2073,16 @@ Window {
                                 {
                                     model.setSelected(payload.mitemid, !model.isSelected(payload.mitemid));
                                     if (model.isSelected(payload.mitemid))
+                                    {
                                         shareObj.addItem(payload.muri);
+                                        selectedFavoritesAccumulator += (payload.mfavorite?1:-1);
+                                    }
                                     else
+                                    {
                                         shareObj.delItem(payload.muri);
+                                        selectedFavoritesAccumulator += (payload.mfavorite?-1:1);
+                                    }
+                                    multiSelectModeShowFavoriteAction = (selectedFavoritesAccumulator <= 0) ? true : false;
                                 }
                                 else
                                 {
@@ -2276,7 +2311,8 @@ Window {
                                 anchors.top: albumTitleText.bottom
                                 height: albumThumbnail.height/10
                                 width: parent.width
-                                text: qsTr("%1 songs").arg(model.count)
+                                //: number of songs in an album
+                                text: qsTr("%n song(s)", "", model.count)
                                 color: theme_fontColorMediaHighlight
                                 font.pixelSize: theme_fontPixelSizeLarge-3
                                 verticalAlignment:Text.AlignVCenter
@@ -2319,7 +2355,7 @@ Window {
                     id: albumSongList
                     selectionMode: multiSelectMode
                     model: albumDetailViewPage.model
-                    footerHeight: toolbar.height
+                    footerHeight: toolbar.height + multibar.height
                     showThumbnail: false
                     showHeader: false
                     onClicked: {
@@ -2327,9 +2363,16 @@ Window {
                         {
                             model.setSelected(payload.mitemid, !model.isSelected(payload.mitemid));
                             if (model.isSelected(payload.mitemid))
+                            {
                                 shareObj.addItem(payload.muri);
+                                selectedFavoritesAccumulator += (payload.mfavorite?1:-1);
+                            }
                             else
+                            {
                                 shareObj.delItem(payload.muri);
+                                selectedFavoritesAccumulator += (payload.mfavorite?-1:1);
+                            }
+                            multiSelectModeShowFavoriteAction = (selectedFavoritesAccumulator <= 0) ? true : false;
                         }
                         else
                         {
@@ -2511,7 +2554,7 @@ Window {
                     id: playlistList
                     selectionMode: multiSelectMode
                     anchors.margins: 3
-                    footerHeight: toolbar.height
+                    footerHeight: toolbar.height + multibar.height
                     selectbyindex: true
                     model: MusicListModel {
                         type: MusicListModel.MusicPlaylist
@@ -2525,11 +2568,18 @@ Window {
                     onClicked: {
                         if(multiSelectMode)
                         {
-                            model.setSelected(index, !model.isSelected(index));
-                            if (model.isSelected(index))
+                            model.setSelected(payload.mitemid, !model.isSelected(payload.mitemid));
+                            if (model.isSelected(payload.mitemid))
+                            {
                                 shareObj.addItem(payload.muri);
+                                selectedFavoritesAccumulator += (payload.mfavorite?1:-1);
+                            }
                             else
+                            {
                                 shareObj.delItem(payload.muri);
+                                selectedFavoritesAccumulator += (payload.mfavorite?-1:1);
+                            }
+                            multiSelectModeShowFavoriteAction = (selectedFavoritesAccumulator <= 0) ? true : false;
                         }
                         else
                         {
@@ -2639,11 +2689,18 @@ Window {
         onClicked:{
             if(multiSelectMode)
             {
-                model.setSelected(index, !model.isSelected(index));
-                if (model.isSelected(index))
+                model.setSelected(payload.mitemid, !model.isSelected(payload.mitemid));
+                if (model.isSelected(payload.mitemid))
+                {
                     shareObj.addItem(payload.muri);
+                    selectedFavoritesAccumulator += (payload.mfavorite?1:-1);
+                }
                 else
+                {
                     shareObj.delItem(payload.muri);
+                    selectedFavoritesAccumulator += (payload.mfavorite?-1:1);
+                }
+                multiSelectModeShowFavoriteAction = (selectedFavoritesAccumulator <= 0) ? true : false;
             }
             else
             {
