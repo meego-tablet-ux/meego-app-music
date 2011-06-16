@@ -30,12 +30,14 @@ Item {
             loop = false;
         }
         playqueueModel.shuffle = shuffle;
+        currentState.shuffle = shuffle;
     }
     onLoopChanged: {
         // if in loop state, shuffle should be off
         if (shuffle && loop) {
             shuffle = false;
         }
+        currentState.repeat = loop;
     }
     BorderImage {
         id: nowPlayingInfo
@@ -131,7 +133,10 @@ Item {
         volumeParent: container.parent
         showshuffle: true
         showrepeat: true
-        onPrevPressed: Code.playPrevSong();
+        onPrevPressed: {
+            Code.playPrevSong();
+            currentState.prevPressed();
+        }
         onPlayPressed: {
             if(Code.play())
                 ispause = true;
@@ -142,7 +147,10 @@ Item {
             Code.pause();
             ispause = false;
         }
-        onNextPressed: Code.playNextSong();
+        onNextPressed: {
+            Code.playNextSong();
+            currentState.nextPressed();
+        }
         Connections {
             target: audio
             onPositionChanged: {
@@ -152,6 +160,7 @@ Item {
             }
         }
         onSliderMoved: {
+            currentState.sliderMoved(audio.duration * audioToolbar.sliderPosition);
             if (audio.seekable) {
                 progressBarConnection.target = null
                 audio.position = audio.duration * audioToolbar.sliderPosition;
