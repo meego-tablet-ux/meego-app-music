@@ -18,7 +18,6 @@ Item {
     property alias count: listview.count
     property string labelUnknownArtist: qsTr("unknown artist")
     property string labelUnknownAlbum: qsTr("unknown album")
-    //This is the number of items in this list
     property string labelItemCount: qsTr("%1")
     property alias interactive: listview.interactive
     property string defaultThumbnail: "image://themedimage/images/media/music_thumb_med"
