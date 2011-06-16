@@ -35,7 +35,9 @@ Window {
     property string labelPlay: qsTr("Play")
     property string labelOpen: qsTr("Open")
     property string labelOpenAlbum: qsTr("Open album")
-    property string labelFavorite: qsTr("Favorite")
+    //: This is a verb. Marks the operation whereby items are added to the favorites list
+    property string labelFavorite: qsTr("Favorite", "Verb")
+    //: This is a verb. Marks the operation whereby items are removed from the favorites list
     property string labelUnFavorite: qsTr("Unfavorite")
     property string labelAddToPlayQueue: qsTr("Add to play queue")
     property string labelAddToPlaylist: qsTr("Add to playlist")
