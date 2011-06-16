@@ -53,8 +53,11 @@ Window {
     property string labelClearPlayqueue: qsTr("Clear play queue")
     property string labelClearPlaylist: qsTr("Clear playlist")
 
+    // number of songs for an artist
     property string labelItemCount: qsTr("%1 items")
+    // number of albums
     property string labelAlbumCount: qsTr("%1 album")
+    // number of songs
     property string labelTrackCount: qsTr("%1 tracks")
 
     property string labelGrid: qsTr("Grid")
@@ -725,6 +728,7 @@ Window {
         ModalDialog {
             id: deleteMultipleItemsDialog
             property int deletecount: Code.selectionCount()
+            // text asking the user if the song(s) is to deleted, warning them that it's permanent
             title: (deletecount < 2)?qsTr("Permanently delete this song?"):qsTr("Permanently delete these %1 songs?").arg(deletecount)
             acceptButtonText: labelConfirmDelete
             cancelButtonText: labelCancel
@@ -1958,6 +1962,7 @@ Window {
                                         anchors.top: albumTitleText.bottom
                                         height: albumThumbnail.height/10
                                         width: parent.width
+                                        // number of tracks in an album
                                         text: qsTr("%1 songs").arg(dinstance.mitemcount)
                                         color: theme_fontColorMediaHighlight
                                         font.pixelSize: theme_fontPixelSizeLarge-3
@@ -2273,6 +2278,7 @@ Window {
                                 anchors.top: albumTitleText.bottom
                                 height: albumThumbnail.height/10
                                 width: parent.width
+                                // number of songs in an album
                                 text: qsTr("%1 songs").arg(model.count)
                                 color: theme_fontColorMediaHighlight
                                 font.pixelSize: theme_fontPixelSizeLarge-3
