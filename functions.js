@@ -312,26 +312,26 @@ function formatAlbumLength(length)
     if( hours == 0 && mins == 0 )
     {//only show seconds
         var secs = parseInt( length%3600 );
-        // music album length in seconds
+        //: music album length in seconds
         time = (secs==1) ? qsTr("1 second") : qsTr("%1 seconds").arg(secs);
     }
     else
     {
         if( hours == 0 )
         {//only show minutes
-            // music album length in minutes
+            //: music album length in minutes
             time = (mins==1) ? qsTr("1 minute") : qsTr("%1 minutes").arg(mins);
         }
         else
         {
             if( mins == 0 )
             {//only show hours
-                // music album length in hours
+                //: music album length in hours
                 time = ((hours == 1) ? qsTr("1 hour") : qsTr("%1 hours").arg(hours));
             }
             else
             {//show hours and minutes
-                // music album length in hours and minutes
+                //: %1 is "%n hour(s)", %2 is "%n minute(s)"
                 time = ((hours == 1) ? qsTr("1 hour") : qsTr("%1 hours").arg(hours)) + ((mins == 1) ? qsTr(" 1 minute") : qsTr(" %1 minutes").arg(mins));
             }
         }
