@@ -22,7 +22,7 @@ Item {
         type: "app"
     }
 
-    function setDeafultData() {
+    function setDefaultData() {
         //data to be transmitted
         //[widget] for data needed by widget only
         //[widget-current] for real-time data needed by widget which need to be transmitted all the time
@@ -66,7 +66,7 @@ Item {
     //sned init data for application
     function startup()
     {
-        setDeafultData();
+        setDefaultData();
         awdclient.startup();
     }
 
