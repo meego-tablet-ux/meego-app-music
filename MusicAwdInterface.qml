@@ -1,16 +1,10 @@
 import Qt 4.7
 import MeeGo.Media 0.1
 import AcerWidgetsDaemonInterface 0.1   //lib from meego-ux-media as awdapi
-import "awd-client.js" as AwdClient
 import "functions.js" as Code
 
 Item {
     id: musicAwdInterface
-
-    //string data for comparing to avoid chaos
-    property string lastArrivedData : ""    //currently lastArrivedData == lastSendData
-    property string thisArrivedData : ""    //data just arrived
-    property string currentData : ""        //current application music data
 
     //Other control bool
     property bool canAddAllTracks: false
@@ -22,23 +16,64 @@ Item {
     signal playNextSong()
     signal playPrevSong()
 
-    //AcerWidgetsDaemon API for composing a http url
-    AwdAddress {
-        id: awdAPI
+    AwdClient {
+        id: awdclient
         name: "music"
         type: "app"
+    }
+
+    function setDeafultData() {
+        //data to be transmitted
+        //[widget] for data needed by widget only
+        //[widget-current] for real-time data needed by widget which need to be transmitted all the time
+        //[application] for data needed by application only
+        //[application-start] for data needed by application only when application starts
+        //[application-current] for real-time data needed by application which need to be transmitted all the time
+        //[other] for other data which may be needed by both widget and application or for some special occasion
+        var musicAwdData =
+        {
+            "act"   : 0,                //[application]: control signals
+                                        /*
+                                            {
+                                                none     : 0
+                                                play     : 1
+                                                pause    : 2
+                                                next     : 3
+                                                prev     : 4
+                                                forward  : 5
+                                                backward : 6
+                                                init     : 7
+                                            }
+                                        */
+            "urn"   : "",               //[application-start]: play the urn
+            "pa"    : 0,                //[application-start]: the audio position
+
+            "pbp"   : 0,                //[widget-current]: for showing current progress bar position
+            "pbt"   : "0:00",           //[widget-current]: for showing current elapsed time text in progress bar
+
+            "da"    : 0,                //[widget]: for widget to calculate the total time of the song
+            "pbn"   : 0,                //[widget]: play or pause, control widget's play button, 0 for false. 1 for true
+            "prc"   : 0,                //[widget]: count of previous music items, for widget previous buttom's state
+            "nxc"   : 0,                //[widget]: count of next music items, for widget next buttom's state
+            "st"    : "Track name",     //[widget]: current song title for widget to show
+            "at"    : "Album name",     //[widget]: current album title for widget to show
+            "is"    : "/home/meego/Music/default.jpg",
+                                        //[widget]: image source for widget background image
+        }
+        awdclient.setCurrentData(musicAwdData);
     }
 
     //sned init data for application
     function startup()
     {
-        AwdClient.initRequestInfo();
+        setDeafultData();
+        awdclient.startup();
     }
 
     //handle data from daemon
     function startUpControlHandle() {
-        if(AwdClient.musicAwdData.act != 7 && AwdClient.musicAwdData.urn != "")
-            setRequestSongs(AwdClient.musicAwdData.urn)            
+        if(awdclient.getData("act") != 7 && awdclient.getData("urn") != "")
+            setRequestSongs(awdclient.getData("urn"))
         else
             initWidget();
     }
@@ -46,8 +81,8 @@ Item {
     //handle control signal from widget
     function controlHandle() {
         if(window.allTracksModel.total == 0)
-            AwdClient.musicAwdData.act = 7;
-        switch(AwdClient.musicAwdData.act) {
+            awdclient.setData("act", 7);
+        switch(awdclient.getData("act")) {
         case 0: break;         //do nothing
         case 1:
             playSong();
@@ -69,8 +104,8 @@ Item {
         default:
             break;
         }
-        if(AwdClient.musicAwdData.act != 7)
-            AwdClient.musicAwdData.act = 0;
+        if(awdclient.getData("act") != 7)
+            awdclient.setData("act", 0);
     }
 
     //set playqueue plays the song last time played
@@ -82,7 +117,7 @@ Item {
         //Then add all the songs;
         window.playqueueModel.addItems(window.allTracksModel.getAllIDs());
         window.playqueueModel.playindex = 0;
-        fisrtSetPosition = AwdClient.musicAwdData.pa;
+        fisrtSetPosition = awdclient.getData("pa");
         forceStates();
     }
 
@@ -92,39 +127,34 @@ Item {
             initNoMuiscData();
         }
         else {
-            AwdClient.musicAwdData.act = 0;
-            AwdClient.musicAwdData.prc = playqueueModel.playindex;
-            AwdClient.musicAwdData.nxc = playqueueModel.total - (playqueueModel.playindex + 1);
-            AwdClient.musicAwdData.urn = playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.URN);
-            AwdClient.musicAwdData.is = editorModel.datafromURN(AwdClient.musicAwdData.urn, MediaItem.ThumbURI);
-            AwdClient.musicAwdData.st = playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.Title);
-            AwdClient.musicAwdData.at = playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.Album);
+            awdclient.setData("act",0);
+            awdclient.setData("prc",playqueueModel.playindex);
+            awdclient.setData("nxc",playqueueModel.total - (playqueueModel.playindex + 1));
+            awdclient.setData("urn",playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.URN));
+            awdclient.setData("is", editorModel.datafromURN(awdclient.getData("urn"), MediaItem.ThumbURI));
+            awdclient.setData("st", playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.Title));
+            awdclient.setData("at", playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.Album));
         }
-        shootData();
+        awdclient.shootData();
     }
 
     //init data when there is no music at all
     function initNoMuiscData()
     {
-        AwdClient.musicAwdData.act = 7;
-        AwdClient.musicAwdData.urn = "";
-        AwdClient.musicAwdData.pa = 0;
-        AwdClient.musicAwdData.pbp = 0;
-        AwdClient.musicAwdData.pbt = "0:00";
-        AwdClient.musicAwdData.da = 0;
-        AwdClient.musicAwdData.pbn = 0;
-        AwdClient.musicAwdData.prc = 0;
-        AwdClient.musicAwdData.nxc = 0;
-        AwdClient.musicAwdData.st  = "";
-        AwdClient.musicAwdData.at  = "";
-        AwdClient.musicAwdData.is = "/home/meego/Music/default.jpg";
-    }
-
-    //send collected data
-    function shootData()
-    {
-        lastArrivedData = AwdClient.Obj2JSON(AwdClient.musicAwdData);
-        AwdClient.sendDataRequest(lastArrivedData);
+        var tempMusicData = {};
+        tempMusicData.act = 7;
+        tempMusicData.urn = "";
+        tempMusicData.pa = 0;
+        tempMusicData.pbp = 0;
+        tempMusicData.pbt = "0:00";
+        tempMusicData.da = 0;
+        tempMusicData.pbn = 0;
+        tempMusicData.prc = 0;
+        tempMusicData.nxc = 0;
+        tempMusicData.st  = "";
+        tempMusicData.at  = "";
+        tempMusicData.is = "/home/meego/Music/default.jpg";
+        awdclient.setCurrentData(tempMusicData);
     }
 
     function syncPosition() {
@@ -137,7 +167,7 @@ Item {
             toolbar.awdRemainingTimeText = Code.formatTime(msecs/1000);
             toolbar.awdElapsedTimeText = Code.formatTime(fisrtSetPosition/1000);
         }
-        switch(AwdClient.musicAwdData.act) {
+        switch(awdclient.getData("act")) {
         case 0: break;         //do nothing
         case 1:
             playSong();
@@ -152,7 +182,7 @@ Item {
             break;
         }
         fisrtSetPosition = 0;
-        AwdClient.musicAwdData.act = 0;
+        awdclient.setData("act", 0);
     }
 
     function forceStates() {
@@ -190,14 +220,14 @@ Item {
     Connections {
         target: window.playqueueModel
         onPlayIndexChanged: {
-            AwdClient.musicAwdData.prc = playqueueModel.playindex;
-            AwdClient.musicAwdData.nxc = playqueueModel.total - (playqueueModel.playindex + 1);
-            AwdClient.musicAwdData.urn = playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.URN);
-            AwdClient.musicAwdData.is = editorModel.datafromURN(AwdClient.musicAwdData.urn, MediaItem.ThumbURI);
-            AwdClient.musicAwdData.st = playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.Title);
-            AwdClient.musicAwdData.at = playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.Album);
+            awdclient.setData("prc", playqueueModel.playindex);
+            awdclient.setData("nxc", playqueueModel.total - (playqueueModel.playindex + 1));
+            awdclient.setData("urn", playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.URN));
+            awdclient.setData("is", editorModel.datafromURN(awdclient.getData("urn"), MediaItem.ThumbURI));
+            awdclient.setData("st", playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.Title));
+            awdclient.setData("at", playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.Album));
             if(!canAddAllTracks)
-                shootData(); //send data
+                awdclient.shootData(); //send data
         }
     }
 
@@ -205,21 +235,21 @@ Item {
         target: audio
         onPositionChanged: {
             if(toolbar.playing)
-                AwdClient.musicAwdData.pbn = 1;
+                awdclient.setData("pbn",1);
             else
-                AwdClient.musicAwdData.pbn = 0;
-            if(AwdClient.musicAwdData.st != toolbar.trackName)
-                AwdClient.musicAwdData.st = toolbar.trackName
-            if(AwdClient.musicAwdData.da != audio.duration)
-                AwdClient.musicAwdData.da = audio.duration;
-            AwdClient.musicAwdData.pa = audio.position
+                awdclient.setData("pbn",0);
+            if(awdclient.getData("st") != toolbar.trackName)
+                awdclient.setData("st",toolbar.trackName);
+            if(awdclient.getData("da") != audio.duration)
+                awdclient.setData("da", audio.duration);
+            awdclient.setData("pa", audio.position);
         }
         onDurationChanged: {
-            AwdClient.musicAwdData.da = audio.duration;
+            awdclient.setData("da", audio.duration);
         }
         onStatusChanged: {
             if(!toolbar.playing)
-                shootData(); //send data
+                awdclient.shootData(); //send data
         }
         onSeekableChanged: {
             if(audio.seekable && fisrtSetPosition != 0) {
@@ -232,25 +262,25 @@ Item {
         target: toolbar
         onPlayingChanged: {
             if(toolbar.playing)
-                AwdClient.musicAwdData.pbn = 1;
+                awdclient.setData("pbn",1);
             else
-                AwdClient.musicAwdData.pbn = 0;
-            shootData(); //send data
+                awdclient.setData("pbn",0);
+            awdclient.shootData(); //send data
         }
         onAwdElapsedTimeTextChanged: {
-            AwdClient.musicAwdData.pbt = toolbar.awdElapsedTimeText;
+            awdclient.setData("pbt",toolbar.awdElapsedTimeText);
         }
         onAwdSliderPositionChanged: {
-            AwdClient.musicAwdData.pbp = toolbar.awdSliderPosition;
+            awdclient.setData("pbp",toolbar.awdSliderPosition);
             if(fisrtSetPosition == 0)
-                shootData(); //send data
+                awdclient.shootData(); //send data
         }
     }
 
     Connections {
         target: window.allTracksModel
         onTotalChanged: {
-            if(AwdClient.musicAwdData.act == 7 && window.playqueueModel.total > 0) {
+            if(awdclient.getData("act") == 7 && window.playqueueModel.total > 0) {
                 initWidget();
             }
             if(window.playqueueModel.total == 0)

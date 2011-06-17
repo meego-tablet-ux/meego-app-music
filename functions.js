@@ -152,6 +152,7 @@ function changeMultipleItemFavorite(val) {
 
 function audioplay()
 {
+    currentState.command = "play";
     resourceManager.userwantsplayback = true;
     dbusControl.updateNowNextTracks();
     dbusControl.playbackState = 1;
@@ -162,6 +163,7 @@ function audioplay()
 function pause()
 {
     audio.pause();
+    currentState.command = "pause";
     resourceManager.userwantsplayback = false;
     dbusControl.playbackState = 2;
     playqueueModel.playstatus = MusicListModel.Paused;
@@ -171,6 +173,7 @@ function pause()
 function stop()
 {
     audio.stop();
+    currentState.command = "stop";
     resourceManager.userwantsplayback = false;
     dbusControl.updateNowNextTracks();
     dbusControl.playbackState = 3;
@@ -313,23 +316,29 @@ function formatAlbumLength(length)
     if( hours == 0 && mins == 0 )
     {//only show seconds
         var secs = parseInt( length%3600 );
-        time = (secs==1) ? qsTr("1 second") : qsTr("%1 seconds").arg(secs);
+        //: music album length in seconds
+        time = qsTr("%n second(s)", "", secs);
     }
     else
     {
         if( hours == 0 )
         {//only show minutes
-            time = (mins==1) ? qsTr("1 minute") : qsTr("%1 minutes").arg(mins);
+            //: music album length in minutes
+            time = qsTr("%n minute(s)", "", mins);
         }
         else
         {
             if( mins == 0 )
             {//only show hours
-                time = ((hours == 1) ? qsTr("1 hour") : qsTr("%1 hours").arg(hours));
+                //: music album length in hours
+                time = qsTr("%n hour(s)", "", hours);
             }
             else
             {//show hours and minutes
-                time = ((hours == 1) ? qsTr("1 hour") : qsTr("%1 hours").arg(hours)) + ((mins == 1) ? qsTr(" 1 minute") : qsTr(" %1 minutes").arg(mins));
+                var time_mins = qsTr("%n minute(s)", "", mins);
+                var time_hours = qsTr("%n hour(s)", "", hours);
+                //: %1 is "%n hour(s)", %2 is "%n minute(s)"
+                time = qsTr("%1 %2").arg(time_hours).arg(time_mins);
             }
         }
     }
@@ -380,4 +389,10 @@ function appendItemToPlaylist(item, playlistItem)
     miscModel.clear();
     miscModel.playlist = playlistItem.mtitle;
     miscModel.addItems(item.mitemid);
+}
+
+function songCheck(cdata)
+{
+    // if the song ands in .desktop, it's not a song
+    return (cdata.indexOf(".desktop", cdata.length - 8) == -1);
 }
