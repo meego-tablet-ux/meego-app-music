@@ -2604,8 +2604,8 @@ Window {
                     onClicked: {
                         if(multiSelectMode)
                         {
-                            model.setSelected(payload.mitemid, !model.isSelected(payload.mitemid));
-                            if (model.isSelected(payload.mitemid))
+                            model.setSelected(index, !model.isSelected(index));
+                            if (model.isSelected(index))
                             {
                                 shareObj.addItem(payload.muri);
                                 selectedFavoritesAccumulator += (payload.mfavorite?1:-1);
@@ -2725,8 +2725,8 @@ Window {
         onClicked:{
             if(multiSelectMode)
             {
-                model.setSelected(payload.mitemid, !model.isSelected(payload.mitemid));
-                if (model.isSelected(payload.mitemid))
+                model.setSelected(index, !model.isSelected(index));
+                if (model.isSelected(index))
                 {
                     shareObj.addItem(payload.muri);
                     selectedFavoritesAccumulator += (payload.mfavorite?1:-1);
