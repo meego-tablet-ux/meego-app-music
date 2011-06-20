@@ -152,6 +152,7 @@ function changeMultipleItemFavorite(val) {
 
 function audioplay()
 {
+    currentState.command = "play";
     resourceManager.userwantsplayback = true;
     dbusControl.updateNowNextTracks();
     dbusControl.playbackState = 1;
@@ -162,6 +163,7 @@ function audioplay()
 function pause()
 {
     audio.pause();
+    currentState.command = "pause";
     resourceManager.userwantsplayback = false;
     dbusControl.playbackState = 2;
     playqueueModel.playstatus = MusicListModel.Paused;
@@ -171,6 +173,7 @@ function pause()
 function stop()
 {
     audio.stop();
+    currentState.command = "stop";
     resourceManager.userwantsplayback = false;
     dbusControl.updateNowNextTracks();
     dbusControl.playbackState = 3;

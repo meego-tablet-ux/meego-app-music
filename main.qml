@@ -129,6 +129,29 @@ Window {
 
     property int contentMargins: 15
 
+    // state management hooks, calling setState sets targetState
+    // currentState is updated to hold all the current values
+    property variant targetState: StateData {}
+    property variant currentState: StateData {}
+    signal setState()
+
+    // Save and Restore saves off the state data
+    SaveRestoreState {
+        id: stateManager
+        onSaveRequired: {
+            setValue("page", currentState.page);
+            setValue("uri", currentState.uri);
+            setValue("command", currentState.command);
+            setValue("position", currentState.position);
+            setValue("shuffle", currentState.shuffle);
+            setValue("repeat", currentState.repeat);
+            setValue("artist", currentState.artist);
+            setValue("album", currentState.album);
+            setValue("playlist", currentState.playlist);
+            sync();
+        }
+    }
+
     bookMenuModel: bookModel
     bookMenuPayload: bookPayload
 
@@ -455,8 +478,12 @@ Window {
         }
         onPositionChanged: {
             dbusControl.position = audio.position;
+            currentState.position = audio.position;
         }
-
+        onSourceChanged: {
+            currentState.urn = editorModel.datafromURI(audio.source, MediaItem.URN);
+            currentState.uri = audio.source;
+        }
         onStatusChanged: {
             if (status == Audio.EndOfMedia) {
                 Code.playNextSong();
@@ -1016,6 +1043,7 @@ Window {
             onActivated : {
                 infocus = true;
                 window.disableToolBarSearch = false;
+                currentState.page = 8;
             }
             onDeactivated : { infocus = false; }
             actionMenuModel: [labelSavePlaylist, labelClearPlayqueue]
@@ -1154,6 +1182,7 @@ Window {
                 infocus = true;
                 window.disableToolBarSearch = false;
                 playlistsPage.actionMenuSelectedIndex = settings.get("PlaylistsView")+1;
+                currentState.page = 6;
             }
             onDeactivated : { infocus = false; }
             Connections {
@@ -1298,6 +1327,7 @@ Window {
                 infocus = true;
                 window.disableToolBarSearch = false;
                 artistsPage.actionMenuSelectedIndex = settings.get("AllArtistsView");
+                currentState.page = 3;
             }
             onDeactivated : { infocus = false; }
             Connections {
@@ -1410,6 +1440,7 @@ Window {
                 infocus = true;
                 window.disableToolBarSearch = false;
                 albumsPage.actionMenuSelectedIndex = settings.get("AllAlbumsView");
+                currentState.page = 1;
             }
             onDeactivated : { infocus = false; }
             Connections {
@@ -1539,6 +1570,7 @@ Window {
                 infocus = true;
                 window.disableToolBarSearch = false;
                 allTracksPage.actionMenuSelectedIndex = settings.get("AllTracksView");
+                currentState.page = 0;
             }
             onDeactivated : { infocus = false; }
             Connections {
@@ -1690,6 +1722,7 @@ Window {
             onActivated : {
                 infocus = true;
                 window.disableToolBarSearch = false;
+                currentState.page = 5;
             }
             onDeactivated : { infocus = false; }
             property variant model: MusicListModel {
@@ -1831,6 +1864,8 @@ Window {
             onActivated : {
                 infocus = true;
                 window.disableToolBarSearch = true;
+                currentState.page = 4;
+                currentState.artist = labelArtist;
             }
             onDeactivated : { infocus = false; }
             property variant model: MusicListModel {
@@ -2237,6 +2272,8 @@ Window {
             onActivated : {
                 infocus = true;
                 window.disableToolBarSearch = true;
+                currentState.page = 2;
+                currentState.album = labelAlbum;
             }
             onDeactivated : { infocus = false; }
 
@@ -2490,6 +2527,8 @@ Window {
             onActivated : {
                 infocus = true;
                 window.disableToolBarSearch = true;
+                currentState.page = 7;
+                currentState.playlist = labelPlaylist;
             }
             onDeactivated : { infocus = false; }
 
