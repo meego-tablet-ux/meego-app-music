@@ -2605,6 +2605,7 @@ Window {
                         if(multiSelectMode)
                         {
                             model.setSelected(index, !model.isSelected(index));
+                            playlistList.selectionChanged();
                             if (model.isSelected(index))
                             {
                                 shareObj.addItem(payload.muri);
@@ -2726,6 +2727,7 @@ Window {
             if(multiSelectMode)
             {
                 model.setSelected(index, !model.isSelected(index));
+                playqueueView.selectionChanged();
                 if (model.isSelected(index))
                 {
                     shareObj.addItem(payload.muri);

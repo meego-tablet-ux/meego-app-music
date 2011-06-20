@@ -38,6 +38,11 @@ Item {
     signal clicked(real mouseX, real mouseY, variant payload, int index)
     signal longPressAndHold(real mouseX, real mouseY, variant payload, int index)
     signal doubleClicked(real mouseX, real mouseY, variant payload, int index)
+    signal selectionChanged();
+
+    onSelectionModeChanged: {
+        container.selectionChanged();
+    }
 
     Image {
         id: titleBar
@@ -242,6 +247,13 @@ Item {
             property string muri: uri
             property string murn: urn
             property int mlength: length
+            property bool selected: (selectbyindex)?(listview.model.isSelected(index)):(listview.model.isSelected(itemid))
+            Connections {
+                target: container
+                onSelectionChanged: {
+                    selected = (selectbyindex)?(listview.model.isSelected(index)):(listview.model.isSelected(itemid));
+                }
+            }
             Image {
                 id: rect
                 width: height
@@ -388,7 +400,7 @@ Item {
                 },
                 State {
                     name: "selectionNotSelected"
-                    when: selectionMode && (selectbyindex)?(!listview.model.isSelected(index)):(!listview.model.isSelected(itemid))
+                    when: selectionMode && !selected
                     PropertyChanges {
                         target: frame
                         source: "image://themedimage/images/media/photos_thumb_med"
@@ -396,7 +408,7 @@ Item {
                 },
                 State {
                     name: "selectionSelected"
-                    when: selectionMode && (selectbyindex)?(listview.model.isSelected(index)):(listview.model.isSelected(itemid))
+                    when: selectionMode && selected
                     PropertyChanges {
                         target: frame
                         source: "image://themedimage/images/media/photos_selected_tick"
