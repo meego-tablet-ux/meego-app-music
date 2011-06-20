@@ -1139,10 +1139,13 @@ Window {
                         id: help
                         helpHeading1: labelPlayQueueHelpHeading1
                         helpText1: labelPlayQueueHelpText1
+                        helpImage1: "image://themedimage/widgets/apps/media/blankscreen-music_view"
                         helpHeading2: labelPlayQueueHelpHeading2
                         helpText2: labelPlayQueueHelpText2
+                        helpImage2: "image://themedimage/widgets/apps/media/blankscreen-music_menu"
                         helpHeading3: labelPlayQueueHelpHeading3
                         helpText3: labelPlayQueueHelpText3
+                        helpImage3: "image://themedimage/widgets/apps/media/blankscreen-music_transfer"
                     }
                     Component.onCompleted: {
                         if (settings.get("PlayQueueOpenedBefore")) {
@@ -1243,10 +1246,13 @@ Window {
                     id: help
                     helpHeading1: labelPlaylistsHelpHeading1
                     helpText1: labelPlaylistsHelpText1
+                    helpImage1: "image://themedimage/widgets/apps/media/blankscreen-music_view"
                     helpHeading2: labelPlaylistsHelpHeading2
                     helpText2: labelPlaylistsHelpText2
+                    helpImage2: "image://themedimage/widgets/apps/media/blankscreen-music_menu"
                     helpHeading3: labelPlaylistsHelpHeading3
                     helpText3: labelPlaylistsHelpText3
+                    helpImage3: "image://themedimage/widgets/apps/media/blankscreen-music_transfer"
                }
                Component.onCompleted: {
                    if (settings.get("PlaylistsOpenedBefore")) {
@@ -1638,6 +1644,7 @@ Window {
                     if(multiSelectMode)
                     {
                         model.setSelected(payload.mitemid, !model.isSelected(payload.mitemid));
+                        listview.selectionChanged();
                         if (model.isSelected(payload.mitemid))
                             {
                             shareObj.addItem(payload.muri);
@@ -1799,10 +1806,13 @@ Window {
                         id: help
                         helpHeading1: labelFavoritesHelpHeading1
                         helpText1: labelFavoritesHelpText1
+                        helpImage1: "image://themedimage/widgets/apps/media/blankscreen-music_view"
                         helpHeading2: labelFavoritesHelpHeading2
                         helpText2: labelFavoritesHelpText2
+                        helpImage2: "image://themedimage/widgets/apps/media/blankscreen-music_menu"
                         helpHeading3: labelFavoritesHelpHeading3
                         helpText3: labelFavoritesHelpText3
+                        helpImage3: "image://themedimage/widgets/apps/media/blankscreen-music_transfer"
                         Component.onCompleted: {
                             if (settings.get("FavoritesOpenedBefore")) {
                                 help.visible = false;
@@ -1825,6 +1835,7 @@ Window {
                     if(multiSelectMode)
                     {
                         model.setSelected(payload.mitemid, !model.isSelected(payload.mitemid));
+                        listView.selectionChanged();
                         if (model.isSelected(payload.mitemid))
                         {
                             shareObj.addItem(payload.muri);
@@ -2107,6 +2118,7 @@ Window {
                                 if(multiSelectMode)
                                 {
                                     model.setSelected(payload.mitemid, !model.isSelected(payload.mitemid));
+                                    songsInAlbumList.selectionChanged();
                                     if (model.isSelected(payload.mitemid))
                                     {
                                         shareObj.addItem(payload.muri);
@@ -2399,6 +2411,7 @@ Window {
                         if(multiSelectMode)
                         {
                             model.setSelected(payload.mitemid, !model.isSelected(payload.mitemid));
+                            albumSongList.selectionChanged();
                             if (model.isSelected(payload.mitemid))
                             {
                                 shareObj.addItem(payload.muri);
