@@ -246,6 +246,13 @@ Item {
             property string muri: uri
             property string murn: urn
             property int mlength: length
+            property bool selected: (selectbyindex)?(listview.model.isSelected(index)):(listview.model.isSelected(itemid))
+            Connections {
+                target: container
+                onSelectionChanged: {
+                    selected = (selectbyindex)?(listview.model.isSelected(index)):(listview.model.isSelected(itemid));
+                }
+            }
             Image {
                 id: rect
                 width: height

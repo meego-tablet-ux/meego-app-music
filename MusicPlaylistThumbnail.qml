@@ -29,13 +29,15 @@ Item {
         }
         else
         {
-            albumThumbnail.oldrotation = albumThumbnail.rotation; if( window.isLandscape ){bringInAnimationLandscape.start();}else{bringInAnimationPortrait.start();} bringInAnimationRotation.start();
+            albumThumbnail.oldrotation = (albumThumbnail.rotation>10 ? 10 : albumThumbnail.rotation );
+            if( window.isLandscape ){bringInAnimationLandscape.start();}else{bringInAnimationPortrait.start();} bringInAnimationRotation.start();
             albumThumbnail4.rotation = albumThumbnail3.rotation; bringInAnimation4.start();
             albumThumbnail3.rotation = albumThumbnail2.rotation;
             albumThumbnail2.rotation = albumThumbnail1.rotation;
             albumThumbnail1.rotation = albumThumbnail.oldrotation;
         }
     }
+
 
     Item {
         id: albumThumbnail4

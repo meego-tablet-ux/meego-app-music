@@ -142,6 +142,29 @@ Window {
     property real globalNewAngle:0
     property bool playlistAnimationNeeded: false
 
+    // state management hooks, calling setState sets targetState
+    // currentState is updated to hold all the current values
+    property variant targetState: StateData {}
+    property variant currentState: StateData {}
+    signal setState()
+
+    // Save and Restore saves off the state data
+    SaveRestoreState {
+        id: stateManager
+        onSaveRequired: {
+            setValue("page", currentState.page);
+            setValue("uri", currentState.uri);
+            setValue("command", currentState.command);
+            setValue("position", currentState.position);
+            setValue("shuffle", currentState.shuffle);
+            setValue("repeat", currentState.repeat);
+            setValue("artist", currentState.artist);
+            setValue("album", currentState.album);
+            setValue("playlist", currentState.playlist);
+            sync();
+        }
+    }
+
     bookMenuModel: bookModel
     bookMenuPayload: bookPayload
 
@@ -467,6 +490,11 @@ Window {
         }
         onPositionChanged: {
             dbusControl.position = audio.position;
+            currentState.position = audio.position;
+        }
+        onSourceChanged: {
+            currentState.urn = editorModel.datafromURI(audio.source, MediaItem.URN);
+            currentState.uri = audio.source;
         }
         onStatusChanged: {
             if (status == Audio.EndOfMedia) {
@@ -560,10 +588,11 @@ Window {
 
         MediaMultiBar {
             id: multibar
-            height: 55
+            height: ( visible ? 55 : 0 )
+            visible: ( opacity > 0 ? true : false )
             opacity: 0
             width: parent.width
-            anchors.bottom: toolbar.top
+            anchors.bottom: parent.bottom
             anchors.left: parent.left
             landscape: window.isLandscape
             showfavourite: (bookMenuSelectedIndexCopy==bookModel.indexOf(labelFavorites))?false:(multiSelectModeShowFavoriteAction?true:false)
@@ -1026,6 +1055,7 @@ Window {
             onActivated : {
                 infocus = true;
                 window.disableToolBarSearch = false;
+                currentState.page = 8;
             }
             onDeactivated : { infocus = false; }
             actionMenuModel: [labelSavePlaylist, labelClearPlayqueue]
@@ -1167,6 +1197,7 @@ Window {
                 infocus = true;
                 window.disableToolBarSearch = false;
                 playlistsPage.actionMenuSelectedIndex = settings.get("PlaylistsView")+1;
+                currentState.page = 6;
             }
             onDeactivated : { infocus = false; }
             Connections {
@@ -1314,6 +1345,7 @@ Window {
                 infocus = true;
                 window.disableToolBarSearch = false;
                 artistsPage.actionMenuSelectedIndex = settings.get("AllArtistsView");
+                currentState.page = 3;
             }
             onDeactivated : { infocus = false; }
             Connections {
@@ -1426,6 +1458,7 @@ Window {
                 infocus = true;
                 window.disableToolBarSearch = false;
                 albumsPage.actionMenuSelectedIndex = settings.get("AllAlbumsView");
+                currentState.page = 1;
             }
             onDeactivated : { infocus = false; }
             Connections {
@@ -1555,6 +1588,7 @@ Window {
                 infocus = true;
                 window.disableToolBarSearch = false;
                 allTracksPage.actionMenuSelectedIndex = settings.get("AllTracksView");
+                currentState.page = 0;
             }
             onDeactivated : { infocus = false; }
             Connections {
@@ -1637,6 +1671,7 @@ Window {
                     }
                     else
                     {
+                        nowPlayingLabel="All Tracks";
                         Code.addToPlayqueueAndPlay(payload);
                     }
                 }
@@ -1682,6 +1717,7 @@ Window {
                     }
                     else
                     {
+                        nowPlayingLabel= "All Tracks";
                         Code.addToPlayqueueAndPlay(payload);
                     }
                 }
@@ -1707,6 +1743,7 @@ Window {
             onActivated : {
                 infocus = true;
                 window.disableToolBarSearch = false;
+                currentState.page = 5;
             }
             onDeactivated : { infocus = false; }
             property variant model: MusicListModel {
@@ -1827,6 +1864,7 @@ Window {
                     }
                     else
                     {
+                        nowPlayingLabel = "Favorites";
                         Code.addToPlayqueueAndPlay(payload);
                     }
                 }
@@ -1852,6 +1890,8 @@ Window {
             onActivated : {
                 infocus = true;
                 window.disableToolBarSearch = true;
+                currentState.page = 4;
+                currentState.artist = labelArtist;
             }
             onDeactivated : { infocus = false; }
             property variant model: MusicListModel {
@@ -2085,7 +2125,6 @@ Window {
                             height: 500
                             width: parent.width
                             interactive: false
-                            footerHeight: toolbar.height + multibar.height
                             showHeader: false
                             showThumbnail: false
                             anchors.leftMargin: 7
@@ -2101,6 +2140,7 @@ Window {
                             listFooter: MusicListHeader {
                                 showDetails: false
                                 width: listview.width
+                                bottomEmptySpace: toolbar.height + multibar.height
                             }
 
                             model: MusicListModel {
@@ -2131,6 +2171,7 @@ Window {
                                 }
                                 else
                                 {
+                                    nowPlayingLabel = "Artist";
                                     Code.addToPlayqueueAndPlay(payload);
                                 }
                             }
@@ -2282,6 +2323,8 @@ Window {
             onActivated : {
                 infocus = true;
                 window.disableToolBarSearch = true;
+                currentState.page = 2;
+                currentState.album = labelAlbum;
             }
             onDeactivated : { infocus = false; }
 
@@ -2412,7 +2455,6 @@ Window {
                     id: albumSongList
                     selectionMode: multiSelectMode
                     model: albumDetailViewPage.model
-                    footerHeight: toolbar.height + multibar.height
                     showThumbnail: false
                     showHeader: false
                     anchors.leftMargin: 7
@@ -2425,6 +2467,7 @@ Window {
                     }
                     listFooter: MusicListHeader {
                         showDetails: false
+                        bottomEmptySpace: toolbar.height + multibar.height
                     }
                     onClicked: {
                         if(multiSelectMode)
@@ -2444,6 +2487,7 @@ Window {
                         }
                         else
                         {
+                            nowPlayingLabel="Album"
                             Code.addToPlayqueueAndPlay(payload);
                         }
                     }
@@ -2629,7 +2673,6 @@ Window {
                     id: playlistSongList
                     selectionMode: multiSelectMode
                     anchors.margins: 7
-                    footerHeight: toolbar.height + multibar.height
                     selectbyindex: true
                     showHeader: false
                     clip: true
@@ -2640,6 +2683,7 @@ Window {
                     }
                     listFooter: MusicListHeader {
                         showDetails: false
+                        bottomEmptySpace: toolbar.height + multibar.height
                     }
                     model: MusicListModel {
                         type: MusicListModel.MusicPlaylist
@@ -2668,7 +2712,9 @@ Window {
                         }
                         else
                         {
+                            nowPlayingLabel = "Playlist"
                             Code.addToPlayqueueAndPlay(payload);
+							Code.getNowPlayingThumbnailForPlaylist();
                         }
                     }
                     onLongPressAndHold: {
@@ -2800,6 +2846,7 @@ Window {
             }
             else
             {
+                nowPlayingLabel = "Play Queue";
                 playqueueModel.playindex = index;
                 playqueueView.currentIndex = index;
                 Code.playNewSong();

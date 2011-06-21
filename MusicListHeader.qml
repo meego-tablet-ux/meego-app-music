@@ -4,10 +4,11 @@ import MeeGo.Media 0.1
 Item {
     id: songListHeader
     width: parent.width
-    height: ( showDetails ? 120 : 40 )
+    height: showDetails ? (120 + bottomEmptySpace) : (40 + bottomEmptySpace)
     property string artistName: ""
     property string albumTitle: ""
     property bool showDetails: false
+    property int bottomEmptySpace: 0
     //color: "#e9e7e7"
     //opacity: 1
 
@@ -45,8 +46,7 @@ Item {
 
     Rectangle{//dark
         id:separatorTop
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 19
+        anchors.bottom: separatorBottom.top
         anchors.horizontalCenter: parent.horizontalCenter
         width: parent.width - 20
         height:1
@@ -55,7 +55,8 @@ Item {
     }
     Rectangle{//light
         id:separatorBottom
-        anchors.top: separatorTop.bottom
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 19 + bottomEmptySpace
         anchors.horizontalCenter: parent.horizontalCenter
         width: parent.width - 20
         height:1

@@ -152,6 +152,7 @@ function changeMultipleItemFavorite(val) {
 
 function audioplay()
 {
+    currentState.command = "play";
     resourceManager.userwantsplayback = true;
     dbusControl.updateNowNextTracks();
     dbusControl.playbackState = 1;
@@ -162,6 +163,7 @@ function audioplay()
 function pause()
 {
     audio.pause();
+    currentState.command = "pause";
     resourceManager.userwantsplayback = false;
     dbusControl.playbackState = 2;
     playqueueModel.playstatus = MusicListModel.Paused;
@@ -296,7 +298,10 @@ function updateNowNextPlaying()
         }
     }
     dbusControl.updateNowNextTracks();
-
+    if( nowPlayingLabel == "Playlist" )
+    {
+        getNowPlayingThumbnailForPlaylist();
+    }
 }
 
 function formatLength(time)
@@ -397,6 +402,7 @@ function songCheck(cdata)
 
 function getSomeThumbnailsForPlaylist( model )
 {
+    globalNewAngle = randomAngle(2,10,(playlistAnimationNeeded?1:-1));//Init this
     stackThumbnailUriCurr = "";
     stackThumbnailUri1 = "";
     stackThumbnailUri2 = "";
