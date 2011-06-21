@@ -16,6 +16,9 @@ Item {
     property alias model: listview.model
     property alias currentIndex: listview.currentIndex
     property alias count: listview.count
+    property alias listHeader: listview.header
+    property alias listFooter: listview.footer
+
     property string labelUnknownArtist: qsTr("unknown artist")
     property string labelUnknownAlbum: qsTr("unknown album")
     property alias interactive: listview.interactive
@@ -128,7 +131,6 @@ Item {
             visible: mode != 0
             elide: Text.ElideRight
         }
-
     }
     ListView {
         id: listview
@@ -138,27 +140,24 @@ Item {
         clip: true
         boundsBehavior: Flickable.StopAtBounds
         highlightMoveSpeed: 1000
-        highlightRangeMode: (playqueue)?(ListView.StrictlyEnforceRange):(ListView.NoHighlightRange)
+        //highlightRangeMode: (playqueue)?(ListView.StrictlyEnforceRange):(ListView.NoHighlightRange)
+        property int highlightindex: ( (listview.model.playstatus == MusicListModel.Playing) ? listview.highlightindex : -1)
         footer: Item{
             width: listview.width
             height: container.footerHeight
         }
-        delegate:  BorderImage {
+        delegate:  Rectangle {
             id: dinstance
             width: parent.width
             height: entryHeight
-            border.left: 5; border.top: 5
-            border.right: 5; border.bottom: 5
-            source: {
-                if ((listview.model.playindex == index)&&(listview.model.playstatus == MusicListModel.Playing)) {
-                    return "image://themedimage/images/media/music_row_highlight_landscape";
+            color: {
+                if ( listview.highlightindex == index ){
+                    return theme_blockColorHighlight;
                 }else if ((index%2) == 0) {
-                    return "image://themedimage/images/media/music_row_landscape";
+                    return "#00000000";
                 }else {
-                    return "image://themedimage/images/media/music_row_whtie_landscape";
+                    return theme_blockColorActive;
                 }
-
-                return "";
             }
 
             property string mtitle
@@ -247,13 +246,6 @@ Item {
             property string muri: uri
             property string murn: urn
             property int mlength: length
-            property bool selected: (selectbyindex)?(listview.model.isSelected(index)):(listview.model.isSelected(itemid))
-            Connections {
-                target: container
-                onSelectionChanged: {
-                    selected = (selectbyindex)?(listview.model.isSelected(index)):(listview.model.isSelected(itemid));
-                }
-            }
             Image {
                 id: rect
                 width: height
@@ -262,7 +254,7 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.left: parent.left
                 fillMode: Image.PreserveAspectCrop
-                source: showThumbnail ? mthumburi : "image://themedimage/icons/actionbar/media-play-disabled"
+                source: showThumbnail ? mthumburi : "image://themedimage/widgets/apps/media/media-play"
 
                 Rectangle {
                     id: fog
@@ -274,7 +266,7 @@ Item {
             }
             Image {
                 id: playingIcon
-                source: "image://themedimage/images/media/icn_currentlyplaying-albumoverlay"
+                source: "image://themedimage/widgets/apps/media/icn_currentlyplaying-albumoverlay"
                 fillMode:Image.PreserveAspectFit
                 width:height
                 height:parent.height -2
