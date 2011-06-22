@@ -2597,7 +2597,7 @@ Window {
         AppPage {
             id: playlistDetailViewPage
             anchors.fill: parent
-            pageTitle: labelAllPlaylist
+            pageTitle: labelPlaylist
             property bool infocus: true
             onActivated : {
                 infocus = true;
