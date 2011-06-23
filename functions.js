@@ -298,7 +298,10 @@ function updateNowNextPlaying()
         }
     }
     dbusControl.updateNowNextTracks();
-
+    if( nowPlayingLabel == "Playlist" )
+    {
+        getNowPlayingThumbnailForPlaylist();
+    }
 }
 
 function formatLength(time)
@@ -395,4 +398,72 @@ function songCheck(cdata)
 {
     // if the song ands in .desktop, it's not a song
     return (cdata.indexOf(".desktop", cdata.length - 8) == -1);
+}
+
+function getSomeThumbnailsForPlaylist( model )
+{
+    globalNewAngle = randomAngle(2,10,(playlistAnimationNeeded?1:-1));//Init this
+    stackThumbnailUriCurr = "";
+    stackThumbnailUri1 = "";
+    stackThumbnailUri2 = "";
+    stackThumbnailUri3 = "";
+    stackThumbnailUri4 = "";
+
+    var uri;
+    var curr_uri = playqueueModel.datafromIndex( playqueueModel.playindex, MediaItem.ThumbURI );
+    var playlistIds = model.getAllIDs();
+    var currAppearsInPlaylist=false
+
+    var i;
+    var a;
+    for (i in playlistIds)
+    {
+        uri = model.datafromID(playlistIds[i], MediaItem.ThumbURI )
+        if( uri == curr_uri ){ currAppearsInPlaylist = true; }
+        if( stackThumbnailUri1 == uri ){ continue;}
+        if( stackThumbnailUri2 == uri ){ continue;}
+        if( stackThumbnailUri3 == uri ){ continue;}
+        if( stackThumbnailUri4 == uri ){ continue;}
+        if( stackThumbnailUri1 == "" && stackThumbnailUri1 != uri ){ stackThumbnailUri1 = uri; continue; }
+        if( stackThumbnailUri2 == "" && stackThumbnailUri2 != uri ){ stackThumbnailUri2 = uri; continue; }
+        if( stackThumbnailUri3 == "" && stackThumbnailUri3 != uri ){ stackThumbnailUri3 = uri; continue; }
+        if( stackThumbnailUri4 == "" && stackThumbnailUri4 != uri ){ stackThumbnailUri4 = uri; continue; }
+    }
+    if( stackThumbnailUri1 == "" ){ stackThumbnailUri1 = "image://themedimage/images/media/music_thumb_med";}
+    if( stackThumbnailUri2 == "" ){ stackThumbnailUri2 = "image://themedimage/images/media/music_thumb_med";}
+    if( stackThumbnailUri3 == "" ){ stackThumbnailUri3 = "image://themedimage/images/media/music_thumb_med";}
+    if( stackThumbnailUri4 == "" ){ stackThumbnailUri4 = "image://themedimage/images/media/music_thumb_med";}
+    if( currAppearsInPlaylist )
+        {stackThumbnailUriCurr = (curr_uri == undefined ? "image://themedimage/images/media/music_thumb_med" : curr_uri );}
+    else
+        {stackThumbnailUriCurr = stackThumbnailUri4;}
+    if( stackThumbnailUriCurr == "" ){stackThumbnailUriCurr = "image://themedimage/images/media/music_thumb_med";}
+    playlistAnimationNeeded=!playlistAnimationNeeded;
+}
+
+function getNowPlayingThumbnailForPlaylist( )
+{
+    var olduri = stackThumbnailUriCurr;
+    var uri = playqueueModel.datafromIndex( playqueueModel.playindex, MediaItem.ThumbURI );
+    stackThumbnailUriCurr = (uri == undefined ? "image://themedimage/images/media/music_thumb_med" : uri );
+
+    if( stackThumbnailUriCurr == "" ){stackThumbnailUriCurr = "image://themedimage/images/media/music_thumb_med";}
+
+    if( olduri != stackThumbnailUriCurr )
+    {
+        globalNewAngle = randomAngle(2,10,(playlistAnimationNeeded?1:-1));
+        stackThumbnailUri4 = stackThumbnailUri3;
+        stackThumbnailUri3 = stackThumbnailUri2;
+        stackThumbnailUri2 = stackThumbnailUri1;
+        stackThumbnailUri1 = olduri;
+        playlistAnimationNeeded=!playlistAnimationNeeded;
+    }
+}
+
+function randomAngle( start, end, sign )
+{
+    var today = new Date();
+    var randSeed = today.getTime();
+    var diff = end-start;
+    return sign * (start + diff*Math.random(randSeed));
 }
