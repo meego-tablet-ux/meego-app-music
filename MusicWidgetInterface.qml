@@ -1,10 +1,10 @@
 import Qt 4.7
 import MeeGo.Media 0.1
-import AcerWidgetsDaemonInterface 0.1   //lib from meego-ux-media as awdapi
+import MeeGo.WidgetInterface 0.1
 import "functions.js" as Code
 
 Item {
-    id: musicAwdInterface
+    id: musicWidgetInterface
 
     //Other control bool
     property bool canAddAllTracks: false
@@ -16,8 +16,8 @@ Item {
     signal playNextSong()
     signal playPrevSong()
 
-    AwdClient {
-        id: awdclient
+    WidgetClient {
+        id: widgetclient
         name: "music"
         type: "app"
     }
@@ -30,7 +30,7 @@ Item {
         //[application-start] for data needed by application only when application starts
         //[application-current] for real-time data needed by application which need to be transmitted all the time
         //[other] for other data which may be needed by both widget and application or for some special occasion
-        var musicAwdData =
+        var musicWidgetData =
         {
             "act"   : 0,                //[application]: control signals
                                         /*
@@ -60,20 +60,21 @@ Item {
             "is"    : "/home/meego/Music/default.jpg",
                                         //[widget]: image source for widget background image
         }
-        awdclient.setCurrentData(musicAwdData);
+        widgetclient.setCurrentData(musicWidgetData);
     }
 
     //sned init data for application
     function startup()
     {
+        requestTest.running = false;
         setDefaultData();
-        awdclient.startup();
+        widgetclient.startup();
     }
 
     //handle data from daemon
     function startUpControlHandle() {
-        if(awdclient.getData("act") != 7 && awdclient.getData("urn") != "")
-            setRequestSongs(awdclient.getData("urn"))
+        if(widgetclient.getData("act") != 7 && widgetclient.getData("urn") != "")
+            setRequestSongs(widgetclient.getData("urn"))
         else
             initWidget();
     }
@@ -81,8 +82,8 @@ Item {
     //handle control signal from widget
     function controlHandle() {
         if(window.allTracksModel.total == 0)
-            awdclient.setData("act", 7);
-        switch(awdclient.getData("act")) {
+            widgetclient.setData("act", 7);
+        switch(widgetclient.getData("act")) {
         case 0: break;         //do nothing
         case 1:
             playSong();
@@ -104,8 +105,8 @@ Item {
         default:
             break;
         }
-        if(awdclient.getData("act") != 7)
-            awdclient.setData("act", 0);
+        if(widgetclient.getData("act") != 7)
+            widgetclient.setData("act", 0);
     }
 
     //set playqueue plays the song last time played
@@ -117,7 +118,7 @@ Item {
         //Then add all the songs;
         window.playqueueModel.addItems(window.allTracksModel.getAllIDs());
         window.playqueueModel.playindex = 0;
-        fisrtSetPosition = awdclient.getData("pa");
+        fisrtSetPosition = widgetclient.getData("pa");
         forceStates();
     }
 
@@ -127,15 +128,15 @@ Item {
             initNoMuiscData();
         }
         else {
-            awdclient.setData("act",0);
-            awdclient.setData("prc",playqueueModel.playindex);
-            awdclient.setData("nxc",playqueueModel.total - (playqueueModel.playindex + 1));
-            awdclient.setData("urn",playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.URN));
-            awdclient.setData("is", editorModel.datafromURN(awdclient.getData("urn"), MediaItem.ThumbURI));
-            awdclient.setData("st", playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.Title));
-            awdclient.setData("at", playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.Album));
+            widgetclient.setData("act",0);
+            widgetclient.setData("prc",playqueueModel.playindex);
+            widgetclient.setData("nxc",playqueueModel.total - (playqueueModel.playindex + 1));
+            widgetclient.setData("urn",playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.URN));
+            widgetclient.setData("is", editorModel.datafromURN(widgetclient.getData("urn"), MediaItem.ThumbURI));
+            widgetclient.setData("st", playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.Title));
+            widgetclient.setData("at", playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.Album));
         }
-        awdclient.shootData();
+        widgetclient.shootData();
     }
 
     //init data when there is no music at all
@@ -154,7 +155,7 @@ Item {
         tempMusicData.st  = "";
         tempMusicData.at  = "";
         tempMusicData.is = "/home/meego/Music/default.jpg";
-        awdclient.setCurrentData(tempMusicData);
+        widgetclient.setCurrentData(tempMusicData);
     }
 
     function syncPosition() {
@@ -162,12 +163,12 @@ Item {
         audio.position = fisrtSetPosition;
         //sync tool bar
         if (audio.duration != 0) {
-            toolbar.awdSliderPosition = fisrtSetPosition/audio.duration;
+            toolbar.widgetSliderPosition = fisrtSetPosition/audio.duration;
             var msecs = audio.duration - fisrtSetPosition;
-            toolbar.awdRemainingTimeText = Code.formatTime(msecs/1000);
-            toolbar.awdElapsedTimeText = Code.formatTime(fisrtSetPosition/1000);
+            toolbar.widgetRemainingTimeText = Code.formatTime(msecs/1000);
+            toolbar.widgetElapsedTimeText = Code.formatTime(fisrtSetPosition/1000);
         }
-        switch(awdclient.getData("act")) {
+        switch(widgetclient.getData("act")) {
         case 0: break;         //do nothing
         case 1:
             playSong();
@@ -182,7 +183,7 @@ Item {
             break;
         }
         fisrtSetPosition = 0;
-        awdclient.setData("act", 0);
+        widgetclient.setData("act", 0);
     }
 
     function forceStates() {
@@ -220,14 +221,14 @@ Item {
     Connections {
         target: window.playqueueModel
         onPlayIndexChanged: {
-            awdclient.setData("prc", playqueueModel.playindex);
-            awdclient.setData("nxc", playqueueModel.total - (playqueueModel.playindex + 1));
-            awdclient.setData("urn", playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.URN));
-            awdclient.setData("is", editorModel.datafromURN(awdclient.getData("urn"), MediaItem.ThumbURI));
-            awdclient.setData("st", playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.Title));
-            awdclient.setData("at", playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.Album));
+            widgetclient.setData("prc", playqueueModel.playindex);
+            widgetclient.setData("nxc", playqueueModel.total - (playqueueModel.playindex + 1));
+            widgetclient.setData("urn", playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.URN));
+            widgetclient.setData("is", editorModel.datafromURN(widgetclient.getData("urn"), MediaItem.ThumbURI));
+            widgetclient.setData("st", playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.Title));
+            widgetclient.setData("at", playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.Album));
             if(!canAddAllTracks)
-                awdclient.shootData(); //send data
+                widgetclient.shootData(); //send data
         }
     }
 
@@ -235,21 +236,21 @@ Item {
         target: audio
         onPositionChanged: {
             if(toolbar.playing)
-                awdclient.setData("pbn",1);
+                widgetclient.setData("pbn",1);
             else
-                awdclient.setData("pbn",0);
-            if(awdclient.getData("st") != toolbar.trackName)
-                awdclient.setData("st",toolbar.trackName);
-            if(awdclient.getData("da") != audio.duration)
-                awdclient.setData("da", audio.duration);
-            awdclient.setData("pa", audio.position);
+                widgetclient.setData("pbn",0);
+            if(widgetclient.getData("st") != toolbar.trackName)
+                widgetclient.setData("st",toolbar.trackName);
+            if(widgetclient.getData("da") != audio.duration)
+                widgetclient.setData("da", audio.duration);
+            widgetclient.setData("pa", audio.position);
         }
         onDurationChanged: {
-            awdclient.setData("da", audio.duration);
+            widgetclient.setData("da", audio.duration);
         }
         onStatusChanged: {
             if(!toolbar.playing)
-                awdclient.shootData(); //send data
+                widgetclient.shootData(); //send data
         }
         onSeekableChanged: {
             if(audio.seekable && fisrtSetPosition != 0) {
@@ -262,25 +263,25 @@ Item {
         target: toolbar
         onPlayingChanged: {
             if(toolbar.playing)
-                awdclient.setData("pbn",1);
+                widgetclient.setData("pbn",1);
             else
-                awdclient.setData("pbn",0);
-            awdclient.shootData(); //send data
+                widgetclient.setData("pbn",0);
+            widgetclient.shootData(); //send data
         }
-        onAwdElapsedTimeTextChanged: {
-            awdclient.setData("pbt",toolbar.awdElapsedTimeText);
+        onWidgetElapsedTimeTextChanged: {
+            widgetclient.setData("pbt",toolbar.widgetElapsedTimeText);
         }
-        onAwdSliderPositionChanged: {
-            awdclient.setData("pbp",toolbar.awdSliderPosition);
+        onWidgetSliderPositionChanged: {
+            widgetclient.setData("pbp",toolbar.widgetSliderPosition);
             if(fisrtSetPosition == 0)
-                awdclient.shootData(); //send data
+                widgetclient.shootData(); //send data
         }
     }
 
     Connections {
         target: window.allTracksModel
         onTotalChanged: {
-            if(awdclient.getData("act") == 7 && window.playqueueModel.total > 0) {
+            if(widgetclient.getData("act") == 7 && window.playqueueModel.total > 0) {
                 initWidget();
             }
             if(window.playqueueModel.total == 0)

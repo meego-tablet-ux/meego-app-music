@@ -22,9 +22,9 @@ Item {
     property bool landscape: false
     property real nowPlayingHeight: 36
 
-    property alias awdSliderPosition: audioToolbar.sliderPosition
-    property alias awdElapsedTimeText: audioToolbar.elapsedTimeText
-    property alias awdRemainingTimeText: audioToolbar.remainingTimeText
+    property alias widgetSliderPosition: audioToolbar.sliderPosition
+    property alias widgetElapsedTimeText: audioToolbar.elapsedTimeText
+    property alias widgetRemainingTimeText: audioToolbar.remainingTimeText
 
     signal playNeedsSongs()
 

@@ -285,7 +285,7 @@ Window {
         }
     }
 
-    MusicAwdInterface {
+    MusicWidgetInterface {
     }
 
     QmlSetting{
