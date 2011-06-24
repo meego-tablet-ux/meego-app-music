@@ -23,15 +23,15 @@ Item {
     property string playlist: ""
 
     /* page definitions:
-       0 = all tracks
-       1 = albums
-       2 = albumdetail (uses album)
+       0 = playqueue
+       1 = playlists
+       2 = favorites
        3 = artists
-       4 = artistdetail (uses artist)
-       5 = favorites
-       6 = playlists
-       7 = playlistdetail (uses playlist)
-       8 = playqueue
+       4 = albums
+       5 = all tracks
+       6 = artist detail
+       7 = album detail
+       8 = playlist detail
     */
 
     // status paramaters

@@ -153,8 +153,8 @@ Window {
         id: stateManager
         onSaveRequired: {
             setValue("page", currentState.page);
-            setValue("uri", currentState.uri);
             setValue("command", currentState.command);
+            setValue("uri", currentState.uri);
             setValue("position", currentState.position);
             setValue("shuffle", currentState.shuffle);
             setValue("repeat", currentState.repeat);
@@ -162,6 +162,68 @@ Window {
             setValue("album", currentState.album);
             setValue("playlist", currentState.playlist);
             sync();
+        }
+    }
+
+    Connections {
+        target: window
+        onSetState: {
+            /* first set the song to its proper playing state */
+            remoteControlItem.mitemid = targetState.uri;
+            remoteControlItem.mitemid = editorModel.datafromURI(targetState.uri, MediaItem.ID);
+            remoteControlItem.mitemtype = editorModel.datafromURI(targetState.uri, MediaItem.ItemType);
+            if(targetState.command == "play")
+                Code.addToPlayqueueAndPlay(remoteControlItem, targetState.position);
+            else if(targetState.command == "pause")
+                Code.addToPlayqueueAndPause(remoteControlItem, targetState.position);
+
+            toolbar.shuffle = targetState.shuffle;
+            toolbar.loop = targetState.repeat;
+
+            if (targetState.page == 0) { // Playqueue Page
+                switchBook(playQueueContent);
+            } else if (targetState.page == 1) { // Playlists Page
+                switchBook(playlistsContent);
+            } else if (targetState.page == 2) { // Favorites Page
+                switchBook(favoritesContent);
+            } else if (targetState.page == 3) { // Artists Page
+                switchBook(artistsContent);
+            } else if (targetState.page == 4) { // Albums Page
+                switchBook(albumsContent);
+            } else if (targetState.page == 5) { // All Tracks Page
+                switchBook(allTracksContent);
+            } else if ((targetState.page == 6)&&(targetState.artist != "")) { // Artist Detail Page
+                switchBook(artistsContent);
+                labelArtist = targetState.artist;
+                thumbnailUri = editorModel.datafromURI(targetState.uri, MediaItem.ThumbURI)
+                if (thumbnailUri == "" | thumbnailUri == undefined)
+                    thumbnailUri = defaultThumbnail;
+                editorModel.setViewed(remoteControlItem.mitemid);
+                window.addPage(artistDetailViewContent);
+            } else if ((targetState.page == 7)&&(targetState.album != "")) { // Album Detail Page
+                switchBook(albumsContent);
+                labelAlbum = targetState.album;
+                try {
+                    labelArtist = editorModel.datafromURI(targetState.uri, MediaItem.Artist)[0];
+                }
+                catch(err) {
+                    labelArtist = "";
+                }
+                thumbnailUri = editorModel.datafromURI(targetState.uri, MediaItem.ThumbURI)
+                if (thumbnailUri == "" | thumbnailUri == undefined)
+                    thumbnailUri = defaultThumbnail;
+                editorModel.setViewed(remoteControlItem.mitemid);
+                window.addPage(albumDetailViewContent);
+            } else if ((targetState.page == 8)&&(targetState.playlist != "")) { // Playlist Detail Page
+                switchBook(playlistsContent);
+                labelPlaylist = targetState.playlist;
+                labelPlaylistURN = editorModel.datafromURI(targetState.uri, MediaItem.URN);
+                thumbnailUri = editorModel.datafromURI(targetState.uri, MediaItem.ThumbURI);
+                if (thumbnailUri == "" | thumbnailUri == undefined)
+                    thumbnailUri = defaultThumbnail;
+                editorModel.setViewed(remoteControlItem.mitemid);
+                window.addPage(playlistDetailViewContent);
+            }
         }
     }
 
@@ -243,7 +305,7 @@ Window {
             }
             if (remoteControlItem.mitemtype == MediaItem.SongItem) {
                 console.log("song loaded");
-                Code.addToPlayqueueAndPlay(remoteControlItem);
+                Code.addToPlayqueueAndPlay(remoteControlItem, 0);
             }else if (remoteControlItem.mitemtype == MediaItem.MusicArtistItem) {
                 labelArtist = thetitle;
                 thumbnailUri = editorModel.datafromURN(identifier, MediaItem.ThumbURI)
@@ -276,10 +338,26 @@ Window {
             remoteControlItem.mitemid = editorModel.datafromURN(identifier, MediaItem.ID);
             remoteControlItem.mitemtype = MediaItem.SongItem;
             if(songnum == 0)
-                Code.addToPlayqueueAndPlay(remoteControlItem);
+                Code.addToPlayqueueAndPlay(remoteControlItem, 0);
             else
                 Code.addToPlayqueue(remoteControlItem);
             songnum++
+        }
+        onDatabaseInitComplete: {
+            if(stateManager.restoreRequired)
+            {
+                targetState.set(stateManager.value("page"),
+                                stateManager.value("command"),
+                                stateManager.value("uri"),
+                                stateManager.value("position"),
+                                stateManager.value("shuffle"),
+                                stateManager.value("repeat"),
+                                stateManager.value("artist"),
+                                stateManager.value("album"),
+                                stateManager.value("playlist"));
+                window.setState();
+                stateManager.invalidate();
+            }
         }
     }
 
@@ -927,7 +1005,7 @@ Window {
                     {
                         // Play
                         if(!multiSelectMode)
-                            Code.addToPlayqueueAndPlay(payload);
+                            Code.addToPlayqueueAndPlay(payload, 0);
                         else if(Code.selectionCount() > 0)
                             Code.addMultipleToPlayqueueAndPlay();
                     }
@@ -1058,7 +1136,7 @@ Window {
             onActivated : {
                 infocus = true;
                 window.disableToolBarSearch = false;
-                currentState.page = 8;
+                currentState.page = 0;
             }
             onDeactivated : { infocus = false; }
             actionMenuModel: [labelSavePlaylist, labelClearPlayqueue]
@@ -1200,7 +1278,7 @@ Window {
                 infocus = true;
                 window.disableToolBarSearch = false;
                 playlistsPage.actionMenuSelectedIndex = settings.get("PlaylistsView")+1;
-                currentState.page = 6;
+                currentState.page = 1;
             }
             onDeactivated : { infocus = false; }
             Connections {
@@ -1289,7 +1367,7 @@ Window {
                      Code.openItemInDetailView(playlistsPage,payload);
                 }
                 onDoubleClicked: {
-                    Code.addToPlayqueueAndPlay(payload);
+                    Code.addToPlayqueueAndPlay(payload, 0);
                 }
                 onLongPressAndHold: {
                     if( !multiSelectMode ){
@@ -1321,7 +1399,7 @@ Window {
                     Code.openItemInDetailView(playlistsPage,payload);
                 }
                 onDoubleClicked: {
-                    Code.addToPlayqueueAndPlay(dinstance);
+                    Code.addToPlayqueueAndPlay(dinstance, 0);
                 }
                 onLongPressAndHold: {
                     if( !multiSelectMode ){
@@ -1404,7 +1482,7 @@ Window {
                     Code.openItemInDetailView(artistsPage,payload)
                 }
                 onDoubleClicked: {
-                    Code.addToPlayqueueAndPlay(payload);
+                    Code.addToPlayqueueAndPlay(payload, 0);
                 }
                 onLongPressAndHold: {
                     if( !multiSelectMode ){
@@ -1435,7 +1513,7 @@ Window {
                     Code.openItemInDetailView(artistsPage,payload)
                 }
                 onDoubleClicked: {
-                    Code.addToPlayqueueAndPlay(payload);
+                    Code.addToPlayqueueAndPlay(payload, 0);
                 }
                 onLongPressAndHold: {
                     if( !multiSelectMode ){
@@ -1461,7 +1539,7 @@ Window {
                 infocus = true;
                 window.disableToolBarSearch = false;
                 albumsPage.actionMenuSelectedIndex = settings.get("AllAlbumsView");
-                currentState.page = 1;
+                currentState.page = 4;
             }
             onDeactivated : { infocus = false; }
             Connections {
@@ -1518,7 +1596,7 @@ Window {
                     Code.openItemInDetailView(albumsPage,payload)
                 }
                 onDoubleClicked: {
-                    Code.addToPlayqueueAndPlay(payload);
+                    Code.addToPlayqueueAndPlay(payload, 0);
                 }
                 onLongPressAndHold: {
                     if( !multiSelectMode ){
@@ -1565,7 +1643,7 @@ Window {
                     Code.openItemInDetailView(albumsPage,payload)
                 }
                 onDoubleClicked: {
-                    Code.addToPlayqueueAndPlay(payload);
+                    Code.addToPlayqueueAndPlay(payload, 0);
                 }
                 onLongPressAndHold: {
                     if( !multiSelectMode ){
@@ -1591,7 +1669,7 @@ Window {
                 infocus = true;
                 window.disableToolBarSearch = false;
                 allTracksPage.actionMenuSelectedIndex = settings.get("AllTracksView");
-                currentState.page = 0;
+                currentState.page = 5;
             }
             onDeactivated : { infocus = false; }
             Connections {
@@ -1675,7 +1753,7 @@ Window {
                     else
                     {
                         nowPlayingLabel="All Tracks";
-                        Code.addToPlayqueueAndPlay(payload);
+                        Code.addToPlayqueueAndPlay(payload, 0);
                     }
                 }
                 onLongPressAndHold:{
@@ -1721,7 +1799,7 @@ Window {
                     else
                     {
                         nowPlayingLabel= "All Tracks";
-                        Code.addToPlayqueueAndPlay(payload);
+                        Code.addToPlayqueueAndPlay(payload, 0);
                     }
                 }
                 onLongPressAndHold:{
@@ -1746,7 +1824,7 @@ Window {
             onActivated : {
                 infocus = true;
                 window.disableToolBarSearch = false;
-                currentState.page = 5;
+                currentState.page = 2;
             }
             onDeactivated : { infocus = false; }
             property variant model: MusicListModel {
@@ -1868,7 +1946,7 @@ Window {
                     else
                     {
                         nowPlayingLabel = "Favorites";
-                        Code.addToPlayqueueAndPlay(payload);
+                        Code.addToPlayqueueAndPlay(payload, 0);
                     }
                 }
                 onLongPressAndHold: {
@@ -1893,7 +1971,7 @@ Window {
             onActivated : {
                 infocus = true;
                 window.disableToolBarSearch = true;
-                currentState.page = 4;
+                currentState.page = 6;
                 currentState.artist = labelArtist;
             }
             onDeactivated : { infocus = false; }
@@ -2175,7 +2253,7 @@ Window {
                                 else
                                 {
                                     nowPlayingLabel = "Artist";
-                                    Code.addToPlayqueueAndPlay(payload);
+                                    Code.addToPlayqueueAndPlay(payload, 0);
                                 }
                             }
                             onLongPressAndHold: {
@@ -2326,7 +2404,7 @@ Window {
             onActivated : {
                 infocus = true;
                 window.disableToolBarSearch = true;
-                currentState.page = 2;
+                currentState.page = 7;
                 currentState.album = labelAlbum;
             }
             onDeactivated : { infocus = false; }
@@ -2491,7 +2569,7 @@ Window {
                         else
                         {
                             nowPlayingLabel="Album"
-                            Code.addToPlayqueueAndPlay(payload);
+                            Code.addToPlayqueueAndPlay(payload, 0);
                         }
                     }
                     onLongPressAndHold: {
@@ -2606,6 +2684,8 @@ Window {
                 infocus = true;
                 window.disableToolBarSearch = true;
                 Code.getSomeThumbnailsForPlaylist( model );
+                currentState.page = 8;
+                currentState.playlist = labelPlaylist;
             }
             onDeactivated : { infocus = false; }
 
@@ -2716,8 +2796,8 @@ Window {
                         else
                         {
                             nowPlayingLabel = "Playlist"
-                            Code.addToPlayqueueAndPlay(payload);
-							Code.getNowPlayingThumbnailForPlaylist();
+                            Code.addToPlayqueueAndPlay(payload, 0);
+                            Code.getNowPlayingThumbnailForPlaylist();
                         }
                     }
                     onLongPressAndHold: {
@@ -2852,7 +2932,7 @@ Window {
                 nowPlayingLabel = "Play Queue";
                 playqueueModel.playindex = index;
                 playqueueView.currentIndex = index;
-                Code.playNewSong();
+                Code.playNewSong(0);
             }
         }
         onLongPressAndHold:{

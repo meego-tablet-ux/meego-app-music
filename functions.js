@@ -113,12 +113,21 @@ function removeMultipleFromPlaylist(list) {
     multiSelectMode = false;
 }
 
-function addToPlayqueueAndPlay(item)
+function addToPlayqueueAndPlay(item, position)
 {
     var idx = playqueueModel.count;
     addToPlayqueue(item);
     playqueueModel.playindex = idx;
-    playNewSong();
+    playNewSong(position);
+    updateNowNextPlaying();
+}
+
+function addToPlayqueueAndPause(item, position)
+{
+    var idx = playqueueModel.count;
+    addToPlayqueue(item);
+    playqueueModel.playindex = idx;
+    pauseNewSong(position);
     updateNowNextPlaying();
 }
 
@@ -128,7 +137,7 @@ function addMultipleToPlayqueueAndPlay()
     var idx = playqueueModel.count;
     playqueueModel.addItems(ids);
     playqueueModel.playindex = idx;
-    playNewSong();
+    playNewSong(0);
     updateNowNextPlaying();
     clearSelected();
     shareObj.clearItems();
@@ -187,12 +196,12 @@ function play()
     if (audio.paused ) {
         audioplay();
     } else {
-        return playNewSong();
+        return playNewSong(0);
     }
     return true;
 }
 
-function playNewSong() {
+function playNewSong(position) {
     audio.stop();
 
     // if there are no songs or the index is out of range, do nothing
@@ -214,8 +223,38 @@ function playNewSong() {
     }
 
     audio.source = playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.URI);
+    audio.position = position;
+
     audioplay();
     editorModel.setViewed(playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.ID));
+    return true;
+}
+
+function pauseNewSong(position) {
+    audio.stop();
+
+    // if there are no songs or the index is out of range, do nothing
+    if((playqueueView.count <= 0)||
+       (playqueueModel.playindex >= playqueueView.count))
+    {
+        return false;
+    }
+
+    if (playqueueModel.playindex == -1)
+        playqueueModel.playindex = 0;
+
+    toolbar.trackName = playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.Title);
+    try {
+        toolbar.artistName = playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.Artist)[0];
+    }
+    catch(err) {
+        toolbar.artistName = "";
+    }
+
+    audio.source = playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.URI);
+    audio.position = position;
+
+    pause();
     return true;
 }
 
@@ -234,7 +273,7 @@ function playNextSong() {
         }
     }
     audio.source = "";
-    playNewSong();
+    playNewSong(0);
     updateNowNextPlaying();
 }
 
@@ -253,7 +292,7 @@ function playPrevSong() {
         playqueueModel.playindex--;
     }
     audio.source = "";
-    playNewSong();
+    playNewSong(0);
     updateNowNextPlaying();
 }
 
