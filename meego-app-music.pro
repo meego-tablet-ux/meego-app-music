@@ -2,6 +2,8 @@ VERSION = 0.2.22
 TEMPLATE = subdirs
 SUBDIRS += plugin
 
+OTHER_FILES += *.qml *.js
+
 qmlfiles.files += *.qml *.png *.js
 qmlfiles.path += $$INSTALL_ROOT/usr/share/$$TARGET
 
