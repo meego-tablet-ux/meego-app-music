@@ -2884,6 +2884,11 @@ Window {
                         target:playlistContentBorder
                         anchors.top: playlistThumbnail.top
                     }
+                    AnchorChanges {
+                        target: playlistDurationDisplay
+                        anchors.top: playlistThumbnail.bottom
+                        anchors.horizontalCenter: playlistThumbnail.horizontalCenter
+                    }
                 },
                 State {
                     name: "portraitPlaylistDetailView"
@@ -2927,6 +2932,11 @@ Window {
                         target:playlistContentBorder
                         anchors.left:parent.left
                         anchors.top:playlistThumbnail.bottom
+                    }
+                    AnchorChanges {
+                        target: playlistDurationDisplay
+                        anchors.top: tPlaylist.bottom
+                        anchors.left: tPlaylist.left
                     }
                 }
             ]
