@@ -1752,7 +1752,7 @@ Window {
                     }
                     else
                     {
-                        nowPlayingLabel="All Tracks";
+                        nowPlayingLabel=labelAllTracks;
                         Code.addToPlayqueueAndPlay(payload, 0);
                     }
                 }
@@ -1798,7 +1798,7 @@ Window {
                     }
                     else
                     {
-                        nowPlayingLabel= "All Tracks";
+                        nowPlayingLabel= labelAllTracks;
                         Code.addToPlayqueueAndPlay(payload, 0);
                     }
                 }
@@ -1945,7 +1945,7 @@ Window {
                     }
                     else
                     {
-                        nowPlayingLabel = "Favorites";
+                        nowPlayingLabel = labelFavorites;
                         Code.addToPlayqueueAndPlay(payload, 0);
                     }
                 }
@@ -2252,7 +2252,7 @@ Window {
                                 }
                                 else
                                 {
-                                    nowPlayingLabel = "Artist";
+                                    nowPlayingLabel = labelAllArtist;
                                     Code.addToPlayqueueAndPlay(payload, 0);
                                 }
                             }
@@ -2568,7 +2568,7 @@ Window {
                         }
                         else
                         {
-                            nowPlayingLabel="Album"
+                            nowPlayingLabel=labelAllAlbums
                             Code.addToPlayqueueAndPlay(payload, 0);
                         }
                     }
@@ -2795,7 +2795,7 @@ Window {
                         }
                         else
                         {
-                            nowPlayingLabel = "Playlist"
+                            nowPlayingLabel = labelAllPlaylist;
                             Code.addToPlayqueueAndPlay(payload, 0);
                             Code.getNowPlayingThumbnailForPlaylist();
                         }
@@ -2929,7 +2929,7 @@ Window {
             }
             else
             {
-                nowPlayingLabel = "Play Queue";
+                nowPlayingLabel = labelPlayqueue;
                 playqueueModel.playindex = index;
                 playqueueView.currentIndex = index;
                 Code.playNewSong(0);
