@@ -418,6 +418,7 @@ function openItemInDetailView(fromPage, item)
         thumbnailUri = item.mthumburi;
         labelPlaylist = item.mtitle;
         labelPlaylistURN = item.murn;
+        currentPlaylist = item;
         window.addPage(playlistDetailViewContent);
         break;
     default:

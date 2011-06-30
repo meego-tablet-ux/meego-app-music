@@ -129,6 +129,7 @@ Window {
     property int targetIndex: 0
 
     property variant currentAlbum
+    property variant currentPlaylist
 
     property variant bookModel: [labelPlayqueue,labelAllPlaylist,labelFavorites,
                                  labelAllArtist,labelAllAlbums,labelAllTracks]
@@ -244,10 +245,12 @@ Window {
         if(multiSelectMode)
         {
             window.setBookMenuData([], []);
+            bookMenuSelectedIndex = -1;
         }
         else
         {
             window.setBookMenuData(bookModel, bookPayload);
+            bookMenuSelectedIndex = bookMenuSelectedIndexCopy;
         }
     }
     onBackButtonPressed:
@@ -2724,7 +2727,37 @@ Window {
                     id: playlistThumbnail
                     width:400
                     height:width
-                    z:(window.isLandscape ? 0 : 2)
+                    z:(window.isLandscape ? 0 : 3)
+                }
+
+                Item{
+                    id: playlistDurationDisplay
+                    z:(window.isLandscape ? 0 : 3)
+                    width: (playlistThumbnail.width*3)/4
+                    Text {
+                        id: playlistLengthText
+                        anchors.top: parent.top
+                        height: playlistThumbnail.height/10
+                        width: parent.width
+                        text: Code.formatAlbumLength(currentPlaylist.mlength);
+                        color: (window.isLandscape ? theme_fontColorMediaHighlight : fontColorMediaArtist )
+                        font.pixelSize: theme_fontPixelSizeLarge-3
+                        verticalAlignment:Text.AlignVCenter
+                        horizontalAlignment:Text.AlignLeft
+                        elide: Text.ElideRight
+                    }
+                    Text {
+                        id: playlistTrackcountText
+                        anchors.top: playlistLengthText.bottom
+                        height: playlistThumbnail.height/10
+                        width: parent.width
+                        text: qsTr("%1 songs").arg(playlistSongList.model.count)
+                        color: (window.isLandscape ? theme_fontColorMediaHighlight : fontColorMediaArtist )
+                        font.pixelSize: theme_fontPixelSizeLarge-3
+                        verticalAlignment:Text.AlignVCenter
+                        horizontalAlignment:Text.AlignLeft
+                        elide: Text.ElideRight
+                    }
                 }
 
                 BorderImage {
@@ -2851,6 +2884,11 @@ Window {
                         target:playlistContentBorder
                         anchors.top: playlistThumbnail.top
                     }
+                    AnchorChanges {
+                        target: playlistDurationDisplay
+                        anchors.top: playlistThumbnail.bottom
+                        anchors.horizontalCenter: playlistThumbnail.horizontalCenter
+                    }
                 },
                 State {
                     name: "portraitPlaylistDetailView"
@@ -2894,6 +2932,11 @@ Window {
                         target:playlistContentBorder
                         anchors.left:parent.left
                         anchors.top:playlistThumbnail.bottom
+                    }
+                    AnchorChanges {
+                        target: playlistDurationDisplay
+                        anchors.top: tPlaylist.bottom
+                        anchors.left: tPlaylist.left
                     }
                 }
             ]
