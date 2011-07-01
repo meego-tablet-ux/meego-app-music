@@ -715,7 +715,7 @@ Window {
             }
             onRmFromQueuePressed: {
                 if(Code.selectionCount() > 0)
-                    {Code.removeFromPlayqueue();}
+                    {Code.removeMultipleFromPlayqueue();}
             }
             onRmFromPlaylistPressed: {
                 if(Code.selectionCount() > 0)
