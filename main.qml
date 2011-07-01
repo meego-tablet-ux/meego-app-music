@@ -854,7 +854,7 @@ Window {
             id: deleteMultipleItemsDialog
             property int deletecount: Code.selectionCount()
             //: text asking the user if the song(s) is to deleted, warning them that it's permanent
-            title: qsTr("Permanently delete these %n song(s)?", "", deletecount)
+            title: qsTr("Permanently delete the selected %n song(s)?", "", deletecount)
             acceptButtonText: labelConfirmDelete
             cancelButtonText: labelCancel
             onAccepted: {
