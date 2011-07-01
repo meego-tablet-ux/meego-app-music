@@ -2241,6 +2241,7 @@ Window {
                                 if(multiSelectMode)
                                 {
                                     model.setSelected(payload.mitemid, !model.isSelected(payload.mitemid));
+                                    songsInAlbumList.selectionChanged();
                                     if (model.isSelected(payload.mitemid))
                                     {
                                         shareObj.addItem(payload.muri);
@@ -2557,6 +2558,7 @@ Window {
                         if(multiSelectMode)
                         {
                             model.setSelected(payload.mitemid, !model.isSelected(payload.mitemid));
+                            albumSongList.selectionChanged();
                             if (model.isSelected(payload.mitemid))
                             {
                                 shareObj.addItem(payload.muri);
