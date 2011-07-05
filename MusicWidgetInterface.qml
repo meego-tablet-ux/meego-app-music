@@ -73,8 +73,9 @@ Item {
 
     //handle data from daemon
     function startUpControlHandle() {
-        if(widgetclient.getData("act") != 7 && widgetclient.getData("urn") != "")
-            setRequestSongs(widgetclient.getData("urn"))
+        if(widgetclient.getData("act") != 7 && widgetclient.getData("urn") != "") {
+            setRequestSongs(widgetclient.getData("urn"));
+        }
         else
             initWidget();
     }
@@ -136,7 +137,7 @@ Item {
             widgetclient.setData("st", playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.Title));
             widgetclient.setData("at", playqueueModel.datafromIndex(playqueueModel.playindex, MediaItem.Album));
         }
-        widgetclient.shootData();
+        widgetclient.shootData("force");
     }
 
     //init data when there is no music at all
@@ -250,7 +251,7 @@ Item {
         }
         onStatusChanged: {
             if(!toolbar.playing)
-                widgetclient.shootData(); //send data
+                widgetclient.shootData("force"); //send data
         }
         onSeekableChanged: {
             if(audio.seekable && fisrtSetPosition != 0) {
@@ -266,7 +267,7 @@ Item {
                 widgetclient.setData("pbn",1);
             else
                 widgetclient.setData("pbn",0);
-            widgetclient.shootData(); //send data
+            widgetclient.shootData("force"); //send data
         }
         onWidgetElapsedTimeTextChanged: {
             widgetclient.setData("pbt",toolbar.widgetElapsedTimeText);
