@@ -73,9 +73,8 @@ Item {
 
     //handle data from daemon
     function startUpControlHandle() {
-        if(widgetclient.getData("act") != 7 && widgetclient.getData("urn") != "") {
+        if(widgetclient.getData("act") != 7 && widgetclient.getData("urn") != "")
             setRequestSongs(widgetclient.getData("urn"));
-        }
         else
             initWidget();
     }
