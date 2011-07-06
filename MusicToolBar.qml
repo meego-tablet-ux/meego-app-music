@@ -22,6 +22,10 @@ Item {
     property bool landscape: false
     property real nowPlayingHeight: 36
 
+    property alias widgetSliderPosition: audioToolbar.sliderPosition
+    property alias widgetElapsedTimeText: audioToolbar.elapsedTimeText
+    property alias widgetRemainingTimeText: audioToolbar.remainingTimeText
+
     signal playNeedsSongs()
 
     onShuffleChanged: {
