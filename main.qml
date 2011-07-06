@@ -1,4 +1,4 @@
-y/*
+/*
  * Copyright 2011 Intel Corporation.
  *
  * This program is licensed under the terms and conditions of the
@@ -2244,6 +2244,7 @@ Window {
                                 if(multiSelectMode)
                                 {
                                     model.setSelected(payload.mitemid, !model.isSelected(payload.mitemid));
+                                    songsInAlbumList.selectionChanged();
                                     if (model.isSelected(payload.mitemid))
                                     {
                                         shareObj.addItem(payload.muri);
@@ -2257,7 +2258,7 @@ Window {
                                     multiSelectModeShowFavoriteAction = (selectedFavoritesAccumulator <= 0) ? true : false;
                                 }
                                 else
-                                { 
+                                {
                                     nowPlayingLabel = labelAllArtist;
                                     Code.addToPlayqueueAndPlay(payload, 0);
                                 }
@@ -2560,6 +2561,7 @@ Window {
                         if(multiSelectMode)
                         {
                             model.setSelected(payload.mitemid, !model.isSelected(payload.mitemid));
+                            albumSongList.selectionChanged();
                             if (model.isSelected(payload.mitemid))
                             {
                                 shareObj.addItem(payload.muri);
