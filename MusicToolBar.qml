@@ -25,18 +25,10 @@ Item {
     signal playNeedsSongs()
 
     onShuffleChanged: {
-        // if in shuffle state, loop makes no sense
-        if (shuffle && loop) {
-            loop = false;
-        }
         playqueueModel.shuffle = shuffle;
         currentState.shuffle = shuffle;
     }
     onLoopChanged: {
-        // if in loop state, shuffle should be off
-        if (shuffle && loop) {
-            shuffle = false;
-        }
         currentState.repeat = loop;
     }
     BorderImage {
