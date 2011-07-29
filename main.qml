@@ -390,32 +390,38 @@ Window {
         application:"meego-app-music"
     }
 
+    function processCommand (parameters)
+    {
+        console.log("CMD = " + parameters[0] + " CDATA = " + parameters[1]);
+        editorModel.songnum = 0;
+        var cmd = parameters[0];
+        var cdata = parameters[1];
+        if (cmd == "play") {
+            Code.play();
+        } else if (cmd == "pause") {
+            Code.pause();
+        } else if (cmd == "stop") {
+            Code.stop();
+        } else if (cmd == "playSong") {
+            if(Code.songCheck(cdata))
+                editorModel.requestItem(MediaItem.SongItem, cdata);
+        } else if (cmd == "playArtist") {
+            editorModel.requestItem(MediaItem.MusicArtistItem, cdata);
+        } else if (cmd == "playAlbum") {
+            editorModel.requestItem(MediaItem.MusicAlbumItem, cdata);
+        } else if (cmd == "playPlaylist") {
+            editorModel.requestItem(MediaItem.MusicPlaylistItem, cdata);
+        } else if(cmd == "show") {
+            if(cdata == "playqueue") {
+                switchBook(playQueueContent);
+            }
+        }
+    }
+
     Connections {
         target: mainWindow
         onCall: {
-            editorModel.songnum = 0;
-            var cmd = parameters[0];
-            var cdata = parameters[1];
-            if (cmd == "play") {
-                Code.play();
-            } else if (cmd == "pause") {
-                Code.pause();
-            } else if (cmd == "stop") {
-                Code.stop();
-            } else if (cmd == "playSong") {
-                if(Code.songCheck(cdata))
-                    editorModel.requestItem(MediaItem.SongItem, cdata);
-            } else if (cmd == "playArtist") {
-                editorModel.requestItem(MediaItem.MusicArtistItem, cdata);
-            } else if (cmd == "playAlbum") {
-                editorModel.requestItem(MediaItem.MusicAlbumItem, cdata);
-            } else if (cmd == "playPlaylist") {
-                editorModel.requestItem(MediaItem.MusicPlaylistItem, cdata);
-            } else if(cmd == "show") {
-                if(cdata == "playqueue") {
-                    switchBook(playQueueContent);
-                }
-            }
+            processCommand(parameters);
         }
     }
     QtObject {
@@ -599,6 +605,10 @@ Window {
         switchBook(allTracksContent);
         bookMenuSelectedIndex = bookModel.indexOf(labelAllTracks);
         startupTimer.start();
+        if(mainWindow.call)
+        {
+            processCommand(mainWindow.call);
+        }
     }
 
     function musicContextMenu(mouseX, mouseY, payload, entrylist)
