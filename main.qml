@@ -392,7 +392,6 @@ Window {
 
     function processCommand (parameters)
     {
-        console.log("CMD = " + parameters[0] + " CDATA = " + parameters[1]);
         editorModel.songnum = 0;
         var cmd = parameters[0];
         var cdata = parameters[1];
